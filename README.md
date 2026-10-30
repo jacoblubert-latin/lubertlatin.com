@@ -64,9 +64,7 @@ Use `&amp;` for an ampersand in text (e.g. `AP Latin &amp; NLE`). Curly quotes a
 
 ### Your photo
 
-1. Save your headshot as `site/assets/jacob-lubert.jpg` (portrait orientation, about 800×1000 px; under 200 KB is ideal — [squoosh.app](https://squoosh.app) can shrink it).
-2. In `index.html`, find the `<!-- ✏️ PHOTO -->` comment and change
-   `src="/assets/jacob-lubert-placeholder.svg"` to `src="/assets/jacob-lubert.jpg"`.
+To change it, replace `site/assets/jacob-lubert.jpg` with a new file of the same name (portrait orientation, about 1000×1250 px; under 200 KB is ideal — [squoosh.app](https://squoosh.app) can shrink it). If the new photo has a different shape, update the `width` and `height` numbers on the `<img>` next to the `<!-- ✏️ PHOTO -->` comment in `index.html` to match.
 
 ### Adding testimonials later
 
