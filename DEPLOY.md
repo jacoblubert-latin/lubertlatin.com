@@ -12,13 +12,22 @@ Total time: about 20 minutes, plus DNS waiting time.
    - Branch to deploy: `main`
    - Build command: *(empty)*
    - Publish directory: `site`
-6. Click **Deploy**. In about a minute you'll have a temporary address like `https://something-random-123.netlify.app`. Open it and check the site works.
-7. Optional: **Site configuration → Site details → Change site name** to `lubertlatin` so the temporary address is `lubertlatin.netlify.app`.
+6. Click **Deploy**. In about a minute you'll have a temporary address. Ours is **https://glittery-bunny-c51d58.netlify.app**.
+7. Optional: **Site configuration → Site details → Change site name** to `lubertlatin` so the temporary address is `lubertlatin.netlify.app`. (If you do this, use the new name in the CNAME record in Part 3.)
 
-### Turn on form notifications
+### Make the site public
 
-1. **Forms** (left sidebar). You should see `contact` and `id-sheet` listed. (If you don't, send a test submission from the live site once; they'll appear.)
-2. **Forms → Form notifications → Add notification → Email notification**. Enter your email, choose "All forms". Now every contact message and PDF signup lands in your inbox.
+New Netlify sites can start out locked behind a Netlify login. **Site configuration → Access & security → Site protection**: set it to **Public**. Until this is done, visitors see a login page and every form fails.
+
+### Turn on forms
+
+1. **Forms** (left sidebar) → **Enable form detection**.
+2. **Deploys → Trigger deploy → Deploy site**. Forms are only detected at deploy time, so this step is required after enabling detection. Afterwards `contact` and `id-sheet` appear under Forms.
+3. **Forms → Form notifications → Add notification → Email notification**. Enter your email, choose "All forms". Now every contact message and PDF signup lands in your inbox.
+
+### Turn off the Netlify HUD (performance)
+
+Netlify injects a small overlay script ("HUD") into every page by default. It's invisible to visitors but costs about 10 Lighthouse performance points on phones. Search the site's settings for **HUD** (Site configuration → General, or your team/user settings) and disable it for this site.
 
 ## Part 2 — Connect the domain
 
@@ -37,11 +46,11 @@ Total time: about 20 minutes, plus DNS waiting time.
    | Type  | Host  | Answer / Value                  | TTL |
    |-------|-------|---------------------------------|-----|
    | ALIAS | *(leave blank)* | `apex-loadbalancer.netlify.com` | 600 |
-   | CNAME | `www` | `lubertlatin.netlify.app`       | 600 |
+   | CNAME | `www` | `glittery-bunny-c51d58.netlify.app` | 600 |
 
    Notes:
    - For the first record, Porkbun's "Host" field left blank means the bare domain (`lubertlatin.com`). Porkbun supports ALIAS at the root, which is the best option. If ALIAS gives you any trouble, use an **A** record with the value `75.2.60.5` instead.
-   - For the CNAME, use your real Netlify site address (whatever `*.netlify.app` name Netlify gave you in Part 1, step 6–7).
+   - For the CNAME, use your Netlify site address. If you renamed the site in Part 1 step 7, use the new name.
 
 4. Save. DNS changes usually take 5–30 minutes but can take a few hours.
 
