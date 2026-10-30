@@ -1,0 +1,19 @@
+# Netlify settings. No build step: Netlify serves the /site folder as-is.
+[build]
+  publish = "site"
+  command = ""
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "DENY"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+# Cache images and the PDF for a week. CSS/JS keep Netlify's default
+# (always fresh), so edits show up right away.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"

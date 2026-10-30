@@ -1,0 +1,8 @@
+.claude/
+node_modules/
+.netlify/
+*.log
+lighthouse*.json
+lighthouse*.html
+Thumbs.db
+.DS_Store

@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /thank-you.html
+Disallow: /free-sheet.html
+
+Sitemap: https://lubertlatin.com/sitemap.xml
