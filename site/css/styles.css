@@ -156,6 +156,10 @@ p { margin: 0 0 1em; }
 .hero-quote .gloss { font-size: 1.05rem; color: var(--text); }
 .hero-quote cite { font-style: normal; font-size: .92rem; }
 
+/* Testimonial: same card as the hero quote, sized for a longer passage */
+.testimonial-quote { max-width: 800px; }
+.testimonial-quote blockquote { font-size: clamp(1.25rem, 2vw, 1.5rem); line-height: 1.45; margin-bottom: 14px; }
+
 /* ---------- Sections ---------- */
 .section { padding: clamp(64px, 9vw, 112px) 0; }
 .section-tint { background: var(--bg-tint); }
@@ -182,17 +186,13 @@ p { margin: 0 0 1em; }
   font-size: .8em; vertical-align: middle; padding: 0 .3em;
 }
 .steps {
-  list-style: none; counter-reset: step; padding: 28px; margin: 48px 0 0;
-  display: grid; gap: 16px; grid-template-columns: 1fr;
+  margin: 48px 0 0; padding: 28px 32px;
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
 }
-@media (min-width: 800px) { .steps { grid-template-columns: repeat(3, 1fr); gap: 32px; } }
-.steps li { counter-increment: step; position: relative; padding-left: 44px; color: var(--muted); }
-.steps li::before {
-  content: counter(step); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%;
-  background: var(--accent); color: #fff; font-weight: 600; display: grid; place-items: center; font-size: .95rem;
-}
-.steps strong { color: var(--text); display: block; }
+.steps p { margin: 0; }
+.steps-flow { font-family: var(--serif); font-size: 1.45rem; font-weight: 600; }
+.steps-flow .arrow { color: var(--accent); margin: 0 .35em; }
+.steps-note { color: var(--muted); margin-top: 8px !important; }
 
 /* Pricing */
 .price-card { display: flex; flex-direction: column; gap: 14px; padding: 32px 28px; }
@@ -200,7 +200,7 @@ p { margin: 0 0 1em; }
 .price { font-family: var(--serif); font-size: 2.6rem; line-height: 1; color: var(--text); margin: 4px 0 0 !important; }
 .price .from, .price .per { font-family: var(--sans); font-size: .95rem; color: var(--muted); }
 .price-text { font-size: 2rem; }
-.price-card .btn { margin-top: auto; }
+.pricing-cta { margin: 32px 0 0; text-align: center; }
 
 /* About */
 .about { display: grid; gap: 40px; align-items: center; grid-template-columns: 1fr; }

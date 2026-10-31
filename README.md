@@ -66,9 +66,9 @@ Use `&amp;` for an ampersand in text (e.g. `AP Latin &amp; NLE`). Curly quotes a
 
 To change it, replace `site/assets/jacob-lubert.jpg` with a new file of the same name (portrait orientation, about 1000×1250 px; under 200 KB is ideal — [squoosh.app](https://squoosh.app) can shrink it). If the new photo has a different shape, update the `width` and `height` numbers on the `<img>` next to the `<!-- ✏️ PHOTO -->` comment in `index.html` to match.
 
-### Adding testimonials later
+### Testimonials
 
-When you have three, add a section between **About** and **Free resource** by copying the structure of the "Who I help" cards. Ask Claude or any developer to help with it; it's a ten-minute job.
+The "What families say" section (between **Pricing** and **About**) holds one quote in a `<blockquote>` with the names in `<cite>`. To add another, copy the whole `<figure class="hero-quote testimonial-quote">...</figure>` block (marked with a `✏️ TESTIMONIALS` comment) and paste it below the first.
 
 ### Colors and fonts
 
