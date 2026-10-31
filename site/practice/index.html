@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>document.documentElement.classList.add("js")</script>
+
+  <title>Latin Parsing Practice (Henle) | Jacob Lubert Latin Tutoring</title>
+  <meta name="description" content="Free Latin parsing drill keyed to Henle First Year. Parse nouns (case, number, gender, use) and verbs (person, number, tense, voice, mood) lesson by lesson, with an explanation for every answer.">
+  <link rel="canonical" href="https://lubertlatin.com/practice/">
+  <meta name="theme-color" content="#7a1f2b">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Jacob Lubert Latin Tutoring">
+  <meta property="og:title" content="Latin Parsing Practice — Jacob Lubert Latin Tutoring">
+  <meta property="og:description" content="A free parsing drill keyed to Henle First Year: ten sentences a round, instant feedback, and an explanation for every form.">
+  <meta property="og:url" content="https://lubertlatin.com/practice/">
+  <meta property="og:image" content="https://lubertlatin.com/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Jacob Lubert Latin Tutoring — online Latin tutoring nationwide">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+
+  <link rel="preload" href="/assets/fonts/EBGaramond-500-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/SourceSans3-400-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/css/fonts.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/practice.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/" aria-label="Jacob Lubert Latin Tutoring, home">
+        <span class="brand-name">Jacob Lubert</span>
+        <span class="brand-tag">Latin Tutoring</span>
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+        <span class="nav-toggle-bars" aria-hidden="true"></span>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <nav id="site-nav" class="site-nav" aria-label="Main">
+        <ul>
+          <li><a href="/#who">Who I help</a></li>
+          <li><a href="/#sessions">Sessions</a></li>
+          <li><a href="/#pricing">Pricing</a></li>
+          <li><a href="/#about">About</a></li>
+          <li><a href="/practice/" aria-current="page">Practice</a></li>
+          <li><a href="/#faq">FAQ</a></li>
+          <li><a href="/#contact">Contact</a></li>
+        </ul>
+        <a class="btn btn-small" href="https://cal.com/jacob-lubert-latin">Book a consultation</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="section practice" aria-labelledby="practice-title">
+      <div class="container narrow">
+        <p class="eyebrow">Practice</p>
+        <h1 id="practice-title">Parsing drill</h1>
+        <p class="lede">Ten sentences a round, keyed to Henle <i>First Year Latin</i>. Say whether the underlined word is a noun or a verb, then parse it. Every answer comes with an explanation.</p>
+
+        <div id="drill" class="drill" data-items-url="/practice/items.json">
+
+          <!-- ===== Start screen ===== -->
+          <form id="screen-start" class="drill-card drill-start" hidden>
+            <fieldset class="drill-fieldset">
+              <legend>Practice</legend>
+              <div class="choice-row">
+                <label class="choice"><input type="radio" name="types" value="noun"><span>Nouns</span></label>
+                <label class="choice"><input type="radio" name="types" value="verb"><span>Verbs</span></label>
+                <label class="choice"><input type="radio" name="types" value="both" checked><span>Both</span></label>
+              </div>
+            </fieldset>
+            <div class="drill-fieldset">
+              <label for="lesson-number" class="lesson-label">Through Henle Lesson <output id="lesson-output" for="lesson-range lesson-number"></output></label>
+              <div class="lesson-controls">
+                <input type="range" id="lesson-range" aria-label="Through Henle Lesson (slider)">
+                <input type="number" id="lesson-number" inputmode="numeric">
+              </div>
+            </div>
+            <p class="fine" id="pool-note" aria-live="polite"></p>
+            <div class="drill-actions">
+              <button class="btn" type="submit" id="start-button">Start</button>
+            </div>
+          </form>
+
+          <!-- ===== Play screen ===== -->
+          <div id="screen-play" class="drill-card drill-play" hidden>
+            <div class="drill-status">
+              <span id="progress"></span>
+              <span id="streak"></span>
+            </div>
+            <p class="drill-sentence" lang="la" id="sentence"></p>
+            <p class="drill-prompt" id="prompt"></p>
+
+            <div id="type-row" class="option-row option-row-type" role="group" aria-label="Noun or verb">
+              <div class="option-chips">
+                <button type="button" class="chip" data-type="noun">Noun</button>
+                <button type="button" class="chip" data-type="verb">Verb</button>
+              </div>
+            </div>
+
+            <div id="fields"></div>
+
+            <div id="feedback" class="feedback" aria-live="polite" hidden></div>
+
+            <div class="drill-actions">
+              <button type="button" class="btn" id="check-button" hidden disabled>Check</button>
+              <button type="button" class="btn" id="next-button" hidden>Next</button>
+            </div>
+          </div>
+
+          <!-- ===== Results screen ===== -->
+          <div id="screen-results" class="drill-card drill-results" hidden>
+            <p class="eyebrow">Round complete</p>
+            <p class="results-score" id="results-score"></p>
+            <p class="results-line" id="results-line"></p>
+            <div id="missed-block">
+              <h2 class="results-heading">Missed items</h2>
+              <ul class="missed-list" id="missed-list"></ul>
+            </div>
+            <div class="drill-actions">
+              <button type="button" class="btn" id="again-button">Play again</button>
+              <button type="button" class="btn btn-outline" id="settings-button">Change settings</button>
+            </div>
+          </div>
+
+          <!-- ===== Loading / error ===== -->
+          <div id="screen-message" class="drill-card" aria-live="polite">
+            <p id="message-text">Loading sentences…</p>
+          </div>
+          <noscript><div class="drill-card"><p>This drill needs JavaScript turned on.</p></div></noscript>
+        </div>
+
+        <p class="tutor-note">Working through this with a tutor goes faster. <a href="https://cal.com/jacob-lubert-latin">Book a free consultation.</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p><strong>Jacob Lubert Latin Tutoring</strong> · Phoenix, AZ · Serving students nationwide online</p>
+      <p><a href="https://cal.com/jacob-lubert-latin">Book a free consultation</a> · <a href="/#free-sheet">Free ID sheet</a> · <a href="/#contact">Contact</a></p>
+      <p class="fine">© <span data-year>2026</span> Jacob Lubert Latin Tutoring</p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js" defer></script>
+  <script src="/js/practice.js" defer></script>
+</body>
+</html>

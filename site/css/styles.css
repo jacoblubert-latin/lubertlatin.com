@@ -55,6 +55,10 @@ h2 { font-size: clamp(1.9rem, 3.6vw, 2.6rem); font-weight: 500; }
 h3 { font-size: 1.4rem; }
 p { margin: 0 0 1em; }
 
+/* EB Garamond swaps u for v in text tagged as Latin ("Dvx" for "Dux").
+   Turn that locale feature off so Latin shows modern spelling. */
+[lang="la"] { font-feature-settings: "locl" 0; }
+
 .container { width: 100%; max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
 .narrow { max-width: 800px; }
 .visually-hidden {

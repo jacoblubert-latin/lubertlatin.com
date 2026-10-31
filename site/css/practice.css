@@ -1,0 +1,115 @@
+/* =========================================================
+   Parsing drill (/practice). Uses the colors, fonts, and
+   spacing from styles.css; only the two feedback colors
+   below are new.
+   ========================================================= */
+
+:root {
+  --ok: #2e6b3f;          /* correct answers */
+  --ok-soft: #e3efe4;
+  --bad: #a8261f;         /* wrong answers */
+  --bad-soft: #f6e3e1;
+}
+
+.drill [hidden] { display: none !important; }
+
+.practice { padding-top: clamp(40px, 6vw, 72px); }
+.practice h1 { margin-bottom: .35em; }
+.practice .lede { margin-bottom: 28px; }
+
+.drill-card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: clamp(20px, 4vw, 32px);
+}
+.drill-card + .drill-card { margin-top: 16px; }
+
+.drill-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+.drill-actions .btn { flex: 1 1 140px; }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn:disabled:hover { background: var(--accent); border-color: var(--accent); }
+
+/* ---------- Start screen ---------- */
+.drill-fieldset { border: 0; padding: 0; margin: 0 0 22px; min-width: 0; }
+.drill-fieldset legend, .lesson-label { font-weight: 600; font-size: .97rem; padding: 0; margin-bottom: 8px; display: block; }
+.lesson-label output { color: var(--accent); font-family: var(--serif); font-size: 1.3em; line-height: 1; margin-left: .15em; }
+
+.choice-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.choice { position: relative; flex: 1 1 90px; }
+.choice input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.choice span {
+  display: flex; align-items: center; justify-content: center; min-height: 48px; padding: .5em 1em;
+  border: 1.5px solid var(--line); border-radius: 999px; background: #fff;
+  font-weight: 600; cursor: pointer; transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+.choice input:checked + span { background: var(--accent); border-color: var(--accent); color: #fff; }
+.choice input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+.lesson-controls { display: flex; align-items: center; gap: 14px; }
+.lesson-controls input[type="range"] {
+  flex: 1; width: auto; padding: 0; border: 0; background: transparent; accent-color: var(--accent); min-height: 44px;
+}
+.lesson-controls input[type="range"]:focus { outline: none; }
+.lesson-controls input[type="range"]:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.lesson-controls input[type="number"] { width: 5.5em; text-align: center; font-size: 1.1rem; }
+
+/* ---------- Play screen ---------- */
+.drill-status {
+  display: flex; justify-content: space-between; gap: 12px;
+  font-size: .82rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+}
+.drill-status .streak-hot { color: var(--accent); }
+
+.drill-sentence {
+  font-family: var(--serif); font-size: clamp(1.55rem, 5vw, 2.1rem); line-height: 1.3;
+  margin: 18px 0 8px; overflow-wrap: anywhere;
+}
+.drill-target {
+  text-decoration: underline; text-decoration-color: var(--accent);
+  text-decoration-thickness: 3px; text-underline-offset: .14em; text-decoration-skip-ink: none;
+}
+.drill-prompt { color: var(--muted); margin: 0 0 14px; }
+
+.option-row { margin: 0 0 16px; }
+.option-row-type .option-chips { gap: 12px; }
+.option-row-type .chip { flex: 1 1 120px; min-height: 60px; font-size: 1.15rem; }
+.option-label { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; font-weight: 600; font-size: .95rem; margin-bottom: 6px; }
+.option-label .row-result { font-weight: 600; font-size: .9rem; }
+.option-label .row-result.is-right { color: var(--ok); }
+.option-label .row-result.is-wrong { color: var(--bad); }
+.option-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.chip {
+  min-height: 44px; padding: .45em 1em; border-radius: 999px;
+  border: 1.5px solid var(--line); background: #fff; color: var(--text);
+  font: 600 .98rem/1.2 var(--sans); cursor: pointer; text-align: center;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+@media (hover: hover) { .chip:not([disabled]):hover { border-color: var(--accent); color: var(--accent); } }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.chip[disabled] { cursor: default; }
+.chip[disabled]:not(.is-right):not(.is-wrong):not(.is-answer) { opacity: .5; }
+.chip.is-right { background: var(--ok); border-color: var(--ok); color: #fff; }
+.chip.is-wrong { background: var(--bad); border-color: var(--bad); color: #fff; }
+.chip.is-answer { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); box-shadow: inset 0 0 0 1px var(--ok); }
+
+.feedback { margin-top: 18px; padding: 16px 18px; border-radius: 8px; background: var(--bg-tint); border-left: 4px solid var(--line); }
+.feedback.is-right { border-left-color: var(--ok); }
+.feedback.is-wrong { border-left-color: var(--bad); }
+.feedback .verdict { font-weight: 600; margin: 0 0 6px; }
+.feedback.is-right .verdict { color: var(--ok); }
+.feedback.is-wrong .verdict { color: var(--bad); }
+.feedback p:last-child { margin: 0; }
+.feedback .parse-line { font-size: .95rem; color: var(--muted); margin: 0 0 6px; }
+
+/* ---------- Results ---------- */
+.results-score { font-family: var(--serif); font-size: clamp(2.6rem, 9vw, 3.8rem); line-height: 1; margin: 0 0 6px; }
+.results-score small { font-size: .45em; color: var(--muted); }
+.results-line { color: var(--muted); }
+.results-heading { font-size: 1.25rem; margin: 26px 0 12px; }
+.missed-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.missed-list li { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; }
+.missed-list .missed-sentence { font-family: var(--serif); font-size: 1.25rem; line-height: 1.3; margin: 0 0 4px; }
+.missed-list .missed-parse { margin: 0; font-size: .95rem; }
+.missed-list .missed-parse b { color: var(--accent); }
+
+.tutor-note { margin: 28px 0 0; text-align: center; color: var(--muted); }
