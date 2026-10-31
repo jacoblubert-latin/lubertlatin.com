@@ -3,6 +3,13 @@
   publish = "site"
   command = ""
 
+# Send the netlify.app address to the real domain.
+[[redirects]]
+  from = "https://glittery-bunny-c51d58.netlify.app/*"
+  to = "https://lubertlatin.com/:splat"
+  status = 301
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]
