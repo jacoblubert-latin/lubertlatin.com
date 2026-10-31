@@ -98,7 +98,9 @@ The PDF signup redirects to `free-sheet.html`, which has the download link. No e
 
 ## Updating the free PDF
 
-The PDF is generated from `tools/id-sheet.html`. Edit that file, then run from the project folder:
+The PDF at `site/assets/latin-declension-conjugation-id-sheet.pdf` is the proofed version supplied directly as a file. To replace it, drop a new PDF over that file (same name), commit, and push.
+
+`tools/id-sheet.html` is the original draft the first PDF was built from; it is older than the current PDF. If you ever want to regenerate from it, edit that file, then run from the project folder (this overwrites the PDF in `site/assets`):
 
 ```bash
 powershell -ExecutionPolicy Bypass -File tools\build-assets.ps1
