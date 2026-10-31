@@ -27,7 +27,7 @@ New Netlify sites can start out locked behind a Netlify login. **Site configurat
 
 ### Turn off the Netlify HUD (performance)
 
-Netlify injects a small overlay script ("HUD") into every page by default. It's invisible to visitors but costs about 10 Lighthouse performance points on phones. Search the site's settings for **HUD** (Site configuration → General, or your team/user settings) and disable it for this site.
+Already done: the HUD setting is **off** for this site, so no overlay script is injected into the live site. The only remaining overlay is the Netlify Drawer on **Deploy Previews** (preview links, not lubertlatin.com), which doesn't affect real visitors. To turn that off too: **Site configuration → Build & deploy → Deploy Previews → Netlify Drawer** → disable.
 
 ## Part 2 — Connect the domain
 
