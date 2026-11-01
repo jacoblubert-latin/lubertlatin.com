@@ -14,16 +14,22 @@ const path = require("path");
 const LESSON_MIN = 1;
 const LESSON_MAX = 42; // Henle First Year has 42 lessons
 
+// Which uses a noun may have in each case. "use" must be one of the
+// uses listed for the item's case.
+const USES_BY_CASE = {
+  nom: ["subject", "predicate nominative"],
+  gen: ["possession"],
+  dat: ["indirect object"],
+  acc: ["direct object", "accusative of place to which"],
+  abl: ["ablative of means", "ablative of agent", "ablative of accompaniment",
+        "ablative of place where", "ablative of place from which", "ablative of time when"],
+  voc: ["vocative/direct address"]
+};
 const NOUN_FIELDS = {
-  case: ["nom", "gen", "dat", "acc", "abl", "voc"],
+  case: Object.keys(USES_BY_CASE),
   number: ["sg", "pl"],
   gender: ["m", "f", "n"],
-  use: [
-    "subject", "predicate nominative", "direct object", "indirect object", "possession",
-    "object of preposition", "ablative of means", "ablative of agent", "ablative of accompaniment",
-    "ablative of place where", "ablative of time when", "accusative of place to which",
-    "vocative/direct address"
-  ]
+  use: [].concat(...Object.values(USES_BY_CASE))
 };
 const VERB_FIELDS = {
   person: [1, 2, 3],
@@ -108,6 +114,12 @@ items.forEach((item, i) => {
   }
   const allowedKeys = Object.keys(spec).concat(item.type === "verb" ? ["clause"] : []);
   for (const k of Object.keys(item.parse)) if (!allowedKeys.includes(k)) err("parse has unexpected field \"" + k + "\"");
+
+  if (item.type === "noun" && USES_BY_CASE[item.parse.case] && NOUN_FIELDS.use.includes(item.parse.use)
+      && !USES_BY_CASE[item.parse.case].includes(item.parse.use)) {
+    err("parse.use " + JSON.stringify(item.parse.use) + " does not go with case " + JSON.stringify(item.parse.case) +
+        " (allowed: " + USES_BY_CASE[item.parse.case].join(", ") + ")");
+  }
 
   if (item.type === "verb") {
     const subj = item.parse.mood === "subjunctive";

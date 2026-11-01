@@ -91,7 +91,7 @@ Each item in `items.json` looks like this:
 ```
 
 - `target_index` counts words from 0. For a two-word form such as *victī sunt*, point at the first word and put both words in `target`.
-- Noun parse: `case` (nom, gen, dat, acc, abl, voc), `number` (sg, pl), `gender` (m, f, n), `use` (one of the fixed list in `tools/validate-items.js`).
+- Noun parse: `case` (nom, gen, dat, acc, abl, voc), `number` (sg, pl), `gender` (m, f, n), `use` (must go with the case; see `USES_BY_CASE` in `tools/validate-items.js`. An ablative, for example, can be means, agent, accompaniment, place where, place from which, or time when).
 - Verb parse: `person` (1, 2, 3), `number`, `tense`, `voice`, `mood`, and `clause` only when `mood` is `subjunctive`.
 
 After editing the file, check it before you push:
@@ -100,7 +100,7 @@ After editing the file, check it before you push:
 node tools/validate-items.js
 ```
 
-It reports missing fields, values that aren't in the allowed lists, a `target_index` that doesn't point at the target word, lesson numbers outside 1–42, and duplicate ids. "OK" means the file is good. To check a different file, give its path: `node tools/validate-items.js path/to/file.json`.
+It reports missing fields, values that aren't in the allowed lists, a use that doesn't go with the case, a `target_index` that doesn't point at the target word, lesson numbers outside 1–42, and duplicate ids. "OK" means the file is good. To check a different file, give its path: `node tools/validate-items.js path/to/file.json`.
 
 ## Publishing a change
 

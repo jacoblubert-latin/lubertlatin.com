@@ -13,12 +13,15 @@
       { key: "case", label: "Case", options: ["nom", "gen", "dat", "acc", "abl", "voc"] },
       { key: "number", label: "Number", options: ["sg", "pl"] },
       { key: "gender", label: "Gender", options: ["m", "f", "n"] },
-      { key: "use", label: "Use", options: [
-        "subject", "predicate nominative", "direct object", "indirect object", "possession",
-        "object of preposition", "ablative of means", "ablative of agent", "ablative of accompaniment",
-        "ablative of place where", "ablative of time when", "accusative of place to which",
-        "vocative/direct address"
-      ] }
+      { key: "use", label: "Use", dependsOn: { case: "*" }, optionsBy: "case", options: {
+        nom: ["subject", "predicate nominative"],
+        gen: ["possession"],
+        dat: ["indirect object"],
+        acc: ["direct object", "accusative of place to which"],
+        abl: ["ablative of means", "ablative of agent", "ablative of accompaniment",
+              "ablative of place where", "ablative of place from which", "ablative of time when"],
+        voc: ["vocative/direct address"]
+      } }
     ],
     verb: [
       { key: "person", label: "Person", options: ["1", "2", "3"] },
@@ -33,6 +36,13 @@
     ]
   };
   var DISPLAY = { "1": "1st", "2": "2nd", "3": "3rd" };
+  // In the Use row the case is already known, so drop the "ablative of" prefix.
+  var USE_DISPLAY = { "accusative of place to which": "place to which", "vocative/direct address": "direct address" };
+  Object.keys(FIELDS.noun[3].options).forEach(function (c) {
+    FIELDS.noun[3].options[c].forEach(function (u) {
+      if (!USE_DISPLAY[u]) USE_DISPLAY[u] = u.replace(/^ablative of /, "");
+    });
+  });
 
   var root = document.getElementById("drill");
   if (!root) return;
@@ -110,9 +120,17 @@
   function fieldsFor(item) { return FIELDS[item.type]; }
   function fieldApplies(field, picks) {
     if (!field.dependsOn) return true;
-    for (var k in field.dependsOn) if (picks[k] !== field.dependsOn[k]) return false;
+    for (var k in field.dependsOn) {
+      if (field.dependsOn[k] === "*" ? picks[k] == null : picks[k] !== field.dependsOn[k]) return false;
+    }
     return true;
   }
+  // Options for a field; for the Use row they depend on the case picked.
+  function optionsFor(field, picks) {
+    if (!field.optionsBy) return field.options;
+    return field.options[picks[field.optionsBy]] || [];
+  }
+  function displayOption(field, v) { return field.key === "use" ? (USE_DISPLAY[v] || v) : display(v); }
   function correctHas(field, item) {
     return !field.dependsOn || item.parse[field.key] != null;
   }
@@ -254,15 +272,19 @@
       label.appendChild(make("span", "row-result"));
       row.appendChild(label);
       var chips = make("div", "option-chips");
-      field.options.forEach(function (opt) {
-        var b = make("button", "chip", display(opt));
-        b.type = "button";
-        b.setAttribute("data-value", opt);
-        b.setAttribute("aria-pressed", "false");
-        chips.appendChild(b);
-      });
+      fillChips(chips, field, optionsFor(field, game.picks));
       row.appendChild(chips);
       el.fields.appendChild(row);
+    });
+  }
+  function fillChips(chips, field, options) {
+    clear(chips);
+    options.forEach(function (opt) {
+      var b = make("button", "chip", displayOption(field, opt));
+      b.type = "button";
+      b.setAttribute("data-value", opt);
+      b.setAttribute("aria-pressed", "false");
+      chips.appendChild(b);
     });
   }
 
@@ -273,13 +295,17 @@
     var key = row.getAttribute("data-field");
     row.querySelectorAll(".chip").forEach(function (b) { b.setAttribute("aria-pressed", String(b === btn)); });
     game.picks[key] = btn.getAttribute("data-value");
-    // Show/hide dependent rows (the clause row after "subjunctive").
+    // Show/hide dependent rows (the clause row after "subjunctive") and
+    // refresh rows whose options depend on this pick (Use after case).
     fieldsFor(current()).forEach(function (field) {
       if (!field.dependsOn) return;
       var r = el.fields.querySelector('[data-field="' + field.key + '"]');
       var applies = fieldApplies(field, game.picks);
       r.hidden = !applies;
-      if (!applies) {
+      if (field.optionsBy === key) {
+        delete game.picks[field.key];
+        fillChips(r.querySelector(".option-chips"), field, optionsFor(field, game.picks));
+      } else if (!applies) {
         delete game.picks[field.key];
         r.querySelectorAll(".chip").forEach(function (b) { b.setAttribute("aria-pressed", "false"); });
       }
@@ -315,7 +341,7 @@
       result.className = "row-result " + (right ? "is-right" : "is-wrong");
       if (right) result.textContent = "✓";
       else if (expected == null) result.textContent = "Not needed: the mood is " + display(item.parse.mood) + ".";
-      else result.textContent = "Correct: " + display(expected);
+      else result.textContent = "Correct: " + displayOption(field, expected);
     });
     el.check.hidden = true;
     finishItem(allRight, allRight ? "Correct!" : "Not quite.", item);
