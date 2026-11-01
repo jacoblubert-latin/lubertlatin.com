@@ -17,7 +17,7 @@
         nom: ["subject", "predicate nominative"],
         gen: ["possession"],
         dat: ["indirect object"],
-        acc: ["direct object", "accusative of place to which"],
+        acc: ["direct object", "accusative of place to which", "accusative of time (post/ante)"],
         abl: ["ablative of means", "ablative of agent", "ablative of accompaniment",
               "ablative of place where", "ablative of place from which", "ablative of time when"],
         voc: ["vocative/direct address"]
@@ -37,7 +37,7 @@
   };
   var DISPLAY = { "1": "1st", "2": "2nd", "3": "3rd" };
   // In the Use row the case is already known, so drop the "ablative of" prefix.
-  var USE_DISPLAY = { "accusative of place to which": "place to which", "vocative/direct address": "direct address" };
+  var USE_DISPLAY = { "accusative of place to which": "place to which", "accusative of time (post/ante)": "time (post/ante)", "vocative/direct address": "direct address" };
   Object.keys(FIELDS.noun[3].options).forEach(function (c) {
     FIELDS.noun[3].options[c].forEach(function (u) {
       if (!USE_DISPLAY[u]) USE_DISPLAY[u] = u.replace(/^ablative of /, "");

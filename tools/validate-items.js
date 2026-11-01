@@ -20,7 +20,7 @@ const USES_BY_CASE = {
   nom: ["subject", "predicate nominative"],
   gen: ["possession"],
   dat: ["indirect object"],
-  acc: ["direct object", "accusative of place to which"],
+  acc: ["direct object", "accusative of place to which", "accusative of time (post/ante)"],
   abl: ["ablative of means", "ablative of agent", "ablative of accompaniment",
         "ablative of place where", "ablative of place from which", "ablative of time when"],
   voc: ["vocative/direct address"]
