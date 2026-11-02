@@ -49,7 +49,7 @@ const ITEM_FIELDS = ["id", "curriculum", "sentence", "target_index", "target", "
 const ITEM_OPTIONAL = ["available"];
 
 // ---------- vocab entries ----------
-const POS = ["noun", "verb", "adjective", "pronoun", "indeclinable", "other"];
+const POS = ["noun", "verb", "adjective", "pronoun", "adverb", "preposition", "conjunction", "indeclinable", "other"];
 const VOCAB_FIELDS = ["id", "curriculum", "lesson", "pos", "lemma"];
 const VOCAB_OPTIONAL = ["english", "flags", "available", "forms", "stem", "gen", "gender", "declension", "parts", "conjugation"];
 
@@ -188,8 +188,8 @@ function validateVocab(vocab, ctx) {
     } else if (e.pos === "verb") {
       if (!Array.isArray(e.parts) || e.parts.length < 2 || !e.parts.every(isStr)) err("a verb needs \"parts\" (principal parts, at least two)");
       if (!L.CONJUGATIONS.includes(String(e.conjugation))) { err("conjugation " + JSON.stringify(e.conjugation) + " is not one of: " + L.CONJUGATIONS.join(", ")); return; }
-      if (String(e.conjugation) === "irregular" && !L.IRREGULAR_LEMMAS.some((k) => L.normalize(k) === L.normalize(e.lemma))) {
-        err("irregular verbs need a hand-entered table; available: " + L.IRREGULAR_LEMMAS.join(", "));
+      if (String(e.conjugation) === "irregular" && !L.hasIrregularTable(e)) {
+        err("irregular verbs need a hand-entered table; available: " + L.IRREGULAR_LEMMAS.join(", ") + " and their compounds (absum, adeō…)");
       }
       if (Array.isArray(e.parts) && e.parts.length >= 2 && isStr(e.lemma)) {
         try { L.synopsis(e); } catch (x) { err("cannot conjugate: " + x.message); }

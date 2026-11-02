@@ -202,6 +202,25 @@ eq("fīō impf subj", forms(L.conjugateSet(fio, "subjunctive", "imperfect", "act
 eq("fīō perf", forms(L.conjugateSet(fio, "indicative", "perfect", "active")), ["factus sum", "factus es", "factus est", "factī sumus", "factī estis", "factī sunt"]);
 eq("fīō voices", L.verbVoices(fio), ["active"]);
 
+// Compounds of sum and eō, and dō (hand table, short a).
+const adeo = V(["adeō", "adīre", "adiī", "aditus"], "irregular", ["no-passive"]);
+eq("adeō pres", forms(L.conjugateSet(adeo, "indicative", "present", "active")), ["adeō", "adīs", "adit", "adīmus", "adītis", "adeunt"]);
+eq("adeō perf", forms(L.conjugateSet(adeo, "indicative", "perfect", "active")), ["adiī", "adīstī", "adiit", "adiimus", "adīstis", "adiērunt"]);
+const absum = V(["absum", "abesse", "āfuī", "āfutūrus"], "irregular", ["no-passive"]);
+eq("absum pres", forms(L.conjugateSet(absum, "indicative", "present", "active")), ["absum", "abes", "abest", "absumus", "abestis", "absunt"]);
+eq("absum perf uses āfu-", forms(L.conjugateSet(absum, "indicative", "perfect", "active"))[0], "āfuī");
+eq("absum impf subj", forms(L.conjugateSet(absum, "subjunctive", "imperfect", "active")), ["abessem", "abessēs", "abesset", "abessēmus", "abessētis", "abessent"]);
+eq("laudō is not a compound of dō", L.parseEntry("laudō, laudāre, laudāvī, laudātus").conjugation, "1");
+eq("dēdō is 3rd", L.parseEntry("dēdō, dēdere, dēdidī, dēditus").conjugation, "3");
+eq("adeō parses irregular", L.parseEntry("adeō, adīre, adiī, aditus").conjugation, "irregular");
+const do_ = V(["dō", "dare", "dedī", "datus"], "irregular");
+eq("dō pres", forms(L.conjugateSet(do_, "indicative", "present", "active")), ["dō", "dās", "dat", "damus", "datis", "dant"]);
+eq("dō impf", forms(L.conjugateSet(do_, "indicative", "imperfect", "active"))[0], "dabam");
+eq("dō pres pas", forms(L.conjugateSet(do_, "indicative", "present", "passive")), ["dor", "daris", "datur", "damur", "daminī", "dantur"]);
+eq("dō perf pas", forms(L.conjugateSet(do_, "indicative", "perfect", "passive"))[2], "datus est");
+eq("dō pres subj", forms(L.conjugateSet(do_, "subjunctive", "present", "active")), ["dem", "dēs", "det", "dēmus", "dētis", "dent"]);
+eq("parse fīnēs", L.parseEntry("fīnēs, fīnium, m.").flags, ["plural-only", "i-stem"]);
+
 // Whole synopsis shape.
 const syn = L.synopsis(laudo);
 eq("synopsis voices", syn.voices, ["active", "passive"]);

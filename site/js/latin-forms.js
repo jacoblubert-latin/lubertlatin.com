@@ -379,6 +379,33 @@
         }
       }
     },
+    // dō keeps a short a (damus, datis, dabam, dabō), so the rules for the
+    // 1st conjugation would put macrons where Henle has none.
+    "dō": {
+      perf: "ded", ppl: "dat", passive: true,
+      active: {
+        indicative: {
+          present: ["dō", "dās", "dat", "damus", "datis", "dant"],
+          imperfect: ["dabam", "dabās", "dabat", "dabāmus", "dabātis", "dabant"],
+          future: ["dabō", "dabis", "dabit", "dabimus", "dabitis", "dabunt"]
+        },
+        subjunctive: {
+          present: ["dem", "dēs", "det", "dēmus", "dētis", "dent"],
+          imperfect: ["darem", "darēs", "daret", "darēmus", "darētis", "darent"]
+        }
+      },
+      passiveForms: {
+        indicative: {
+          present: ["dor", "daris", "datur", "damur", "daminī", "dantur"],
+          imperfect: ["dabar", "dabāris", "dabātur", "dabāmur", "dabāminī", "dabantur"],
+          future: ["dabor", "daberis", "dabitur", "dabimur", "dabiminī", "dabuntur"]
+        },
+        subjunctive: {
+          present: ["der", "dēris", "dētur", "dēmur", "dēminī", "dentur"],
+          imperfect: ["darer", "darēris", "darētur", "darēmur", "darēminī", "darentur"]
+        }
+      }
+    },
     // fīō serves as the passive of faciō: active-looking present system,
     // perfect system from the participle factus.
     "fīō": {
@@ -397,32 +424,50 @@
     }
   };
   // Lemmas may be given with or without macrons / j.
+  // Compounds (adeō, absum, praesum, trānseō…) use the base verb's table
+  // with the prefix put back on each hand-entered form; their own
+  // principal parts supply the perfect stem (absum → āfu-).
+  // Only sum, eō and ferō take prefixes (dēdō and reddō are 3rd conjugation).
+  var COMPOUND_BASES = ["sum", "eō", "ferō"];
+  var PREFIXES = ["ab", "ad", "ante", "circum", "con", "dē", "ex", "in", "inter", "intrō", "ob", "per", "prae", "prō", "prōd", "red", "sub", "super", "trāns"];
   function irregularFor(entry) {
     var key = normalize(entry.lemma);
     var found = null;
-    Object.keys(IRREGULAR).forEach(function (k) { if (normalize(k) === key) found = IRREGULAR[k]; });
+    Object.keys(IRREGULAR).forEach(function (k) {
+      var nk = normalize(k);
+      if (key === nk) found = { table: IRREGULAR[k], prefix: "" };
+      else if (!found && COMPOUND_BASES.indexOf(k) >= 0 && endsWith(key, nk) && key.length > nk.length) {
+        var prefix = entry.lemma.slice(0, entry.lemma.length - k.length);
+        if (PREFIXES.some(function (p) { return normalize(p) === normalize(prefix); })) found = { table: IRREGULAR[k], prefix: prefix };
+      }
+    });
     return found;
   }
 
-  function irregularSet(table, mood, tense, voice) {
+  function irregularSet(entry, hit, mood, tense, voice) {
+    var table = hit.table, pre = hit.prefix;
     var perfTense = tense === "perfect" || tense === "pluperfect" || tense === "future perfect";
+    var parts = entry.parts || [];
+    var perf = parts[2] && endsWith(parts[2], "ī") ? cut(parts[2], "ī") : (table.perf ? pre + table.perf : null);
+    var ppl = table.ppl ? pre + table.ppl : null;
+    if (parts[3] && endsWith(parts[3], "us") && !endsWith(parts[3], "ūrus")) ppl = cut(parts[3], "us");
     if (voice === "passive") {
       if (!table.passive) return null;
-      if (!perfTense) { var pf = table.passiveForms[mood] && table.passiveForms[mood][tense]; return pf ? plain(pf) : null; }
-      return perfectPassive(table.ppl, mood, tense);
+      if (!perfTense) { var pf = table.passiveForms[mood] && table.passiveForms[mood][tense]; return pf ? plain(add(pre, pf)) : null; }
+      return perfectPassive(ppl, mood, tense);
     }
     var given = table.active[mood] && table.active[mood][tense];
-    if (given) return plain(given);
+    if (given) return plain(add(pre, given));
     if (!perfTense) return null;
-    if (table.perfectFromParticiple) return perfectPassive(table.ppl, mood, tense);
-    if (!table.perf) return null;
+    if (table.perfectFromParticiple) return perfectPassive(ppl, mood, tense);
+    if (!perf) return null;
     if (mood === "indicative") {
-      if (tense === "perfect") return plain(add(table.perf, A.perf));
-      if (tense === "pluperfect") return plain(add(table.perf, A.plup));
-      return plain(add(table.perf, A.futp));
+      if (tense === "perfect") return plain(add(perf, A.perf));
+      if (tense === "pluperfect") return plain(add(perf, A.plup));
+      return plain(add(perf, A.futp));
     }
-    if (tense === "perfect") return plain(add(table.perf, A.perfS));
-    if (tense === "pluperfect") return plain(add(table.perf, A.plupS));
+    if (tense === "perfect") return plain(add(perf, A.perfS));
+    if (tense === "pluperfect") return plain(add(perf, A.plupS));
     return null;
   }
   function perfectPassive(ppl, mood, tense) {
@@ -447,7 +492,7 @@
     if (String(entry.conjugation) === "irregular") {
       var t = irregularFor(entry);
       if (!t) throw new Error("no hand-entered table for irregular verb " + entry.lemma);
-      return t.passive ? ["active", "passive"] : ["active"];
+      return t.table.passive ? ["active", "passive"] : ["active"];
     }
     return ["active", "passive"];
   }
@@ -460,7 +505,8 @@
       var t = irregularFor(entry);
       if (!t) throw new Error("no hand-entered table for irregular verb " + entry.lemma);
       if (voice === "deponent") return null;
-      return irregularSet(t, mood, tense, voice);
+      if (voice === "passive" && hasFlag(entry, "no-passive")) return null;
+      return irregularSet(entry, t, mood, tense, voice);
     }
     var stems = verbStems(entry);
     var dep = hasFlag(entry, "deponent");
@@ -510,6 +556,8 @@
       else if (endsWith(gen, "is")) decl = "3";
       else if (endsWith(gen, "ōrum")) { decl = "2"; flags.push("plural-only"); }
       else if (endsWith(gen, "ārum")) { decl = "1"; flags.push("plural-only"); }
+      else if (endsWith(gen, "ium")) { decl = "3"; flags.push("plural-only", "i-stem"); }   // fīnēs, fīnium; mīlia, mīlium
+      else if (endsWith(gen, "um")) { decl = "3"; flags.push("plural-only"); }
       else if (endsWith(gen, "ī")) decl = "2";
       else throw new Error("cannot tell the declension from the genitive " + gen);
       var e = { pos: "noun", lemma: raw[0], gen: gen, gender: m[1], declension: decl };
@@ -607,6 +655,7 @@
     stripMacrons: stripMacrons, normalize: normalize, sameForm: sameForm, spell: spell, hasFlag: hasFlag,
     declineNoun: declineNoun, nounEntryText: nounEntryText,
     conjugateSet: conjugateSet, synopsis: synopsis, verbVoices: verbVoices, verbEntryText: verbEntryText, personIndex: personIndex,
-    parseEntry: parseEntry, formsOf: formsOf, availability: availability, lessonOf: lessonOf
+    parseEntry: parseEntry, formsOf: formsOf, availability: availability, lessonOf: lessonOf,
+    hasIrregularTable: function (entry) { return !!irregularFor(entry); }
   };
 });

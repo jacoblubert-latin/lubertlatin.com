@@ -116,7 +116,7 @@ Every data file lives in a folder named for the textbook, and every item and ent
 
 ### Dictionary entries (`vocab.json`)
 
-The typed games generate every form from these entries with the rules engine in `site/js/latin-forms.js`. One entry per line:
+The typed games generate every form from these entries with the rules engine in `site/js/latin-forms.js`. The Henle file was transcribed (with macrons) from the First Year master list, which has no lesson numbers: each word's `lesson` is the earliest lesson of a sentence in `items.json` that uses one of its forms, or else the lesson the grammar schedule introduces its declension or conjugation. Adjust them as you go. One entry per line:
 
 ```json
 {"id":"terra","curriculum":"henle","lesson":1,"pos":"noun","lemma":"terra","gen":"terrae","gender":"f","declension":"1","english":"land"}
@@ -131,7 +131,7 @@ The typed games generate every form from these entries with the rules engine in 
 
 - **Nouns:** `lemma`, `gen` (genitive singular; genitive plural for a plural-only noun), `gender` (m, f, n), `declension` ("1"–"5"). The stem comes from the genitive, so *ager, agrī* and *fīlius, fīliī* work by themselves; 2nd-declension -ius nouns get the vocative in -ī, 3rd-declension neuters and i-stems (`"i-stem"` flag: gen. pl. -ium; neuters also abl. -ī and nom./acc. pl. -ia), and the 4th and 5th declensions are all handled. Flags: `i-stem`, `plural-only`, `singular-only`, `no-vocative`. For an odd word, `"forms": {"sg.voc": "deus", "pl.nom": ["dī", "deī"]}` overrides single cells (a list means every spelling is accepted).
 - **Verbs:** `parts` (principal parts; three for a deponent, ending in "… sum"), `conjugation` ("1", "2", "3", "3io", "4" or "irregular"). Flags: `deponent`, `no-passive` (intransitive verbs: only the active column is shown). The verbs **sum, possum, eō, ferō, volō, nōlō, mālō, fīō** are hand-entered tables, not rules; give them `"conjugation": "irregular"`.
-- **Other words** (`adjective`, `pronoun`, `indeclinable`, `other`) are only used to work out sentence availability; give an optional `"forms": [...]` list for anything that inflects.
+- **Other words** (`adjective`, `pronoun`, `adverb`, `preposition`, `conjunction`, `indeclinable`, `other`) are only used to work out sentence availability; give an optional `"forms": [...]` list for anything that inflects.
 - Spelling: write consonantal i as **j** the way Henle does (*jubeō*, *cūjus*). The games show it as j or i according to the student's spelling setting, and grading accepts i/j and u/v either way. Macrons are ignored unless the student turns on "strict macrons", and every correct form is shown with macrons.
 
 ### Proofing the generator
