@@ -1,58 +1,33 @@
-// Parsing drill for /practice. Loads /practice/items.json and runs
-// 10-item rounds. Only the start-screen filters are stored (localStorage).
+// Shared shell for the /practice games: loads a curriculum's data files,
+// runs the start screen (game options + lesson filter), rounds, scoring,
+// streak and the end-of-round review. Each game (js/games/*.js) registers
+// itself with LatinPractice.register() and only supplies the parts that
+// differ: start-screen options, the pool, how an item is shown and graded,
+// and how a missed item is reviewed.
+//
+// Page markup: <div id="drill" data-game="parse" data-curriculum="henle" data-root="/practice/data/">
+// Data files live at <root><curriculum>/<file>.json. Adding a textbook means
+// adding a folder there (plus, later, a picker that sets data-curriculum).
 (function () {
   "use strict";
-
-  var ROUND_SIZE = 10;
-  var STORAGE_KEY = "lubertlatin.practice.filters";
-
-  // Field order and allowed values. The validator (tools/validate-items.js)
-  // checks items.json against these same lists.
-  var FIELDS = {
-    noun: [
-      { key: "case", label: "Case", options: ["nom", "gen", "dat", "acc", "abl", "voc"] },
-      { key: "number", label: "Number", options: ["sg", "pl"] },
-      { key: "gender", label: "Gender", options: ["m", "f", "n"] },
-      { key: "use", label: "Use", dependsOn: { case: "*" }, optionsBy: "case", options: {
-        nom: ["subject", "predicate nominative"],
-        gen: ["possession"],
-        dat: ["indirect object"],
-        acc: ["direct object", "accusative of place to which", "accusative of time (post/ante)"],
-        abl: ["ablative of means", "ablative of agent", "ablative of accompaniment",
-              "ablative of place where", "ablative of place from which", "ablative of time when"],
-        voc: ["vocative/direct address"]
-      } }
-    ],
-    verb: [
-      { key: "person", label: "Person", options: ["1", "2", "3"] },
-      { key: "number", label: "Number", options: ["sg", "pl"] },
-      { key: "tense", label: "Tense", options: ["present", "imperfect", "future", "perfect", "pluperfect", "future perfect"] },
-      { key: "voice", label: "Voice", options: ["active", "passive"] },
-      { key: "mood", label: "Mood", options: ["indicative", "imperative", "subjunctive"] },
-      { key: "clause", label: "Clause", dependsOn: { mood: "subjunctive" }, options: [
-        "purpose", "result", "indirect command", "indirect question",
-        "cum-circumstantial", "cum-causal", "cum-concessive"
-      ] }
-    ]
-  };
-  var DISPLAY = { "1": "1st", "2": "2nd", "3": "3rd" };
-  // In the Use row the case is already known, so drop the "ablative of" prefix.
-  var USE_DISPLAY = { "accusative of place to which": "place to which", "accusative of time (post/ante)": "time (post/ante)", "vocative/direct address": "direct address" };
-  Object.keys(FIELDS.noun[3].options).forEach(function (c) {
-    FIELDS.noun[3].options[c].forEach(function (u) {
-      if (!USE_DISPLAY[u]) USE_DISPLAY[u] = u.replace(/^ablative of /, "");
-    });
-  });
 
   var root = document.getElementById("drill");
   if (!root) return;
 
+  var gameId = root.getAttribute("data-game");
+  var curriculumId = root.getAttribute("data-curriculum") || "henle";
+  var dataRoot = root.getAttribute("data-root") || "/practice/data/";
+  var TYPED_KEY = "lubertlatin.practice.typed";
+
   var el = {
     start: document.getElementById("screen-start"),
+    startOptions: document.getElementById("start-options"),
+    startExtra: document.getElementById("start-extra"),
     play: document.getElementById("screen-play"),
     results: document.getElementById("screen-results"),
     message: document.getElementById("screen-message"),
     messageText: document.getElementById("message-text"),
+    lessonLabel: document.getElementById("lesson-label-text"),
     lessonRange: document.getElementById("lesson-range"),
     lessonNumber: document.getElementById("lesson-number"),
     lessonOutput: document.getElementById("lesson-output"),
@@ -60,10 +35,7 @@
     startButton: document.getElementById("start-button"),
     progress: document.getElementById("progress"),
     streak: document.getElementById("streak"),
-    sentence: document.getElementById("sentence"),
-    prompt: document.getElementById("prompt"),
-    typeRow: document.getElementById("type-row"),
-    fields: document.getElementById("fields"),
+    area: document.getElementById("game-area"),
     feedback: document.getElementById("feedback"),
     check: document.getElementById("check-button"),
     next: document.getElementById("next-button"),
@@ -75,14 +47,13 @@
     settings: document.getElementById("settings-button")
   };
 
-  var items = [];
-  var minLesson = 1, maxLesson = 1;
-  var filters = { types: "both", lesson: 1 };
-  var game = null; // { round, index, correct, streak, missed, phase, picks }
-
-  // ---------- helpers ----------
-  function show(screen) {
-    [el.start, el.play, el.results, el.message].forEach(function (s) { s.hidden = s !== screen; });
+  // ---------- small DOM/utility helpers shared with the games ----------
+  function clear(node) { while (node.firstChild) node.removeChild(node.firstChild); }
+  function make(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
   }
   function shuffle(a) {
     for (var i = a.length - 1; i > 0; i--) {
@@ -91,306 +62,241 @@
     }
     return a;
   }
-  function display(v) { return DISPLAY[String(v)] || String(v); }
-  function clear(node) { while (node.firstChild) node.removeChild(node.firstChild); }
-  function make(tag, cls, text) {
-    var n = document.createElement(tag);
-    if (cls) n.className = cls;
-    if (text != null) n.textContent = text;
-    return n;
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function readJSON(key) {
+    try { var v = JSON.parse(localStorage.getItem(key)); return v && typeof v === "object" ? v : null; }
+    catch (e) { return null; }
   }
-  function wordsOf(s) { return s.trim().split(/\s+/); }
+  function writeJSON(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) { /* ignore */ } }
+  // Lesson an item counts as in this curriculum: `available` wins over `lesson`.
+  function lessonOf(thing) {
+    if (thing.available && thing.available[curriculumId] != null) return thing.available[curriculumId];
+    return thing.lesson;
+  }
+  function plural(n, one, many) { return n === 1 ? one : (many || one + "s"); }
 
-  // Sentence with the target word(s) underlined. Multi-word targets
-  // (e.g. "victī sunt") underline each word from target_index on.
-  function renderSentence(container, item) {
-    clear(container);
-    var words = wordsOf(item.sentence);
-    var span = wordsOf(item.target).length;
-    words.forEach(function (w, i) {
-      if (i > 0) container.appendChild(document.createTextNode(" "));
-      if (i >= item.target_index && i < item.target_index + span) {
-        container.appendChild(make("span", "drill-target", w));
-      } else {
-        container.appendChild(document.createTextNode(w));
+  // ---------- typed-answer kit (used by the decline and synopsis games) ----------
+  var typed = {
+    settings: { strict: false, spelling: "henle" },
+    load: function () {
+      var s = readJSON(TYPED_KEY);
+      if (s) {
+        if (typeof s.strict === "boolean") typed.settings.strict = s.strict;
+        if (s.spelling === "henle" || s.spelling === "classical") typed.settings.spelling = s.spelling;
       }
-    });
-  }
-
-  function fieldsFor(item) { return FIELDS[item.type]; }
-  function fieldApplies(field, picks) {
-    if (!field.dependsOn) return true;
-    for (var k in field.dependsOn) {
-      if (field.dependsOn[k] === "*" ? picks[k] == null : picks[k] !== field.dependsOn[k]) return false;
+    },
+    save: function () { writeJSON(TYPED_KEY, typed.settings); },
+    // Start-screen controls: strict macrons + spelling convention.
+    renderSettings: function (container) {
+      var fs = make("fieldset", "drill-fieldset");
+      fs.appendChild(make("legend", null, "Typing"));
+      var row = make("div", "choice-row");
+      row.appendChild(choice("checkbox", "strict", "1", "Strict macrons", typed.settings.strict));
+      fs.appendChild(row);
+      container.appendChild(fs);
+      var fs2 = make("fieldset", "drill-fieldset");
+      fs2.appendChild(make("legend", null, "Spelling"));
+      var row2 = make("div", "choice-row");
+      row2.appendChild(choice("radio", "spelling", "henle", "Henle (j)", typed.settings.spelling === "henle"));
+      row2.appendChild(choice("radio", "spelling", "classical", "Classical (i)", typed.settings.spelling === "classical"));
+      fs2.appendChild(row2);
+      container.appendChild(fs2);
+      var note = make("p", "fine", "Macrons are ignored unless strict macrons is on. i/j and u/v are always accepted either way.");
+      container.appendChild(note);
+    },
+    readSettings: function (form) {
+      var s = form.querySelector("input[name=strict]");
+      typed.settings.strict = !!(s && s.checked);
+      var sp = form.querySelector("input[name=spelling]:checked");
+      typed.settings.spelling = sp ? sp.value : "henle";
+      typed.save();
+    },
+    spell: function (s) { return window.LatinForms ? window.LatinForms.spell(s, typed.settings.spelling) : s; },
+    same: function (answer, expected) { return window.LatinForms.sameForm(answer, expected, typed.settings.strict); },
+    // One text input for a form, with a hidden "correct answer" line.
+    input: function (label) {
+      var inp = make("input", "form-input");
+      inp.type = "text"; inp.autocomplete = "off"; inp.autocapitalize = "none"; inp.spellcheck = false;
+      inp.setAttribute("lang", "la");
+      if (label) inp.setAttribute("aria-label", label);
+      return inp;
+    },
+    // Grade one input against expected (string or [string]); marks it and
+    // shows the correct form when wrong. Returns true/false.
+    grade: function (inp, expected) {
+      var main = Array.isArray(expected) ? expected[0] : expected;
+      var right = typed.same(inp.value, expected);
+      inp.disabled = true;
+      inp.classList.add(right ? "is-right" : "is-wrong");
+      inp.setAttribute("aria-invalid", right ? "false" : "true");
+      var cell = inp.parentNode;
+      if (!right) {
+        var ans = make("span", "cell-answer", typed.spell(main));
+        ans.setAttribute("lang", "la");
+        cell.appendChild(ans);
+      }
+      return right;
+    },
+    // Macron buttons that insert into the input last focused inside `area`.
+    macronBar: function (area) {
+      var bar = make("div", "macron-bar");
+      bar.setAttribute("role", "group"); bar.setAttribute("aria-label", "Insert a long vowel");
+      var last = null;
+      area.addEventListener("focusin", function (e) { if (e.target.matches("input.form-input")) last = e.target; });
+      "āēīōū".split("").forEach(function (ch) {
+        var b = make("button", "macron-key", ch);
+        b.type = "button"; b.tabIndex = -1;
+        b.addEventListener("mousedown", function (e) { e.preventDefault(); });
+        b.addEventListener("click", function () {
+          if (!last || last.disabled) return;
+          var s = last.selectionStart, en = last.selectionEnd, v = last.value;
+          last.value = v.slice(0, s) + ch + v.slice(en);
+          last.setSelectionRange(s + 1, s + 1);
+          last.focus();
+          last.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+        bar.appendChild(b);
+      });
+      return bar;
+    },
+    // Enter: move to the next empty input, or check when none is left.
+    enterToAdvance: function (area, onCheck) {
+      area.addEventListener("keydown", function (e) {
+        if (e.key !== "Enter" || !e.target.matches("input.form-input")) return;
+        e.preventDefault();
+        var inputs = Array.prototype.slice.call(area.querySelectorAll("input.form-input:not([disabled])"));
+        var i = inputs.indexOf(e.target);
+        var next = inputs.slice(i + 1).concat(inputs.slice(0, i)).filter(function (x) { return !x.value.trim(); })[0];
+        if (next) next.focus(); else onCheck();
+      });
     }
-    return true;
-  }
-  // Options for a field; for the Use row they depend on the case picked.
-  function optionsFor(field, picks) {
-    if (!field.optionsBy) return field.options;
-    return field.options[picks[field.optionsBy]] || [];
-  }
-  function displayOption(field, v) { return field.key === "use" ? (USE_DISPLAY[v] || v) : display(v); }
-  function correctHas(field, item) {
-    return !field.dependsOn || item.parse[field.key] != null;
-  }
-  function parseText(item) {
-    var parts = fieldsFor(item)
-      .filter(function (f) { return item.parse[f.key] != null; })
-      .map(function (f) { return display(item.parse[f.key]); });
-    return item.type + " · " + parts.join(" · ");
+  };
+  // A pill-styled radio/checkbox like the start screen's existing choices.
+  function choice(type, name, value, text, checked) {
+    var label = make("label", "choice");
+    var input = make("input"); input.type = type; input.name = name; input.value = value; input.checked = !!checked;
+    label.appendChild(input);
+    label.appendChild(make("span", null, text));
+    return label;
   }
 
-  // ---------- filters / start screen ----------
-  function loadFilters() {
-    try {
-      var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      if (saved && typeof saved === "object") {
-        if (["noun", "verb", "both"].indexOf(saved.types) >= 0) filters.types = saved.types;
-        if (typeof saved.lesson === "number" && isFinite(saved.lesson)) filters.lesson = saved.lesson;
-      }
-    } catch (e) { /* no storage, or bad data: use defaults */ }
-  }
-  function saveFilters() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(filters)); } catch (e) { /* ignore */ }
+  // ---------- state ----------
+  var game = null, ctx = null, data = {}, curriculum = null;
+  var bounds = { min: 1, max: 1 };
+  var round = null; // { items, index, correct, streak, missed:[{item,result}], phase }
+
+  function show(screen) {
+    [el.start, el.play, el.results, el.message].forEach(function (s) { s.hidden = s !== screen; });
   }
   function clampLesson(n) {
     n = Math.round(Number(n));
-    if (!isFinite(n)) n = maxLesson;
-    return Math.min(maxLesson, Math.max(minLesson, n));
+    if (!isFinite(n)) n = bounds.max;
+    return Math.min(bounds.max, Math.max(bounds.min, n));
   }
-  function pool() {
-    return items.filter(function (it) {
-      return it.lesson <= filters.lesson && (filters.types === "both" || it.type === filters.types);
-    });
+
+  // ---------- start screen ----------
+  function loadSettings() {
+    var saved = readJSON(game.storageKey);
+    if (saved && typeof saved.lesson === "number" && isFinite(saved.lesson)) ctx.settings.lesson = saved.lesson;
+    if (saved && game.restore) game.restore(saved);
   }
+  function saveSettings() { writeJSON(game.storageKey, ctx.settings); typed.save(); }
+
   function readStartForm() {
-    var checked = el.start.querySelector("input[name=types]:checked");
-    filters.types = checked ? checked.value : "both";
-    filters.lesson = clampLesson(el.lessonNumber.value);
+    ctx.settings.lesson = clampLesson(el.lessonNumber.value);
+    if (game.readStart) game.readStart(el.start);
+    if (game.typed) typed.readSettings(el.start);
   }
   function syncStartForm() {
-    var radio = el.start.querySelector("input[name=types][value=" + filters.types + "]");
-    if (radio) radio.checked = true;
-    el.lessonRange.value = filters.lesson;
-    el.lessonNumber.value = filters.lesson;
-    el.lessonOutput.textContent = filters.lesson;
-    var n = pool().length;
-    var what = filters.types === "both" ? "words" : filters.types + "s";
-    if (n === 0) {
-      el.poolNote.textContent = "No " + what + " through Lesson " + filters.lesson + " yet. Raise the lesson number.";
-    } else {
-      el.poolNote.textContent = n + " " + what + " to draw from" + (n < ROUND_SIZE ? " (a round will be " + n + " long)" : "") + ".";
-    }
+    el.lessonRange.value = ctx.settings.lesson;
+    el.lessonNumber.value = ctx.settings.lesson;
+    el.lessonOutput.textContent = ctx.settings.lesson;
+    if (game.updateStart) game.updateStart(el.start);
+    var n = game.pool().length;
+    el.poolNote.textContent = game.poolNote(n);
     el.startButton.disabled = n === 0;
   }
   function onStartChange() { readStartForm(); syncStartForm(); }
 
-  // ---------- round building ----------
-  // Random, no repeats, and no two items from the same sentence when
-  // the pool has enough distinct sentences; otherwise fill from the rest.
-  function buildRound(list) {
-    var shuffled = shuffle(list.slice());
-    var picked = [], used = {};
-    shuffled.forEach(function (it) {
-      if (picked.length < ROUND_SIZE && !used[it.sentence]) { picked.push(it); used[it.sentence] = true; }
-    });
-    if (picked.length < ROUND_SIZE) {
-      shuffled.forEach(function (it) {
-        if (picked.length < ROUND_SIZE && picked.indexOf(it) < 0) picked.push(it);
-      });
-    }
-    return shuffle(picked);
+  function buildStartScreen() {
+    clear(el.startOptions); clear(el.startExtra);
+    el.lessonLabel.textContent = "Through " + curriculum.short + " " + curriculum.lessonWord + " ";
+    el.lessonRange.min = el.lessonNumber.min = bounds.min;
+    el.lessonRange.max = el.lessonNumber.max = bounds.max;
+    game.renderStart(el.startOptions, el.startExtra);
+    if (game.typed) typed.renderSettings(el.startExtra);
   }
 
+  // ---------- rounds ----------
+  function defaultBuildRound(list, size) { return shuffle(list.slice()).slice(0, size); }
+
   function startRound() {
-    game = { round: buildRound(pool()), index: 0, correct: 0, streak: 0, missed: [] };
+    var size = game.roundSize ? game.roundSize() : 10;
+    var items = (game.buildRound || defaultBuildRound)(game.pool(), size);
+    round = { items: items, index: 0, correct: 0, streak: 0, missed: [], phase: "play" };
     show(el.play);
     showItem();
   }
-
-  // ---------- play ----------
-  function current() { return game.round[game.index]; }
-
+  function current() { return round.items[round.index]; }
   function updateStatus() {
-    el.progress.textContent = (game.index + 1) + " of " + game.round.length;
-    el.streak.textContent = "Streak " + game.streak;
-    el.streak.className = game.streak >= 3 ? "streak-hot" : "";
+    el.progress.textContent = (round.index + 1) + " of " + round.items.length;
+    el.streak.textContent = "Streak " + round.streak;
+    el.streak.className = round.streak >= 3 ? "streak-hot" : "";
   }
-
   function showItem() {
-    var item = current();
-    game.phase = "type";
-    game.picks = {};
+    round.phase = "play";
     updateStatus();
-    renderSentence(el.sentence, item);
-    el.prompt.textContent = "Is the underlined word a noun or a verb?";
-    el.typeRow.hidden = false;
-    el.typeRow.querySelectorAll(".chip").forEach(function (b) {
-      b.disabled = false; b.className = "chip"; b.removeAttribute("aria-pressed");
-    });
-    clear(el.fields);
+    clear(el.area);
     el.feedback.hidden = true; el.feedback.className = "feedback"; clear(el.feedback);
-    el.check.hidden = true; el.check.disabled = true;
+    el.check.hidden = !!game.hideCheckUntilReady; el.check.disabled = true;
     el.next.hidden = true;
-    el.sentence.focus && el.play.scrollIntoView({ block: "start", behavior: "smooth" });
+    game.begin(current(), el.area);
+    el.play.scrollIntoView({ block: "start", behavior: "smooth" });
   }
-
-  function onTypePick(e) {
-    var btn = e.target.closest(".chip[data-type]");
-    if (!btn || game.phase !== "type") return;
-    var item = current();
-    var picked = btn.getAttribute("data-type");
-    if (picked === item.type) {
-      btn.className = "chip is-right"; btn.setAttribute("aria-pressed", "true");
-      el.typeRow.querySelectorAll(".chip").forEach(function (b) { b.disabled = true; });
-      game.phase = "fields";
-      el.prompt.textContent = "Right, a " + item.type + ". Now parse it.";
-      buildFieldRows(item);
-      el.check.hidden = false;
-      el.check.disabled = true;
-    } else {
-      btn.className = "chip is-wrong";
-      el.typeRow.querySelectorAll(".chip").forEach(function (b) {
-        b.disabled = true;
-        if (b.getAttribute("data-type") === item.type) b.className = "chip is-answer";
-      });
-      finishItem(false, "Not quite. It's a " + item.type + ".", item);
-    }
-  }
-
-  function buildFieldRows(item) {
-    clear(el.fields);
-    fieldsFor(item).forEach(function (field) {
-      var row = make("div", "option-row");
-      row.setAttribute("role", "group");
-      row.setAttribute("aria-label", field.label);
-      row.setAttribute("data-field", field.key);
-      row.hidden = !fieldApplies(field, game.picks);
-      var label = make("div", "option-label");
-      label.appendChild(make("span", null, field.label));
-      label.appendChild(make("span", "row-result"));
-      row.appendChild(label);
-      var chips = make("div", "option-chips");
-      fillChips(chips, field, optionsFor(field, game.picks));
-      row.appendChild(chips);
-      el.fields.appendChild(row);
-    });
-  }
-  function fillChips(chips, field, options) {
-    clear(chips);
-    options.forEach(function (opt) {
-      var b = make("button", "chip", displayOption(field, opt));
-      b.type = "button";
-      b.setAttribute("data-value", opt);
-      b.setAttribute("aria-pressed", "false");
-      chips.appendChild(b);
-    });
-  }
-
-  function onFieldPick(e) {
-    var btn = e.target.closest(".chip[data-value]");
-    if (!btn || game.phase !== "fields") return;
-    var row = btn.closest(".option-row");
-    var key = row.getAttribute("data-field");
-    row.querySelectorAll(".chip").forEach(function (b) { b.setAttribute("aria-pressed", String(b === btn)); });
-    game.picks[key] = btn.getAttribute("data-value");
-    // Show/hide dependent rows (the clause row after "subjunctive") and
-    // refresh rows whose options depend on this pick (Use after case).
-    fieldsFor(current()).forEach(function (field) {
-      if (!field.dependsOn) return;
-      var r = el.fields.querySelector('[data-field="' + field.key + '"]');
-      var applies = fieldApplies(field, game.picks);
-      r.hidden = !applies;
-      if (field.optionsBy === key) {
-        delete game.picks[field.key];
-        fillChips(r.querySelector(".option-chips"), field, optionsFor(field, game.picks));
-      } else if (!applies) {
-        delete game.picks[field.key];
-        r.querySelectorAll(".chip").forEach(function (b) { b.setAttribute("aria-pressed", "false"); });
-      }
-    });
-    el.check.disabled = !allPicked();
-  }
-
-  function allPicked() {
-    return fieldsFor(current()).every(function (f) {
-      return !fieldApplies(f, game.picks) || game.picks[f.key] != null;
-    });
-  }
-
   function onCheck() {
-    if (game.phase !== "fields" || !allPicked()) return;
+    if (round.phase !== "play" || !game.canCheck()) return;
     var item = current();
-    var allRight = true;
-    fieldsFor(item).forEach(function (field) {
-      var row = el.fields.querySelector('[data-field="' + field.key + '"]');
-      var result = row.querySelector(".row-result");
-      var expected = correctHas(field, item) ? String(item.parse[field.key]) : null;
-      var picked = game.picks[field.key] != null ? String(game.picks[field.key]) : null;
-      if (expected == null && picked == null) return; // clause row not involved
-      row.hidden = false;
-      var right = expected === picked;
-      if (!right) allRight = false;
-      row.querySelectorAll(".chip").forEach(function (b) {
-        b.disabled = true;
-        var v = b.getAttribute("data-value");
-        if (v === picked) b.className = right ? "chip is-right" : "chip is-wrong";
-        else if (v === expected) b.className = "chip is-answer";
-      });
-      result.className = "row-result " + (right ? "is-right" : "is-wrong");
-      if (right) result.textContent = "✓";
-      else if (expected == null) result.textContent = "Not needed: the mood is " + display(item.parse.mood) + ".";
-      else result.textContent = "Correct: " + displayOption(field, expected);
-    });
+    var result = game.check(item, el.area);
     el.check.hidden = true;
-    finishItem(allRight, allRight ? "Correct!" : "Not quite.", item);
+    finish(result.right, item, result);
   }
-
-  function finishItem(right, verdict, item) {
-    game.phase = "done";
-    if (right) { game.correct++; game.streak++; }
-    else { game.streak = 0; game.missed.push(item); }
+  // result: { right, verdict?, feedback: [Node], ... } — stored for the review.
+  function finish(right, item, result) {
+    round.phase = "done";
+    if (right) { round.correct++; round.streak++; }
+    else { round.streak = 0; round.missed.push({ item: item, result: result }); }
     updateStatus();
     clear(el.feedback);
     el.feedback.className = "feedback " + (right ? "is-right" : "is-wrong");
-    el.feedback.appendChild(make("p", "verdict", verdict));
-    el.feedback.appendChild(make("p", "parse-line", item.target + ": " + parseText(item)));
-    el.feedback.appendChild(make("p", null, item.explanation));
+    el.feedback.appendChild(make("p", "verdict", result.verdict || (right ? "Correct!" : "Not quite.")));
+    (result.feedback || []).forEach(function (node) { el.feedback.appendChild(node); });
     el.feedback.hidden = false;
+    el.check.hidden = true;
     el.next.hidden = false;
-    el.next.textContent = game.index + 1 < game.round.length ? "Next" : "See score";
+    el.next.textContent = round.index + 1 < round.items.length ? "Next" : "See score";
     el.next.focus();
   }
-
   function onNext() {
-    if (game.phase !== "done") return;
-    game.index++;
-    if (game.index < game.round.length) showItem();
-    else showResults();
+    if (round.phase !== "done") return;
+    round.index++;
+    if (round.index < round.items.length) showItem(); else showResults();
   }
 
   // ---------- results ----------
   function showResults() {
-    var n = game.round.length;
+    var n = round.items.length;
     clear(el.score);
-    el.score.appendChild(document.createTextNode(game.correct + " "));
+    el.score.appendChild(document.createTextNode(round.correct + " "));
     el.score.appendChild(make("small", null, "/ " + n));
-    var pct = Math.round(100 * game.correct / n);
-    el.resultsLine.textContent = game.correct === n
+    var pct = Math.round(100 * round.correct / n);
+    el.resultsLine.textContent = round.correct === n
       ? "Perfect round. Optimē!"
-      : pct + "% right. " + (game.missed.length === 1 ? "One to review." : game.missed.length + " to review.");
+      : pct + "% right. " + (round.missed.length === 1 ? "One to review." : round.missed.length + " to review.");
     clear(el.missedList);
-    el.missedBlock.hidden = game.missed.length === 0;
-    game.missed.forEach(function (item) {
+    el.missedBlock.hidden = round.missed.length === 0;
+    round.missed.forEach(function (m) {
       var li = make("li");
-      var s = make("p", "missed-sentence"); s.setAttribute("lang", "la");
-      renderSentence(s, item);
-      li.appendChild(s);
-      var p = make("p", "missed-parse");
-      p.appendChild(make("b", null, item.target));
-      p.appendChild(document.createTextNode(" — " + parseText(item)));
-      li.appendChild(p);
+      game.review(m.item, m.result, li);
       el.missedList.appendChild(li);
     });
     show(el.results);
@@ -406,37 +312,62 @@
   });
   el.start.addEventListener("submit", function (e) {
     e.preventDefault();
-    readStartForm(); syncStartForm(); saveFilters();
-    if (pool().length) startRound();
+    readStartForm(); syncStartForm(); saveSettings();
+    if (game.pool().length) startRound();
   });
-  el.typeRow.addEventListener("click", onTypePick);
-  el.fields.addEventListener("click", onFieldPick);
   el.check.addEventListener("click", onCheck);
   el.next.addEventListener("click", onNext);
   el.again.addEventListener("click", startRound);
   el.settings.addEventListener("click", function () { syncStartForm(); show(el.start); });
 
-  // ---------- load ----------
-  fetch(root.getAttribute("data-items-url"), { cache: "no-cache" })
-    .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-    .then(function (data) {
-      if (!Array.isArray(data) || !data.length) throw new Error("No items");
-      items = data.filter(function (it) { return it && FIELDS[it.type] && it.parse; });
-      minLesson = Infinity; maxLesson = -Infinity;
-      items.forEach(function (it) {
-        if (it.lesson < minLesson) minLesson = it.lesson;
-        if (it.lesson > maxLesson) maxLesson = it.lesson;
+  // ---------- loading ----------
+  function fetchJSON(file) {
+    return fetch(dataRoot + curriculumId + "/" + file + ".json", { cache: "no-cache" })
+      .then(function (r) { if (!r.ok) throw new Error(file + ": HTTP " + r.status); return r.json(); });
+  }
+
+  function boot(g) {
+    game = g;
+    var files = ["curriculum"].concat(g.data || []);
+    Promise.all(files.map(fetchJSON))
+      .then(function (loaded) {
+        files.forEach(function (f, i) { data[f] = loaded[i]; });
+        curriculum = data.curriculum;
+        if (!curriculum || !curriculum.lessons) throw new Error("bad curriculum.json");
+        ctx = {
+          curriculum: curriculumId, curriculumInfo: curriculum, data: data,
+          settings: Object.assign({ lesson: curriculum.lessons }, g.defaults || {}),
+          area: el.area,
+          shell: {
+            make: make, clear: clear, shuffle: shuffle, pick: pick, plural: plural, lessonOf: lessonOf, typed: typed,
+            setCheckEnabled: function (on) { el.check.hidden = false; el.check.disabled = !on; },
+            finish: function (right, item, result) { el.check.hidden = true; finish(right, item, result); },
+            check: onCheck
+          }
+        };
+        if (g.typed) typed.load();
+        g.setup(ctx);
+        bounds = g.lessonBounds();
+        if (!isFinite(bounds.min) || !isFinite(bounds.max)) throw new Error("No items");
+        ctx.settings.lesson = bounds.max; // default: everything unlocked
+        loadSettings();
+        ctx.settings.lesson = clampLesson(ctx.settings.lesson);
+        buildStartScreen();
+        syncStartForm();
+        show(el.start);
+      })
+      .catch(function (err) {
+        el.messageText.textContent = "The practice data couldn't be loaded. Please refresh the page and try again.";
+        if (window.console) console.error("practice: ", err);
       });
-      el.lessonRange.min = el.lessonNumber.min = minLesson;
-      el.lessonRange.max = el.lessonNumber.max = maxLesson;
-      filters.lesson = maxLesson; // default: highest lesson in the file
-      loadFilters();
-      filters.lesson = clampLesson(filters.lesson);
-      syncStartForm();
-      show(el.start);
-    })
-    .catch(function (err) {
-      el.messageText.textContent = "The sentences couldn't be loaded. Please refresh the page and try again.";
-      if (window.console) console.error("practice: ", err);
-    });
+  }
+
+  var registry = {};
+  window.LatinPractice = {
+    register: function (g) {
+      registry[g.id] = g;
+      if (g.id === gameId && !game) boot(g);
+    },
+    games: registry
+  };
 })();

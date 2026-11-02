@@ -10,6 +10,12 @@
   status = 301
   force = true
 
+# The drill's data moved under /practice/data/<curriculum>/.
+[[redirects]]
+  from = "/practice/items.json"
+  to = "/practice/data/henle/items.json"
+  status = 301
+
 [[headers]]
   for = "/*"
   [headers.values]

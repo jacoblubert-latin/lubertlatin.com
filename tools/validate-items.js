@@ -1,21 +1,24 @@
 #!/usr/bin/env node
-// Checks the parsing-drill data file for the /practice page.
+// Checks the practice data files under site/practice/data/<curriculum>/:
+// items.json (parsing drill), vocab.json (typed games) and curriculum.json.
 //
-//   node tools/validate-items.js                      (checks site/practice/items.json)
-//   node tools/validate-items.js path/to/other.json
+//   node tools/validate-items.js                               checks every curriculum folder
+//   node tools/validate-items.js site/practice/data/henle/vocab.json   checks one file (by its name)
 //
 // Exits 0 when everything is fine, 1 when there are problems.
-// The allowed values below must match FIELDS in site/js/practice.js.
+// The allowed parse values below must match FIELDS in site/js/games/parse.js;
+// declension/conjugation codes and flags come from site/js/latin-forms.js.
 
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const L = require("../site/js/latin-forms.js");
 
+const DATA_DIR = path.join(__dirname, "..", "site", "practice", "data");
 const LESSON_MIN = 1;
-const LESSON_MAX = 42; // Henle First Year has 42 lessons
+const DEFAULT_LESSON_MAX = 42; // used when a curriculum.json gives no "lessons"
 
-// Which uses a noun may have in each case. "use" must be one of the
-// uses listed for the item's case.
+// ---------- parsing-drill items ----------
 const USES_BY_CASE = {
   nom: ["subject", "predicate nominative"],
   gen: ["possession"],
@@ -42,106 +45,271 @@ const CLAUSES = [
   "purpose", "result", "indirect command", "indirect question",
   "cum-circumstantial", "cum-causal", "cum-concessive"
 ];
-const TOP_FIELDS = ["id", "sentence", "target_index", "target", "lesson", "type", "parse", "explanation"];
+const ITEM_FIELDS = ["id", "curriculum", "sentence", "target_index", "target", "lesson", "type", "parse", "explanation"];
+const ITEM_OPTIONAL = ["available"];
 
-const file = path.resolve(process.argv[2] || path.join(__dirname, "..", "site", "practice", "items.json"));
+// ---------- vocab entries ----------
+const POS = ["noun", "verb", "adjective", "pronoun", "adverb", "preposition", "conjunction", "indeclinable", "other"];
+const VOCAB_FIELDS = ["id", "curriculum", "lesson", "pos", "lemma"];
+const VOCAB_OPTIONAL = ["english", "flags", "available", "forms", "stem", "gen", "gender", "declension", "parts", "conjugation"];
 
-let text;
-try { text = fs.readFileSync(file, "utf8"); }
-catch (e) { console.error("Cannot read " + file + ": " + e.message); process.exit(1); }
-
-let items;
-try { items = JSON.parse(text.replace(/^﻿/, "")); }
-catch (e) { console.error("Not valid JSON: " + e.message); process.exit(1); }
-
-if (!Array.isArray(items)) { console.error("The file must be a JSON array of items."); process.exit(1); }
-
-const errors = [];
-const seenIds = new Map();
-
-// Strip punctuation from the ends of a word so "via." matches "via".
 const trim = (w) => w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
 const isStr = (v) => typeof v === "string" && v.trim().length > 0;
 const isInt = (v) => Number.isInteger(v);
+const isObj = (v) => v && typeof v === "object" && !Array.isArray(v);
 
-items.forEach((item, i) => {
-  const where = "item " + (i + 1) + (item && item.id ? " (" + item.id + ")" : "");
-  const err = (msg) => errors.push(where + ": " + msg);
-
-  if (!item || typeof item !== "object" || Array.isArray(item)) { err("is not an object"); return; }
-
-  for (const k of TOP_FIELDS) if (!(k in item)) err("missing field \"" + k + "\"");
-  for (const k of Object.keys(item)) if (!TOP_FIELDS.includes(k)) err("unexpected field \"" + k + "\"");
-
-  if (!isStr(item.id)) err("id must be a non-empty string");
-  else if (seenIds.has(item.id)) err("duplicate id (also item " + seenIds.get(item.id) + ")");
-  else seenIds.set(item.id, i + 1);
-
-  if (!isStr(item.sentence)) err("sentence must be a non-empty string");
-  if (!isStr(item.target)) err("target must be a non-empty string");
-  if (!isStr(item.explanation)) err("explanation must be a non-empty string");
-
-  if (!isInt(item.lesson)) err("lesson must be a whole number");
-  else if (item.lesson < LESSON_MIN || item.lesson > LESSON_MAX) err("lesson " + item.lesson + " is outside " + LESSON_MIN + "–" + LESSON_MAX);
-
-  // target_index must point at the target word (or the first word of a
-  // multi-word target such as "victī sunt").
-  if (!isInt(item.target_index) || item.target_index < 0) err("target_index must be a whole number ≥ 0");
-  else if (isStr(item.sentence) && isStr(item.target)) {
-    const words = item.sentence.trim().split(/\s+/);
-    const targetWords = item.target.trim().split(/\s+/);
-    if (item.target_index + targetWords.length > words.length) {
-      err("target_index " + item.target_index + " is past the end of the sentence (" + words.length + " words)");
-    } else {
-      targetWords.forEach((tw, j) => {
-        const sw = words[item.target_index + j];
-        if (trim(sw) !== trim(tw)) {
-          err("target_index " + item.target_index + " points at \"" + sw + "\", but target is \"" + item.target + "\"");
-        }
-      });
-    }
-  }
-
-  if (item.type !== "noun" && item.type !== "verb") { err("type must be \"noun\" or \"verb\""); return; }
-  if (!item.parse || typeof item.parse !== "object" || Array.isArray(item.parse)) { err("parse must be an object"); return; }
-
-  const spec = item.type === "noun" ? NOUN_FIELDS : VERB_FIELDS;
-  for (const [key, allowed] of Object.entries(spec)) {
-    if (!(key in item.parse)) { err("parse is missing \"" + key + "\""); continue; }
-    if (!allowed.includes(item.parse[key])) {
-      err("parse." + key + " = " + JSON.stringify(item.parse[key]) + " is not one of: " + allowed.join(", "));
-    }
-  }
-  const allowedKeys = Object.keys(spec).concat(item.type === "verb" ? ["clause"] : []);
-  for (const k of Object.keys(item.parse)) if (!allowedKeys.includes(k)) err("parse has unexpected field \"" + k + "\"");
-
-  if (item.type === "noun" && USES_BY_CASE[item.parse.case] && NOUN_FIELDS.use.includes(item.parse.use)
-      && !USES_BY_CASE[item.parse.case].includes(item.parse.use)) {
-    err("parse.use " + JSON.stringify(item.parse.use) + " does not go with case " + JSON.stringify(item.parse.case) +
-        " (allowed: " + USES_BY_CASE[item.parse.case].join(", ") + ")");
-  }
-
-  if (item.type === "verb") {
-    const subj = item.parse.mood === "subjunctive";
-    if (subj && !("clause" in item.parse)) err("mood is subjunctive but parse has no \"clause\"");
-    if (!subj && "clause" in item.parse) err("parse has \"clause\" but mood is " + JSON.stringify(item.parse.mood) + ", not subjunctive");
-    if ("clause" in item.parse && !CLAUSES.includes(item.parse.clause)) {
-      err("parse.clause = " + JSON.stringify(item.parse.clause) + " is not one of: " + CLAUSES.join(", "));
-    }
-  }
-});
-
-if (errors.length) {
-  console.error(errors.length + " problem" + (errors.length === 1 ? "" : "s") + " in " + file + ":\n");
-  errors.forEach((e) => console.error("  - " + e));
-  process.exit(1);
+function readJSON(file) {
+  let text;
+  try { text = fs.readFileSync(file, "utf8"); }
+  catch (e) { return { error: "Cannot read " + file + ": " + e.message }; }
+  try { return { data: JSON.parse(text.replace(/^﻿/, "")) }; }
+  catch (e) { return { error: "Not valid JSON: " + e.message }; }
 }
 
-const nouns = items.filter((it) => it.type === "noun").length;
-const verbs = items.length - nouns;
-const lessons = items.map((it) => it.lesson);
-const sentences = new Set(items.map((it) => it.sentence)).size;
-console.log(
-  "OK: " + items.length + " items (" + nouns + " nouns, " + verbs + " verbs) from " +
-  sentences + " sentences, lessons " + Math.min(...lessons) + "–" + Math.max(...lessons) + "."
-);
+// Lesson range check shared by items and vocab: `lesson` and each `available` value.
+function checkLessons(thing, err, curriculumId, lessonMax, lessonMaxFor) {
+  if (!isInt(thing.lesson)) err("lesson must be a whole number");
+  else if (thing.lesson < LESSON_MIN || thing.lesson > lessonMax) err("lesson " + thing.lesson + " is outside " + LESSON_MIN + "–" + lessonMax);
+  if ("available" in thing) {
+    if (!isObj(thing.available)) { err("available must be an object like {\"henle\": 7}"); return; }
+    for (const [cur, n] of Object.entries(thing.available)) {
+      if (!/^[a-z][a-z0-9-]*$/.test(cur)) err("available has a bad curriculum key " + JSON.stringify(cur));
+      const max = lessonMaxFor(cur);
+      if (!isInt(n)) err("available." + cur + " must be a whole number");
+      else if (n < LESSON_MIN || n > max) err("available." + cur + " = " + n + " is outside " + LESSON_MIN + "–" + max);
+    }
+  }
+}
+
+function validateItems(items, ctx) {
+  const errors = [];
+  if (!Array.isArray(items)) return ["The file must be a JSON array of items."];
+  const seenIds = new Map();
+  items.forEach((item, i) => {
+    const where = "item " + (i + 1) + (item && item.id ? " (" + item.id + ")" : "");
+    const err = (msg) => errors.push(where + ": " + msg);
+    if (!isObj(item)) { err("is not an object"); return; }
+
+    for (const k of ITEM_FIELDS) if (!(k in item)) err("missing field \"" + k + "\"");
+    for (const k of Object.keys(item)) if (!ITEM_FIELDS.includes(k) && !ITEM_OPTIONAL.includes(k)) err("unexpected field \"" + k + "\"");
+
+    if (!isStr(item.id)) err("id must be a non-empty string");
+    else if (seenIds.has(item.id)) err("duplicate id (also item " + seenIds.get(item.id) + ")");
+    else seenIds.set(item.id, i + 1);
+
+    if (!isStr(item.curriculum)) err("curriculum must be a non-empty string (e.g. \"henle\")");
+    else if (ctx.curriculumId && item.curriculum !== ctx.curriculumId) err("curriculum is " + JSON.stringify(item.curriculum) + " but the file is in the " + ctx.curriculumId + " folder");
+
+    if (!isStr(item.sentence)) err("sentence must be a non-empty string");
+    if (!isStr(item.target)) err("target must be a non-empty string");
+    if (!isStr(item.explanation)) err("explanation must be a non-empty string");
+
+    checkLessons(item, err, ctx.curriculumId, ctx.lessonMax, ctx.lessonMaxFor);
+
+    if (!isInt(item.target_index) || item.target_index < 0) err("target_index must be a whole number ≥ 0");
+    else if (isStr(item.sentence) && isStr(item.target)) {
+      const words = item.sentence.trim().split(/\s+/);
+      const targetWords = item.target.trim().split(/\s+/);
+      if (item.target_index + targetWords.length > words.length) {
+        err("target_index " + item.target_index + " is past the end of the sentence (" + words.length + " words)");
+      } else {
+        targetWords.forEach((tw, j) => {
+          const sw = words[item.target_index + j];
+          if (trim(sw) !== trim(tw)) err("target_index " + item.target_index + " points at \"" + sw + "\", but target is \"" + item.target + "\"");
+        });
+      }
+    }
+
+    if (item.type !== "noun" && item.type !== "verb") { err("type must be \"noun\" or \"verb\""); return; }
+    if (!isObj(item.parse)) { err("parse must be an object"); return; }
+
+    const spec = item.type === "noun" ? NOUN_FIELDS : VERB_FIELDS;
+    for (const [key, allowed] of Object.entries(spec)) {
+      if (!(key in item.parse)) { err("parse is missing \"" + key + "\""); continue; }
+      if (!allowed.includes(item.parse[key])) err("parse." + key + " = " + JSON.stringify(item.parse[key]) + " is not one of: " + allowed.join(", "));
+    }
+    const allowedKeys = Object.keys(spec).concat(item.type === "verb" ? ["clause"] : []);
+    for (const k of Object.keys(item.parse)) if (!allowedKeys.includes(k)) err("parse has unexpected field \"" + k + "\"");
+
+    if (item.type === "noun" && USES_BY_CASE[item.parse.case] && NOUN_FIELDS.use.includes(item.parse.use)
+        && !USES_BY_CASE[item.parse.case].includes(item.parse.use)) {
+      err("parse.use " + JSON.stringify(item.parse.use) + " does not go with case " + JSON.stringify(item.parse.case) +
+          " (allowed: " + USES_BY_CASE[item.parse.case].join(", ") + ")");
+    }
+    if (item.type === "verb") {
+      const subj = item.parse.mood === "subjunctive";
+      if (subj && !("clause" in item.parse)) err("mood is subjunctive but parse has no \"clause\"");
+      if (!subj && "clause" in item.parse) err("parse has \"clause\" but mood is " + JSON.stringify(item.parse.mood) + ", not subjunctive");
+      if ("clause" in item.parse && !CLAUSES.includes(item.parse.clause)) err("parse.clause = " + JSON.stringify(item.parse.clause) + " is not one of: " + CLAUSES.join(", "));
+    }
+  });
+  return errors;
+}
+
+function validateVocab(vocab, ctx) {
+  const errors = [];
+  if (!Array.isArray(vocab)) return ["The file must be a JSON array of entries."];
+  const seenIds = new Map();
+  vocab.forEach((e, i) => {
+    const where = "entry " + (i + 1) + (e && (e.id || e.lemma) ? " (" + (e.id || e.lemma) + ")" : "");
+    const err = (msg) => errors.push(where + ": " + msg);
+    if (!isObj(e)) { err("is not an object"); return; }
+
+    for (const k of VOCAB_FIELDS) if (!(k in e)) err("missing field \"" + k + "\"");
+    for (const k of Object.keys(e)) if (!VOCAB_FIELDS.includes(k) && !VOCAB_OPTIONAL.includes(k)) err("unexpected field \"" + k + "\"");
+
+    if (!isStr(e.id)) err("id must be a non-empty string");
+    else if (seenIds.has(e.id)) err("duplicate id (also entry " + seenIds.get(e.id) + ")");
+    else seenIds.set(e.id, i + 1);
+    if (!isStr(e.curriculum)) err("curriculum must be a non-empty string");
+    else if (ctx.curriculumId && e.curriculum !== ctx.curriculumId) err("curriculum is " + JSON.stringify(e.curriculum) + " but the file is in the " + ctx.curriculumId + " folder");
+    if (!isStr(e.lemma)) err("lemma must be a non-empty string");
+    checkLessons(e, err, ctx.curriculumId, ctx.lessonMax, ctx.lessonMaxFor);
+    if (!POS.includes(e.pos)) { err("pos must be one of: " + POS.join(", ")); return; }
+    if ("english" in e && typeof e.english !== "string") err("english must be a string");
+    if ("flags" in e) {
+      const allowed = e.pos === "noun" ? L.NOUN_FLAGS : e.pos === "verb" ? L.VERB_FLAGS : [];
+      if (!Array.isArray(e.flags)) err("flags must be an array");
+      else e.flags.forEach((f) => { if (!allowed.includes(f)) err("flag " + JSON.stringify(f) + " is not one of: " + (allowed.join(", ") || "(no flags for " + e.pos + ")")); });
+    }
+
+    if (e.pos === "noun") {
+      if (!isStr(e.gen)) err("a noun needs \"gen\" (genitive singular)");
+      if (!["m", "f", "n"].includes(e.gender)) err("gender must be m, f or n");
+      if (!L.DECLENSIONS.includes(String(e.declension))) { err("declension " + JSON.stringify(e.declension) + " is not one of: " + L.DECLENSIONS.join(", ")); return; }
+      if ("forms" in e && !isObj(e.forms)) err("forms (overrides) must be an object like {\"sg.voc\": \"deus\"}");
+      if (isObj(e.forms)) Object.keys(e.forms).forEach((k) => {
+        const m = /^(sg|pl)\.(nom|gen|dat|acc|abl|voc)$/.exec(k);
+        if (!m) err("forms has a bad key " + JSON.stringify(k) + " (use sg.nom … pl.voc)");
+      });
+      if (isStr(e.gen) && e.gender) {
+        try { L.declineNoun(e); } catch (x) { err("cannot decline: " + x.message); }
+      }
+    } else if (e.pos === "verb") {
+      if (!Array.isArray(e.parts) || e.parts.length < 2 || !e.parts.every(isStr)) err("a verb needs \"parts\" (principal parts, at least two)");
+      if (!L.CONJUGATIONS.includes(String(e.conjugation))) { err("conjugation " + JSON.stringify(e.conjugation) + " is not one of: " + L.CONJUGATIONS.join(", ")); return; }
+      if (String(e.conjugation) === "irregular" && !L.hasIrregularTable(e)) {
+        err("irregular verbs need a hand-entered table; available: " + L.IRREGULAR_LEMMAS.join(", ") + " and their compounds (absum, adeō…)");
+      }
+      if (Array.isArray(e.parts) && e.parts.length >= 2 && isStr(e.lemma)) {
+        try { L.synopsis(e); } catch (x) { err("cannot conjugate: " + x.message); }
+      }
+    } else {
+      if ("forms" in e && (!Array.isArray(e.forms) || !e.forms.every(isStr))) err("forms must be an array of strings for a " + e.pos);
+      for (const k of ["gen", "gender", "declension", "parts", "conjugation"]) if (k in e) err("\"" + k + "\" only belongs on a noun or verb");
+    }
+  });
+  return errors;
+}
+
+function validateCurriculum(c) {
+  const errors = [];
+  const err = (m) => errors.push(m);
+  if (!isObj(c)) return ["curriculum.json must be an object"];
+  if (!isStr(c.id)) err("id must be a non-empty string");
+  if (!isStr(c.name)) err("name must be a non-empty string");
+  if (!isStr(c.short)) err("short must be a non-empty string (used in \"Through Henle Lesson\")");
+  if (!isStr(c.lessonWord)) err("lessonWord must be a non-empty string (e.g. \"Lesson\" or \"Chapter\")");
+  if (!isInt(c.lessons) || c.lessons < 1) err("lessons must be a whole number ≥ 1");
+  if ("grammar" in c) {
+    if (!isObj(c.grammar)) err("grammar must be an object");
+    else {
+      const max = isInt(c.lessons) ? c.lessons : DEFAULT_LESSON_MAX;
+      const walk = (obj, pathStr) => {
+        for (const [k, v] of Object.entries(obj)) {
+          const p = pathStr + "." + k;
+          if (isObj(v)) walk(v, p);
+          else if (v !== null && (!isInt(v) || v < 1 || v > max)) err("grammar" + p + " = " + JSON.stringify(v) + " should be a lesson number 1–" + max + " or null");
+        }
+      };
+      walk(c.grammar, "");
+      const v = c.grammar.verbs || {};
+      ["indicative", "subjunctive"].forEach((mood) => {
+        if (v[mood]) ["active", "passive"].forEach((voice) => {
+          if (v[mood][voice]) Object.keys(v[mood][voice]).forEach((t) => {
+            const allowed = mood === "indicative" ? L.IND_TENSES : L.SUBJ_TENSES;
+            if (!allowed.includes(t)) err("grammar.verbs." + mood + "." + voice + " has unknown tense " + JSON.stringify(t));
+          });
+        });
+      });
+      if (v.conjugation) Object.keys(v.conjugation).forEach((k) => { if (!L.CONJUGATIONS.includes(k)) err("grammar.verbs.conjugation has unknown code " + JSON.stringify(k)); });
+      const n = c.grammar.nouns || {};
+      if (n.declension) Object.keys(n.declension).forEach((k) => { if (!L.DECLENSIONS.includes(k)) err("grammar.nouns.declension has unknown code " + JSON.stringify(k)); });
+    }
+  }
+  return errors;
+}
+
+// ---------- driver ----------
+function lessonMaxOf(dir) {
+  const r = readJSON(path.join(dir, "curriculum.json"));
+  return r.data && isInt(r.data.lessons) ? r.data.lessons : DEFAULT_LESSON_MAX;
+}
+function contextFor(dir) {
+  const id = path.basename(dir);
+  return {
+    curriculumId: id,
+    lessonMax: lessonMaxOf(dir),
+    lessonMaxFor: (cur) => {
+      const other = path.join(DATA_DIR, cur);
+      return fs.existsSync(path.join(other, "curriculum.json")) ? lessonMaxOf(other) : DEFAULT_LESSON_MAX;
+    }
+  };
+}
+function checkFile(file, ctx) {
+  const name = path.basename(file);
+  const r = readJSON(file);
+  if (r.error) return { errors: [r.error], summary: "" };
+  if (name === "items.json") {
+    const errors = validateItems(r.data, ctx);
+    if (errors.length) return { errors };
+    const items = r.data, nouns = items.filter((it) => it.type === "noun").length;
+    const lessons = items.map((it) => it.lesson), sentences = new Set(items.map((it) => it.sentence)).size;
+    const withAvail = items.filter((it) => it.available).length;
+    return { errors, summary: items.length + " items (" + nouns + " nouns, " + (items.length - nouns) + " verbs) from " + sentences +
+      " sentences, lessons " + Math.min(...lessons) + "–" + Math.max(...lessons) + (withAvail ? ", " + withAvail + " with \"available\"" : "") + "." };
+  }
+  if (name === "vocab.json") {
+    const errors = validateVocab(r.data, ctx);
+    if (errors.length) return { errors };
+    const v = r.data, nouns = v.filter((e) => e.pos === "noun").length, verbs = v.filter((e) => e.pos === "verb").length;
+    return { errors, summary: v.length + " entries (" + nouns + " nouns, " + verbs + " verbs, " + (v.length - nouns - verbs) + " other)." };
+  }
+  if (name === "curriculum.json") {
+    const errors = validateCurriculum(r.data);
+    return { errors, summary: errors.length ? "" : r.data.name + ", " + r.data.lessons + " " + r.data.lessonWord.toLowerCase() + "s." };
+  }
+  return { errors: ["Don't know how to check a file called " + name + " (expected items.json, vocab.json or curriculum.json)"], summary: "" };
+}
+
+let files = [];
+if (process.argv[2]) {
+  const f = path.resolve(process.argv[2]);
+  files = [{ file: f, ctx: fs.existsSync(path.join(path.dirname(f), "curriculum.json")) ? contextFor(path.dirname(f)) : { curriculumId: null, lessonMax: DEFAULT_LESSON_MAX, lessonMaxFor: () => DEFAULT_LESSON_MAX } }];
+} else {
+  const dirs = fs.readdirSync(DATA_DIR).map((d) => path.join(DATA_DIR, d)).filter((d) => fs.statSync(d).isDirectory());
+  dirs.forEach((dir) => {
+    const ctx = contextFor(dir);
+    ["curriculum.json", "items.json", "vocab.json"].forEach((n) => {
+      const f = path.join(dir, n);
+      if (fs.existsSync(f)) files.push({ file: f, ctx });
+      else if (n === "curriculum.json") files.push({ file: f, ctx, missing: true });
+    });
+  });
+}
+
+let bad = 0;
+files.forEach(({ file, ctx, missing }) => {
+  const rel = path.relative(process.cwd(), file);
+  if (missing) { bad++; console.error(rel + ": missing (every curriculum folder needs a curriculum.json)"); return; }
+  const r = checkFile(file, ctx);
+  if (r.errors.length) {
+    bad++;
+    console.error(r.errors.length + " problem" + (r.errors.length === 1 ? "" : "s") + " in " + rel + ":\n");
+    r.errors.forEach((e) => console.error("  - " + e));
+    console.error("");
+  } else {
+    console.log("OK " + rel + ": " + r.summary);
+  }
+});
+process.exit(bad ? 1 : 0);

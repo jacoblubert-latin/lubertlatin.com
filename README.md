@@ -14,17 +14,24 @@ site/                 ← everything Netlify publishes
   free-sheet.html     ← "thank you" page after the PDF signup (has the download link)
   thank-you.html      ← "thank you" page after the contact form
   404.html            ← page-not-found
-  practice/index.html ← the parsing drill page (lubertlatin.com/practice/)
-  practice/items.json ← the drill's sentences and answers (edit this to add items)
+  practice/index.html          ← game 1: the parsing drill (lubertlatin.com/practice/)
+  practice/decline/index.html  ← game 2: decline a noun (typed)
+  practice/synopsis/index.html ← game 3: verb synopsis (typed)
+  practice/data/henle/         ← one folder per textbook (see "The practice games")
+    curriculum.json            ← name, lesson count, and which forms each lesson teaches
+    items.json                 ← parsing-drill sentences and answers
+    vocab.json                 ← dictionary entries for the typed games
   css/styles.css      ← colors, fonts, layout
-  css/practice.css    ← styles for the drill only
+  css/practice.css    ← styles for the practice games only
   css/fonts.css       ← self-hosted font files (don't edit)
   js/main.js          ← mobile menu, footer year, FAQ search markup
-  js/practice.js      ← the drill itself
+  js/practice.js      ← the shared game shell (start screen, lesson filter, scoring, review)
+  js/latin-forms.js   ← the rules engine that declines nouns and conjugates verbs
+  js/games/*.js       ← one file per game: parse.js, decline.js, synopsis.js
   assets/             ← images, fonts, and the PDF
   robots.txt, sitemap.xml
 netlify.toml          ← Netlify settings
-tools/                ← sources for the PDF and images, plus the drill data checker
+tools/                ← sources for the PDF and images, plus the data checker and paradigm tools
 ```
 
 ## Editing text and pricing (no coding needed)
@@ -78,29 +85,82 @@ The "What families say" section (between **Pricing** and **About**) holds one qu
 
 Open `site/css/styles.css`. The first block (`:root`) holds the colors. Change `--accent` to recolor every button and heading accent.
 
-## The parsing drill (/practice)
+## The practice games (/practice)
 
-The drill at `site/practice/` is static: it reads `site/practice/items.json` in the browser and keeps no data anywhere else (the last filter settings are remembered in the student's own browser only).
+Three games share one shell (`site/js/practice.js`): the start screen with its lesson filter, scoring, streak, the end-of-round review, and the footer. Each game is a small file in `site/js/games/` that only says what its start-screen options are, which items are in the pool, how an item is shown and graded, and how a missed item is reviewed. Everything is static: the browser reads JSON from `site/practice/data/<textbook>/` and keeps nothing anywhere else (the last settings are remembered in the student's own browser only).
 
-Each item in `items.json` looks like this:
+| Page | Game | Data |
+|---|---|---|
+| `/practice/` | **Parsing drill** – noun or verb, then parse it with chips | `items.json` |
+| `/practice/decline/` | **Decline a noun** – type the whole table, or one form | `vocab.json` |
+| `/practice/synopsis/` | **Verb synopsis** – type a Henle-style synopsis, or one form | `vocab.json` |
+
+### Textbooks (curricula)
+
+Every data file lives in a folder named for the textbook, and every item and entry carries a matching `"curriculum"` field. Only `henle` exists now. To add Wheelock, *Latin for the New Millennium* or *Ecce Romani* later: copy the folder, write its `curriculum.json`, `items.json` and `vocab.json`, and set `data-curriculum` on the `<div id="drill">` of each page (a textbook picker on the start screen will set that attribute; the games themselves don't change).
+
+`curriculum.json` holds the display name, the number of lessons, the word for a lesson ("Lesson" or "Chapter") and a **grammar schedule**: the lesson in which each declension, conjugation, tense, voice and mood is first taught. The typed games open a row or column once the lesson filter reaches that number. The Henle numbers were seeded from the lessons already used in `items.json`; correct any that are off.
+
+### Parsing-drill items (`items.json`)
 
 ```json
-{"id":"s01-w1","sentence":"In silvā est via.","target_index":1,"target":"silvā","lesson":1,
+{"id":"s01-w1","curriculum":"henle","sentence":"In silvā est via.","target_index":1,"target":"silvā","lesson":1,
  "type":"noun","parse":{"case":"abl","number":"sg","gender":"f","use":"ablative of place where"},
  "explanation":"..."}
 ```
 
 - `target_index` counts words from 0. For a two-word form such as *victī sunt*, point at the first word and put both words in `target`.
-- Noun parse: `case` (nom, gen, dat, acc, abl, voc), `number` (sg, pl), `gender` (m, f, n), `use` (must go with the case; see `USES_BY_CASE` in `tools/validate-items.js`. An ablative, for example, can be means, agent, accompaniment, place where, place from which, or time when).
+- Noun parse: `case` (nom, gen, dat, acc, abl, voc), `number` (sg, pl), `gender` (m, f, n), `use` (must go with the case; see `USES_BY_CASE` in `tools/validate-items.js`).
 - Verb parse: `person` (1, 2, 3), `number`, `tense`, `voice`, `mood`, and `clause` only when `mood` is `subjunctive`.
+- Optional `"available": {"henle": 7}` says in which lesson of each textbook the sentence becomes usable; it wins over `lesson` for that textbook, so one sentence can serve several books. `node tools/compute-available.js` works these numbers out from `vocab.json` (a sentence is available after the lesson that introduces the last of its words), lists the words the vocab doesn't cover yet, and with `--write` fills the field in.
 
-After editing the file, check it before you push:
+### Dictionary entries (`vocab.json`)
+
+The typed games generate every form from these entries with the rules engine in `site/js/latin-forms.js`. The Henle file was transcribed (with macrons) from the First Year master list, which has no lesson numbers: each word's `lesson` is the earliest lesson of a sentence in `items.json` that uses one of its forms, or else the lesson the grammar schedule introduces its declension or conjugation. Adjust them as you go. One entry per line:
+
+```json
+{"id":"terra","curriculum":"henle","lesson":1,"pos":"noun","lemma":"terra","gen":"terrae","gender":"f","declension":"1","english":"land"}
+{"id":"hostis","curriculum":"henle","lesson":5,"pos":"noun","lemma":"hostis","gen":"hostis","gender":"m","declension":"3","flags":["i-stem"],"english":"enemy"}
+{"id":"castra","curriculum":"henle","lesson":3,"pos":"noun","lemma":"castra","gen":"castrōrum","gender":"n","declension":"2","flags":["plural-only"],"english":"camp"}
+{"id":"laudo","curriculum":"henle","lesson":11,"pos":"verb","lemma":"laudō","parts":["laudō","laudāre","laudāvī","laudātus"],"conjugation":"1","english":"praise"}
+{"id":"capio","curriculum":"henle","lesson":14,"pos":"verb","lemma":"capiō","parts":["capiō","capere","cēpī","captus"],"conjugation":"3io","english":"take"}
+{"id":"sequor","curriculum":"henle","lesson":30,"pos":"verb","lemma":"sequor","parts":["sequor","sequī","secūtus sum"],"conjugation":"3","flags":["deponent"],"english":"follow"}
+{"id":"sum","curriculum":"henle","lesson":1,"pos":"verb","lemma":"sum","parts":["sum","esse","fuī","futūrus"],"conjugation":"irregular","flags":["no-passive"],"english":"be"}
+{"id":"in","curriculum":"henle","lesson":1,"pos":"indeclinable","lemma":"in","english":"in, on; into"}
+```
+
+- **Nouns:** `lemma`, `gen` (genitive singular; genitive plural for a plural-only noun), `gender` (m, f, n), `declension` ("1"–"5"). The stem comes from the genitive, so *ager, agrī* and *fīlius, fīliī* work by themselves; 2nd-declension -ius nouns get the vocative in -ī, 3rd-declension neuters and i-stems (`"i-stem"` flag: gen. pl. -ium; neuters also abl. -ī and nom./acc. pl. -ia), and the 4th and 5th declensions are all handled. Flags: `i-stem`, `plural-only`, `singular-only`, `no-vocative`. For an odd word, `"forms": {"sg.voc": "deus", "pl.nom": ["dī", "deī"]}` overrides single cells (a list means every spelling is accepted).
+- **Verbs:** `parts` (principal parts; three for a deponent, ending in "… sum"), `conjugation` ("1", "2", "3", "3io", "4" or "irregular"). Flags: `deponent`, `no-passive` (intransitive verbs: only the active column is shown). The verbs **sum, possum, eō, ferō, volō, nōlō, mālō, fīō** are hand-entered tables, not rules; give them `"conjugation": "irregular"`.
+- **Other words** (`adjective`, `pronoun`, `adverb`, `preposition`, `conjunction`, `indeclinable`, `other`) are only used to work out sentence availability; give an optional `"forms": [...]` list for anything that inflects.
+- Spelling: write consonantal i as **j** the way Henle does (*jubeō*, *cūjus*). The games show it as j or i according to the student's spelling setting, and grading accepts i/j and u/v either way. Macrons are ignored unless the student turns on "strict macrons", and every correct form is shown with macrons.
+
+### Proofing the generator
+
+Print the full paradigm the games will use for any words, from `vocab.json` or from a dictionary line that needn't be in the file:
+
+```bash
+node tools/paradigm.js mīles hostis laudō
+```
+```bash
+node tools/paradigm.js "mare, maris, n. i" "sequor, sequī, secūtus sum" "capiō, capere, cēpī, captus"
+```
+```bash
+node tools/paradigm.js --all
+```
+
+`--irregular` prints the eight hand-entered verbs; `--classical` shows i instead of j. A word that needs `forms` overrides (*vīs*, *deus*, *Jēsūs*, *domus*) can be given as a full JSON entry in quotes instead of a dictionary line. The engine also has a fixed test of known paradigms (every declension type, all conjugations, deponents, the irregulars, and the grading rules):
+
+```bash
+node tools/test-forms.js
+```
+
+### Checking the data before you push
 
 ```bash
 node tools/validate-items.js
 ```
 
-It reports missing fields, values that aren't in the allowed lists, a use that doesn't go with the case, a `target_index` that doesn't point at the target word, lesson numbers outside 1–42, and duplicate ids. "OK" means the file is good. To check a different file, give its path: `node tools/validate-items.js path/to/file.json`.
+With no arguments it checks every textbook folder: `curriculum.json` (shape and lesson numbers), `items.json` (missing fields, values outside the allowed lists, a use that doesn't go with the case, a `target_index` that doesn't point at the target word, lesson and `available` numbers outside the book, duplicate ids) and `vocab.json` (missing fields, unknown declension/conjugation codes and flags, entries the engine can't decline or conjugate, irregular verbs without a hand table). "OK" on every line means the data is good. To check one file, give its path: `node tools/validate-items.js site/practice/data/henle/vocab.json`.
 
 ## Publishing a change
 

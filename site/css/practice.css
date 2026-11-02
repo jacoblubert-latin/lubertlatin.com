@@ -113,3 +113,58 @@
 .missed-list .missed-parse b { color: var(--accent); }
 
 .tutor-note { margin: 28px 0 0; text-align: center; color: var(--muted); }
+
+/* ---------- Game tabs (shared shell) ---------- */
+.game-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; }
+.game-tabs a {
+  display: inline-flex; align-items: center; min-height: 40px; padding: .35em 1em; border-radius: 999px;
+  border: 1.5px solid var(--line); background: #fff; color: var(--text); font-weight: 600; font-size: .95rem; text-decoration: none;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+@media (hover: hover) { .game-tabs a:hover { border-color: var(--accent); color: var(--accent); } }
+.game-tabs a[aria-current="page"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.choice.is-unavailable span { opacity: .45; cursor: not-allowed; text-decoration: line-through; }
+
+/* ---------- Typed games: entry line, grids, inputs ---------- */
+.entry-line { font-family: var(--serif); font-size: clamp(1.45rem, 4.5vw, 1.9rem); line-height: 1.3; margin: 18px 0 2px; overflow-wrap: anywhere; }
+.entry-gloss { color: var(--muted); margin: 0 0 14px; }
+.entry-gloss b { color: var(--accent); }
+
+.form-input {
+  width: 100%; min-width: 0; min-height: 44px; padding: .4em .6em; border: 1.5px solid var(--line); border-radius: 8px;
+  background: #fff; color: var(--text); font: 500 1.08rem/1.2 var(--serif); font-feature-settings: "locl" 0; /* the font shorthand resets the [lang=la] rule in styles.css */
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.form-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(122, 31, 43, .18); }
+.form-input.is-right { border-color: var(--ok); background: var(--ok-soft); color: var(--ok); }
+.form-input.is-wrong { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); text-decoration: line-through; }
+.form-input:disabled { opacity: 1; }
+.cell-answer { display: block; margin-top: 4px; font-family: var(--serif); font-size: 1.05rem; color: var(--ok); font-weight: 600; }
+.single-form { max-width: 22rem; }
+.single-form .form-input { font-size: 1.3rem; min-height: 52px; }
+
+.form-grid { width: 100%; border-collapse: collapse; margin: 8px 0 0; table-layout: fixed; }
+.form-grid th, .form-grid td { padding: 6px 6px 6px 0; text-align: left; vertical-align: top; }
+.form-grid thead th { font-size: .82rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding-bottom: 4px; }
+.form-grid tbody th { font-weight: 600; font-size: .95rem; white-space: nowrap; width: 5.2em; padding-top: 16px; color: var(--text); }
+.form-grid td:last-child { padding-right: 0; }
+.form-grid .cell-none { color: var(--muted); padding-top: 16px; }
+.form-grid .grid-section th { padding: 18px 0 2px; width: auto; white-space: normal; font-family: var(--serif); font-size: 1.15rem; font-weight: 500; color: var(--accent); border-bottom: 1px solid var(--line); }
+.synopsis-grid tbody th { width: 6em; }
+@media (max-width: 480px) {
+  .form-grid tbody th { width: 3.6em; font-size: .85rem; }
+  .synopsis-grid tbody th { width: 4.4em; }
+  .form-input { font-size: 1rem; padding: .4em .45em; }
+}
+
+.macron-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+.macron-key {
+  min-width: 44px; min-height: 40px; border-radius: 8px; border: 1.5px solid var(--line); background: #fff;
+  font: 500 1.15rem/1 var(--serif); color: var(--text); cursor: pointer;
+}
+@media (hover: hover) { .macron-key:hover { border-color: var(--accent); color: var(--accent); } }
+
+.missed-cells { margin: 6px 0 0; padding-left: 1.1em; font-size: .95rem; }
+.missed-cells li { margin: 2px 0; }
+.missed-cells b { color: var(--ok); font-family: var(--serif); font-size: 1.05em; }
+.missed-list .missed-cells li { background: none; border: 0; padding: 0; border-radius: 0; }
