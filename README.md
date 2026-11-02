@@ -14,13 +14,17 @@ site/                 ← everything Netlify publishes
   free-sheet.html     ← "thank you" page after the PDF signup (has the download link)
   thank-you.html      ← "thank you" page after the contact form
   404.html            ← page-not-found
+  practice/index.html ← the parsing drill page (lubertlatin.com/practice/)
+  practice/items.json ← the drill's sentences and answers (edit this to add items)
   css/styles.css      ← colors, fonts, layout
+  css/practice.css    ← styles for the drill only
   css/fonts.css       ← self-hosted font files (don't edit)
   js/main.js          ← mobile menu, footer year, FAQ search markup
+  js/practice.js      ← the drill itself
   assets/             ← images, fonts, and the PDF
   robots.txt, sitemap.xml
 netlify.toml          ← Netlify settings
-tools/                ← sources for the PDF and images (see below)
+tools/                ← sources for the PDF and images, plus the drill data checker
 ```
 
 ## Editing text and pricing (no coding needed)
@@ -73,6 +77,30 @@ The "What families say" section (between **Pricing** and **About**) holds one qu
 ### Colors and fonts
 
 Open `site/css/styles.css`. The first block (`:root`) holds the colors. Change `--accent` to recolor every button and heading accent.
+
+## The parsing drill (/practice)
+
+The drill at `site/practice/` is static: it reads `site/practice/items.json` in the browser and keeps no data anywhere else (the last filter settings are remembered in the student's own browser only).
+
+Each item in `items.json` looks like this:
+
+```json
+{"id":"s01-w1","sentence":"In silvā est via.","target_index":1,"target":"silvā","lesson":1,
+ "type":"noun","parse":{"case":"abl","number":"sg","gender":"f","use":"ablative of place where"},
+ "explanation":"..."}
+```
+
+- `target_index` counts words from 0. For a two-word form such as *victī sunt*, point at the first word and put both words in `target`.
+- Noun parse: `case` (nom, gen, dat, acc, abl, voc), `number` (sg, pl), `gender` (m, f, n), `use` (must go with the case; see `USES_BY_CASE` in `tools/validate-items.js`. An ablative, for example, can be means, agent, accompaniment, place where, place from which, or time when).
+- Verb parse: `person` (1, 2, 3), `number`, `tense`, `voice`, `mood`, and `clause` only when `mood` is `subjunctive`.
+
+After editing the file, check it before you push:
+
+```bash
+node tools/validate-items.js
+```
+
+It reports missing fields, values that aren't in the allowed lists, a use that doesn't go with the case, a `target_index` that doesn't point at the target word, lesson numbers outside 1–42, and duplicate ids. "OK" means the file is good. To check a different file, give its path: `node tools/validate-items.js path/to/file.json`.
 
 ## Publishing a change
 
