@@ -1,0 +1,7 @@
+[
+{"id":"terra","curriculum":"henle","lesson":1,"pos":"noun","lemma":"terra","gen":"terrae","gender":"f","declension":"1","english":"land, earth"},
+{"id":"miles","curriculum":"henle","lesson":4,"pos":"noun","lemma":"mīles","gen":"mīlitis","gender":"m","declension":"3","english":"soldier"},
+{"id":"hostis","curriculum":"henle","lesson":5,"pos":"noun","lemma":"hostis","gen":"hostis","gender":"m","declension":"3","flags":["i-stem"],"english":"enemy (of the state)"},
+{"id":"laudo","curriculum":"henle","lesson":11,"pos":"verb","lemma":"laudō","parts":["laudō","laudāre","laudāvī","laudātus"],"conjugation":"1","english":"praise"},
+{"id":"sum","curriculum":"henle","lesson":1,"pos":"verb","lemma":"sum","parts":["sum","esse","fuī","futūrus"],"conjugation":"irregular","flags":["no-passive"],"english":"be"}
+]
