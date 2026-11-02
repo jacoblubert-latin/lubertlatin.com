@@ -264,6 +264,11 @@ const vocab = [
 ];
 eq("availability", L.availability("Mīlitēs in terrā laudātī sunt.", vocab, "henle"), { lesson: 11, unknown: [] });
 eq("availability unknown", L.availability("Mīlitēs rēgem laudant.", vocab, "henle"), { lesson: 11, unknown: ["rēgem"] });
+const grammar = { nouns: { declension: { "1": 1, "3": 4 } }, verbs: { conjugation: { "1": 11 }, indicative: { active: { present: 11, perfect: 17 }, passive: { perfect: 20 } }, subjunctive: { active: { pluperfect: 32 } } } };
+eq("availability with grammar: perfect passive", L.availability("Mīlitēs in terrā laudātī sunt.", vocab, "henle", grammar).lesson, 20);
+eq("availability with grammar: present", L.availability("Mīlitēs terram laudant.", vocab, "henle", grammar).lesson, 11);
+eq("availability with grammar: plup subj", L.availability("laudāvissent", vocab, "henle", grammar).lesson, 32);
+eq("availability with grammar: sum alone stays early", L.availability("Terra est.", [...vocab, { lemma: "sum", parts: ["sum", "esse", "fuī", "futūrus"], conjugation: "irregular", pos: "verb", lesson: 1, curriculum: "henle", flags: ["no-passive"] }], "henle", grammar).lesson, 1);
 eq("lessonOf available", L.lessonOf({ lesson: 3, available: { henle: 7 } }, "henle"), 7);
 eq("lessonOf fallback", L.lessonOf({ lesson: 3, available: { henle: 7 } }, "wheelock"), 3);
 

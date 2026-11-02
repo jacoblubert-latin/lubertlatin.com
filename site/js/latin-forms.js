@@ -614,11 +614,57 @@
     });
     return Object.keys(out);
   }
+  // Every form with the lesson it can first be read: the entry's lesson,
+  // raised to the lesson the curriculum's grammar schedule teaches that
+  // form (declension, vocative, tense/voice/mood). Without a schedule the
+  // entry's lesson is used. Returns [{form, lesson}].
+  function formLessons(entry, curriculum, grammar) {
+    var base = lessonOf(entry, curriculum);
+    var g = grammar || {};
+    var out = [];
+    function push(f, l) { f.split(/\s+/).forEach(function (w) { out.push({ form: normalize(w), lesson: l }); }); }
+    function at(x) { return x == null ? 0 : x; }
+    if (Array.isArray(entry.forms) || (entry.pos !== "noun" && entry.pos !== "verb")) {
+      (Array.isArray(entry.forms) ? entry.forms : [entry.lemma]).forEach(function (f) { push(f, base); });
+      return out;
+    }
+    if (entry.pos === "noun") {
+      var d = declineNoun(entry);
+      var declL = at(g.nouns && g.nouns.declension && g.nouns.declension[String(entry.declension)]);
+      NUMBERS.forEach(function (n) { CASES.forEach(function (c) {
+        var f = d[n][c]; if (!f) return;
+        var l = Math.max(base, declL, c === "voc" ? at(g.nouns && g.nouns.vocative) : 0);
+        (Array.isArray(f) ? f : [f]).forEach(function (x) { push(x, l); });
+      }); });
+      return out;
+    }
+    var s = synopsis(entry);
+    var conjL = at(g.verbs && g.verbs.conjugation && g.verbs.conjugation[String(entry.conjugation)]);
+    s.voices.forEach(function (v) {
+      var sv = v === "deponent" ? "passive" : v;
+      ["indicative", "subjunctive"].forEach(function (mood) {
+        Object.keys(s[mood][v]).forEach(function (t) {
+          var tl = at(g.verbs && g.verbs[mood] && g.verbs[mood][sv] && g.verbs[mood][sv][t]);
+          // Irregular verbs (sum, possum, eō…) are met in the present system
+          // long before the regular conjugations: est and erat appear from
+          // Lesson 1, so their present-system indicative follows the
+          // "irregular" line of the conjugation schedule instead.
+          var earlyIrregular = endsWith(normalize(entry.lemma), "sum") && mood === "indicative" && IND_TENSES.indexOf(t) < 3;
+          var l = earlyIrregular ? Math.max(base, conjL) : Math.max(base, conjL, tl);
+          (s[mood][v][t] || []).forEach(function (cell) {
+            push(cell.form, l); cell.accept.forEach(function (a) { push(a, l); });
+          });
+        });
+      });
+    });
+    (entry.parts || []).forEach(function (p) { push(p, Math.max(base, conjL)); });
+    return out;
+  }
   // Lesson a sentence becomes available in a curriculum: the lesson that
-  // introduces the last of its words. Words not in the vocab are listed
-  // in `unknown` and ignored for the lesson.
-  function availability(sentence, vocab, curriculum) {
-    var index = buildFormIndex(vocab, curriculum);
+  // introduces the last of its words (each word in the form it has here).
+  // Words not in the vocab are listed in `unknown` and ignored.
+  function availability(sentence, vocab, curriculum, grammar) {
+    var index = buildFormIndex(vocab, curriculum, grammar);
     var lesson = null, unknown = [];
     sentence.trim().split(/\s+/).forEach(function (w) {
       var key = normalize(w.replace(/^[^\p{L}]+|[^\p{L}]+$/gu, ""));
@@ -630,15 +676,17 @@
     return { lesson: lesson, unknown: unknown };
   }
   var indexCache = null;
-  function buildFormIndex(vocab, curriculum) {
-    if (indexCache && indexCache.vocab === vocab && indexCache.curriculum === curriculum) return indexCache.index;
+  // form → earliest lesson over every reading of that form.
+  function buildFormIndex(vocab, curriculum, grammar) {
+    if (indexCache && indexCache.vocab === vocab && indexCache.curriculum === curriculum && indexCache.grammar === grammar) return indexCache.index;
     var index = {};
     vocab.forEach(function (e) {
       if (e.curriculum && curriculum && e.curriculum !== curriculum) return;
-      var lesson = e.available && e.available[curriculum] != null ? e.available[curriculum] : e.lesson;
-      formsOf(e).forEach(function (f) { if (index[f] == null || lesson < index[f]) index[f] = lesson; });
+      formLessons(e, curriculum, grammar).forEach(function (fl) {
+        if (index[fl.form] == null || fl.lesson < index[fl.form]) index[fl.form] = fl.lesson;
+      });
     });
-    indexCache = { vocab: vocab, curriculum: curriculum, index: index };
+    indexCache = { vocab: vocab, curriculum: curriculum, grammar: grammar, index: index };
     return index;
   }
   // Lesson an item or vocab entry counts as, for a curriculum.
@@ -655,7 +703,7 @@
     stripMacrons: stripMacrons, normalize: normalize, sameForm: sameForm, spell: spell, hasFlag: hasFlag,
     declineNoun: declineNoun, nounEntryText: nounEntryText,
     conjugateSet: conjugateSet, synopsis: synopsis, verbVoices: verbVoices, verbEntryText: verbEntryText, personIndex: personIndex,
-    parseEntry: parseEntry, formsOf: formsOf, availability: availability, lessonOf: lessonOf,
+    parseEntry: parseEntry, formsOf: formsOf, formLessons: formLessons, availability: availability, lessonOf: lessonOf,
     hasIrregularTable: function (entry) { return !!irregularFor(entry); }
   };
 });

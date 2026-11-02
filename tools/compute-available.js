@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 // Works out when each sentence in items.json becomes available in a
 // curriculum: the lesson that introduces the last of its words, looked up
-// by generating every form of every vocab.json entry.
+// by generating every form of every vocab.json entry. A form counts from
+// the later of the word's lesson and the lesson curriculum.json's grammar
+// schedule teaches that form (its tense, voice, mood or declension).
 //
 //   node tools/compute-available.js                 report for henle (no changes made)
 //   node tools/compute-available.js --write         fill in "available": {"henle": N} on each item
@@ -23,12 +25,12 @@ for (let i = 0; i < args.length; i++) {
 }
 const dir = path.join(__dirname, "..", "site", "practice", "data", curriculum);
 const read = (f) => JSON.parse(fs.readFileSync(path.join(dir, f), "utf8").replace(/^﻿/, ""));
-const items = read("items.json"), vocab = read("vocab.json");
+const items = read("items.json"), vocab = read("vocab.json"), grammar = (read("curriculum.json").grammar || {});
 
 const unknownCounts = {};
 let known = 0, changed = 0;
 items.forEach((it) => {
-  const r = L.availability(it.sentence, vocab, curriculum);
+  const r = L.availability(it.sentence, vocab, curriculum, grammar);
   r.unknown.forEach((w) => { const k = w.replace(/^[^\p{L}]+|[^\p{L}]+$/gu, "").toLowerCase(); unknownCounts[k] = (unknownCounts[k] || 0) + 1; });
   const current = L.lessonOf(it, curriculum);
   if (r.unknown.length === 0) {
