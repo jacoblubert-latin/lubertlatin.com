@@ -1,0 +1,25 @@
+{
+  "id": "henle",
+  "name": "Henle First Year Latin",
+  "short": "Henle",
+  "lessons": 42,
+  "lessonWord": "Lesson",
+  "_note": "grammar: the lesson in which each form is first taught. The typed games unlock a row or column once the lesson filter reaches that number. These numbers were seeded from the lessons already used in items.json; correct any that are off. A value of null means the form is never taught in this book.",
+  "grammar": {
+    "nouns": {
+      "declension": { "1": 1, "2": 2, "3": 4, "4": 8, "5": 9 },
+      "vocative": 28
+    },
+    "verbs": {
+      "conjugation": { "1": 11, "2": 12, "3": 13, "3io": 14, "4": 14, "irregular": 1 },
+      "indicative": {
+        "active":  { "present": 11, "imperfect": 15, "future": 16, "perfect": 17, "pluperfect": 18, "future perfect": 18 },
+        "passive": { "present": 19, "imperfect": 19, "future": 19, "perfect": 20, "pluperfect": 20, "future perfect": 20 }
+      },
+      "subjunctive": {
+        "active":  { "present": 28, "imperfect": 29, "perfect": 34, "pluperfect": 32 },
+        "passive": { "present": 28, "imperfect": 29, "perfect": 34, "pluperfect": 32 }
+      }
+    }
+  }
+}
