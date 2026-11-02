@@ -223,6 +223,14 @@ eq("spell henle", L.spell("jubeō", "henle"), "jubeō");
 eq("parse noun", L.parseEntry("mīles, mīlitis, m."), { pos: "noun", lemma: "mīles", gen: "mīlitis", gender: "m", declension: "3" });
 eq("parse i-stem", L.parseEntry("mare, maris, n. i").flags, ["i-stem"]);
 eq("parse 5th", L.parseEntry("rēs, reī, f.").declension, "5");
+eq("parse deus is 2nd", L.parseEntry("deus, deī, m.").declension, "2");
+d = L.declineNoun({ pos: "noun", lemma: "deus", gen: "deī", gender: "m", declension: "2",
+  forms: { "sg.voc": "deus", "pl.nom": ["dī", "deī"], "pl.dat": ["dīs", "deīs"], "pl.abl": ["dīs", "deīs"], "pl.voc": ["dī", "deī"] } });
+eq("deus overrides", [d.sg.voc, d.pl.nom, d.pl.gen, d.pl.dat], ["deus", ["dī", "deī"], "deōrum", ["dīs", "deīs"]]);
+d = L.declineNoun({ pos: "noun", lemma: "Jēsūs", gen: "Jēsū", gender: "m", declension: "4", stem: "Jēs", flags: ["singular-only"],
+  forms: { "sg.gen": "Jēsū", "sg.dat": "Jēsū", "sg.voc": "Jēsū" } });
+eq("Jēsūs", d.sg, { nom: "Jēsūs", gen: "Jēsū", dat: "Jēsū", acc: "Jēsum", abl: "Jēsū", voc: "Jēsū" });
+eq("Jēsūs no plural", d.pl.nom, null);
 eq("parse castra", L.parseEntry("castra, castrōrum, n."), { pos: "noun", lemma: "castra", gen: "castrōrum", gender: "n", declension: "2", stem: "castr", flags: ["plural-only"] });
 eq("parse verb", L.parseEntry("capiō, capere, cēpī, captus").conjugation, "3io");
 eq("parse deponent", L.parseEntry("sequor, sequī, secūtus sum").flags, ["deponent"]);

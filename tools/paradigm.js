@@ -5,6 +5,7 @@
 //   node tools/paradigm.js mīles hostis laudō            words from vocab.json (macrons optional)
 //   node tools/paradigm.js "mare, maris, n. i"           any dictionary line (needn't be in vocab.json)
 //   node tools/paradigm.js "sequor, sequī, secūtus sum"
+//   node tools/paradigm.js '{"pos":"noun","lemma":"vīs",...}'  a full vocab.json entry (for words needing "forms" overrides)
 //   node tools/paradigm.js --all                         every word in vocab.json
 //   node tools/paradigm.js --irregular                   the hand-entered verbs
 //   node tools/paradigm.js --curriculum henle mīles      another curriculum folder (default henle)
@@ -47,6 +48,7 @@ function findEntry(word) {
   const key = L.normalize(word);
   const hit = vocab.find((e) => e.lemma && L.normalize(e.lemma) === key) || vocab.find((e) => e.id === word);
   if (hit) return hit;
+  if (word.trim().charAt(0) === "{") return JSON.parse(word); // a full vocab.json entry
   if (word.indexOf(",") >= 0) return L.parseEntry(word);
   if (IRREGULAR_ENTRIES[word] || Object.keys(IRREGULAR_ENTRIES).some((k) => L.normalize(k) === key)) {
     const k = Object.keys(IRREGULAR_ENTRIES).find((k) => L.normalize(k) === key);

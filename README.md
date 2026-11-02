@@ -129,7 +129,7 @@ The typed games generate every form from these entries with the rules engine in 
 {"id":"in","curriculum":"henle","lesson":1,"pos":"indeclinable","lemma":"in","english":"in, on; into"}
 ```
 
-- **Nouns:** `lemma`, `gen` (genitive singular; genitive plural for a plural-only noun), `gender` (m, f, n), `declension` ("1"–"5"). The stem comes from the genitive, so *ager, agrī* and *fīlius, fīliī* work by themselves; 2nd-declension -ius nouns get the vocative in -ī, 3rd-declension neuters and i-stems (`"i-stem"` flag: gen. pl. -ium; neuters also abl. -ī and nom./acc. pl. -ia), and the 4th and 5th declensions are all handled. Flags: `i-stem`, `plural-only`, `no-vocative`. For an odd word, `"forms": {"sg.voc": "deus", "pl.nom": ["dī", "deī"]}` overrides single cells (a list means every spelling is accepted).
+- **Nouns:** `lemma`, `gen` (genitive singular; genitive plural for a plural-only noun), `gender` (m, f, n), `declension` ("1"–"5"). The stem comes from the genitive, so *ager, agrī* and *fīlius, fīliī* work by themselves; 2nd-declension -ius nouns get the vocative in -ī, 3rd-declension neuters and i-stems (`"i-stem"` flag: gen. pl. -ium; neuters also abl. -ī and nom./acc. pl. -ia), and the 4th and 5th declensions are all handled. Flags: `i-stem`, `plural-only`, `singular-only`, `no-vocative`. For an odd word, `"forms": {"sg.voc": "deus", "pl.nom": ["dī", "deī"]}` overrides single cells (a list means every spelling is accepted).
 - **Verbs:** `parts` (principal parts; three for a deponent, ending in "… sum"), `conjugation` ("1", "2", "3", "3io", "4" or "irregular"). Flags: `deponent`, `no-passive` (intransitive verbs: only the active column is shown). The verbs **sum, possum, eō, ferō, volō, nōlō, mālō, fīō** are hand-entered tables, not rules; give them `"conjugation": "irregular"`.
 - **Other words** (`adjective`, `pronoun`, `indeclinable`, `other`) are only used to work out sentence availability; give an optional `"forms": [...]` list for anything that inflects.
 - Spelling: write consonantal i as **j** the way Henle does (*jubeō*, *cūjus*). The games show it as j or i according to the student's spelling setting, and grading accepts i/j and u/v either way. Macrons are ignored unless the student turns on "strict macrons", and every correct form is shown with macrons.
@@ -148,7 +148,7 @@ node tools/paradigm.js "mare, maris, n. i" "sequor, sequī, secūtus sum" "capi�
 node tools/paradigm.js --all
 ```
 
-`--irregular` prints the eight hand-entered verbs; `--classical` shows i instead of j. The engine also has a fixed test of known paradigms (every declension type, all conjugations, deponents, the irregulars, and the grading rules):
+`--irregular` prints the eight hand-entered verbs; `--classical` shows i instead of j. A word that needs `forms` overrides (*vīs*, *deus*, *Jēsūs*, *domus*) can be given as a full JSON entry in quotes instead of a dictionary line. The engine also has a fixed test of known paradigms (every declension type, all conjugations, deponents, the irregulars, and the grading rules):
 
 ```bash
 node tools/test-forms.js

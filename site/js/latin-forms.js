@@ -22,7 +22,7 @@
   var SUBJ_TENSES = ["present", "imperfect", "perfect", "pluperfect"];
   var DECLENSIONS = ["1", "2", "3", "4", "5"];
   var CONJUGATIONS = ["1", "2", "3", "3io", "4", "irregular"];
-  var NOUN_FLAGS = ["i-stem", "plural-only", "no-vocative"];
+  var NOUN_FLAGS = ["i-stem", "plural-only", "singular-only", "no-vocative"];
   var VERB_FLAGS = ["deponent", "no-passive"];
 
   var CASE_NAMES = { nom: "nominative", gen: "genitive", dat: "dative", acc: "accusative", abl: "ablative", voc: "vocative" };
@@ -133,6 +133,7 @@
       });
     }
     if (hasFlag(entry, "plural-only")) CASES.forEach(function (c) { sg[c] = null; });
+    if (hasFlag(entry, "singular-only")) CASES.forEach(function (c) { pl[c] = null; });
     if (hasFlag(entry, "no-vocative")) { sg.voc = null; pl.voc = null; }
     return { sg: sg, pl: pl };
   }
@@ -505,7 +506,7 @@
       var gen = raw[1], decl;
       if (endsWith(gen, "ae")) decl = "1";
       else if (endsWith(gen, "ūs")) decl = "4";
-      else if (endsWith(gen, "ēī") || endsWith(gen, "eī")) decl = "5";
+      else if (endsWith(gen, "ēī") || (endsWith(gen, "eī") && endsWith(raw[0], "ēs"))) decl = "5"; // rēs, reī; but deus, deī is 2nd
       else if (endsWith(gen, "is")) decl = "3";
       else if (endsWith(gen, "ōrum")) { decl = "2"; flags.push("plural-only"); }
       else if (endsWith(gen, "ārum")) { decl = "1"; flags.push("plural-only"); }
