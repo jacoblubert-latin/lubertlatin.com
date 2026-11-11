@@ -152,6 +152,8 @@
 .form-grid .cell-none { color: var(--muted); padding-top: 16px; }
 .form-grid .grid-section th { padding: 18px 0 2px; width: auto; white-space: normal; font-family: var(--serif); font-size: 1.15rem; font-weight: 500; color: var(--accent); border-bottom: 1px solid var(--line); }
 .synopsis-grid tbody th { width: 6em; }
+/* A long form (dēmōnstrātūrus esse) breaks inside its cell on a phone instead of running into the next column. */
+.synopsis-grid .cell-answer { overflow-wrap: anywhere; }
 @media (max-width: 480px) {
   .form-grid tbody th { width: 3.6em; font-size: .85rem; }
   .synopsis-grid tbody th { width: 4.4em; }
