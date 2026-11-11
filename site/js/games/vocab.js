@@ -76,7 +76,12 @@
     } catch (err) { text = e.lemma; }
     return T.spell(text);
   }
+  // Every word met by the chosen lesson: the wrong options and the "either
+  // word" answers come from these, whichever way the lesson filter is set.
   function openWords() { return words.filter(function (w) { return S.lessonOf(w) <= lesson(); }); }
+  // Is the word one the lesson filter asks? Through Lesson N: all of the
+  // above. Lesson N only: the words whose own lesson is N.
+  function asked(w) { return S.inLesson(S.lessonOf(w)); }
   function filtered(list) {
     return list.filter(function (w) { return ctx.settings.pos.indexOf(group(w)) >= 0; });
   }
@@ -211,7 +216,7 @@
     },
     updateStart: function (form) {
       var have = {};
-      openWords().forEach(function (w) { have[group(w)] = true; });
+      openWords().filter(asked).forEach(function (w) { have[group(w)] = true; });
       form.querySelectorAll("input[name=pos]").forEach(function (b) {
         b.disabled = !have[b.value];
         b.parentNode.classList.toggle("is-unavailable", b.disabled);
@@ -236,18 +241,20 @@
       }
     },
 
-    pool: function () { return filtered(isChoice() ? eligible() : openWords()); },
+    pool: function () { return filtered(isChoice() ? eligible() : openWords()).filter(asked); },
     poolNote: function (n) {
       if (!ctx.settings.pos.length) return "Pick at least one part of speech.";
+      var only = ctx.settings.lessonOnly;
       if (n === 0) {
-        var open = filtered(openWords()).length;
+        var open = filtered(openWords()).filter(asked).length;
+        if (only && !open) return "No words of those parts of speech are new in " + S.lessonName() + ". Pick another lesson or other parts of speech.";
         if (open && isChoice()) {
           return "Too few words through Lesson " + lesson() + " for multiple choice: each question needs four different meanings. " +
             "Raise the lesson number or switch to English → Latin.";
         }
         return "No words through Lesson " + lesson() + " for those parts of speech yet. Raise the lesson number or pick other parts of speech.";
       }
-      return n + " " + S.plural(n, "word") + " in play" + (n < ROUND_SIZE ? " (a round will be " + n + " long)" : "") + ".";
+      return n + " " + S.plural(n, "word") + (only ? " new in " + S.lessonName() : " in play") + (n < ROUND_SIZE ? " (a round will be " + n + " long)" : "") + ".";
     },
     roundSize: function () { return ROUND_SIZE; },
     // No repeats; in English → Latin, no two words asked by the same gloss.

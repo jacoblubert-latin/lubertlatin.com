@@ -218,13 +218,20 @@
     },
     pool: function () {
       return items.filter(function (it) {
-        return S.lessonOf(it) <= ctx.settings.lesson && (ctx.settings.types === "both" || it.type === ctx.settings.types);
+        // through Lesson N, or Lesson N only: by the lesson the sentence is first usable
+        return S.inLesson(S.lessonOf(it)) && (ctx.settings.types === "both" || it.type === ctx.settings.types);
       });
     },
     poolNote: function (n) {
       var what = ctx.settings.types === "both" ? "words" : ctx.settings.types + "s";
-      if (n === 0) return "No " + what + " through Lesson " + ctx.settings.lesson + " yet. Raise the lesson number.";
-      return n + " " + what + " to draw from" + (n < ROUND_SIZE ? " (a round will be " + n + " long)" : "") + ".";
+      var only = ctx.settings.lessonOnly;
+      if (n === 0) {
+        return only ? "No " + what + " become usable in " + S.lessonName() + ". Pick another lesson."
+          : "No " + what + " through Lesson " + ctx.settings.lesson + " yet. Raise the lesson number.";
+      }
+      if (only) what = (n === 1 ? what.replace(/s$/, "") : what) + " first usable in " + S.lessonName();
+      else what += " to draw from";
+      return n + " " + what + (n < ROUND_SIZE ? " (a round will be " + n + " long)" : "") + ".";
     },
     roundSize: function () { return ROUND_SIZE; },
     // Random, no repeats, and no two items from the same sentence when

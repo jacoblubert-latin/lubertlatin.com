@@ -17,12 +17,40 @@
   function cases() { return ctx.settings.vocative ? ROWS.concat(["voc"]) : ROWS; }
   function entryText(e) { return T.spell(L.nounEntryText(e)); }
   function adjText(e) { return T.spell(L.adjectiveEntryText(e)); }
-  function declensionTaught(d) {
-    var g = grammar.nouns && grammar.nouns.declension;
-    return !g || g[d] == null || g[d] <= lesson();
+  // A noun opens at the later of its own lesson and its declension's.
+  function nounOpen(n) { return L.nounOpenLesson(n, ctx.curriculum, grammar); }
+  function nounsThrough() { return nouns.filter(function (n) { return nounOpen(n) <= lesson(); }); }
+
+  // ---------- "Lesson N only" ----------
+  // What belongs to Lesson N is what first opens there. For a noun that is
+  // its whole table. In the lesson that teaches the vocative (Henle 27) the
+  // vocatives of the earlier nouns open too: they are asked one form at a
+  // time, whatever the mode and with or without "Include vocative".
+  function only() { return !!ctx.settings.lessonOnly; }
+  function nounIsNew(n) { return nounOpen(n) === lesson(); }
+  function vocativeOnly() { return only() && L.vocativeLesson(grammar) === lesson(); }
+  function hasVocative(n) { var d = L.declineNoun(n); return !!(d.sg.voc || d.pl.voc); }
+  // The cases asked of a noun one form at a time.
+  function casesOf(n) { return only() && !nounIsNew(n) ? ["voc"] : cases(); }
+  // A noun + adjective pair opens at the later of its two words.
+  function pairIsNew(n, a) { return Math.max(nounOpen(n), adjLesson(a)) === lesson(); }
+  // The cells of a pair that are in play: all of them through Lesson N; in
+  // Lesson N only, those of a pair that is new, and the vocative of an
+  // earlier pair in the vocative's lesson.
+  function pairCells(n, a) {
+    if (!only()) return phraseCells(n, a);
+    if (pairIsNew(n, a)) return phraseCells(n, a);
+    return vocativeOnly() ? phraseCells(n, a, ["voc"]) : [];
   }
-  function nounsThrough() {
-    return nouns.filter(function (n) { return S.lessonOf(n) <= lesson() && declensionTaught(String(n.declension)); });
+  // The nouns the lesson filter offers, before the Declensions boxes.
+  function nounsOffered() {
+    var list = nounsThrough();
+    if (!only()) return list;
+    if (isPhrase()) {
+      var adjs = adjectivesThrough();
+      return list.filter(function (n) { return adjs.some(function (a) { return pairCells(n, a).length > 0; }); });
+    }
+    return list.filter(function (n) { return nounIsNew(n) || (vocativeOnly() && hasVocative(n)); });
   }
   function cellLabel(c, n) { return L.CASE_NAMES[c] + " " + L.NUMBER_NAMES[n]; }
 
@@ -32,10 +60,7 @@
   function asking() { return isPhrase() ? ctx.settings.phraseForm : ctx.settings.mode; }
   // Lesson an adjective can first be drilled: the later of its own lesson
   // and the lesson its type is taught. null = never in this book.
-  function adjLesson(a) {
-    var start = L.adjectiveStartLesson(a, grammar);
-    return start == null ? null : Math.max(S.lessonOf(a), start);
-  }
+  function adjLesson(a) { return L.adjectiveOpenLesson(a, ctx.curriculum, grammar); }
   function adjectivesThrough() {
     return adjectives.filter(function (a) { var l = adjLesson(a); return l != null && l <= lesson(); });
   }
@@ -75,10 +100,11 @@
   // Nouns in the order a round takes them: about four in five are nouns
   // some open adjective differs from (at Lesson 7 that leaves out terra and
   // servus, whose only partners are magna and magnus).
-  function nounOrder(list, adjs) {
+  // partnersOf(noun) gives the adjectives it may be paired with.
+  function nounOrder(list, partnersOf) {
     var mixed = [], plain = [];
     S.shuffle(list.slice()).forEach(function (n) {
-      (adjs.some(function (a) { return differs(n, a); }) ? mixed : plain).push(n);
+      (partnersOf(n).some(function (a) { return differs(n, a); }) ? mixed : plain).push(n);
     });
     var out = [];
     while (mixed.length || plain.length) {
@@ -198,7 +224,7 @@
     },
     updateStart: function (form) {
       var have = {};
-      nounsThrough().forEach(function (n) { have[String(n.declension)] = true; });
+      nounsOffered().forEach(function (n) { have[String(n.declension)] = true; });
       form.querySelectorAll("input[name=declension]").forEach(function (b) {
         b.disabled = !have[b.value];
         b.parentNode.classList.toggle("is-unavailable", b.disabled);
@@ -232,7 +258,7 @@
 
     pool: function () {
       var sel = ctx.settings.declensions;
-      var list = nounsThrough().filter(function (n) { return !sel.length || sel.indexOf(String(n.declension)) >= 0; });
+      var list = nounsOffered().filter(function (n) { return !sel.length || sel.indexOf(String(n.declension)) >= 0; });
       if (!isPhrase()) return list;
       var adjs = adjectivesThrough();
       if (!adjs.length) return [];
@@ -241,6 +267,7 @@
     },
     poolNote: function (n) {
       if (isPhrase() && !adjectivesThrough().length) return phraseClosedNote();
+      if (only()) return onlyNote(n);
       if (n === 0) return "No nouns through Lesson " + lesson() + " with those declensions yet. Raise the lesson number or pick other declensions.";
       var size = game.roundSize();
       var short = asking() === "table" && n < size ? " (a round will be " + n + " long)" : "";
@@ -250,21 +277,29 @@
       }
       return n + " " + S.plural(n, "noun") + " to draw from" + short + ".";
     },
-    roundSize: function () { return asking() === "table" ? 4 : 10; },
+    // (in the vocative's own lesson the earlier words are asked one form at a time)
+    roundSize: function () { return asking() === "table" && !vocativeOnly() ? 4 : 10; },
     buildRound: function (list, size) {
       if (isPhrase()) return buildPhraseRound(list, size);
-      if (ctx.settings.mode === "table") {
+      var tableMode = ctx.settings.mode === "table";
+      if (tableMode && !vocativeOnly()) {
         return S.shuffle(list.slice()).slice(0, size).map(function (e) { return { entry: e }; });
       }
       // Single forms: every (noun, case, number) with a form, no repeats.
-      var all = [];
+      // (Lesson N only, in the vocative's lesson: just the vocative of an
+      // earlier noun; in full-table mode a noun new in that lesson is still
+      // a table, up to a normal round of tables.)
+      var all = [], tables = [];
       list.forEach(function (e) {
+        if (tableMode && nounIsNew(e)) { tables.push({ entry: e }); return; }
         var d = L.declineNoun(e);
-        L.NUMBERS.forEach(function (n) { cases().forEach(function (c) {
+        L.NUMBERS.forEach(function (n) { casesOf(e).forEach(function (c) {
           if (d[n][c]) all.push({ entry: e, "case": c, number: n, expected: d[n][c] });
         }); });
       });
-      return S.shuffle(all).slice(0, size);
+      var singles = S.shuffle(all);
+      if (!tables.length) return singles.slice(0, size);
+      return S.shuffle(S.shuffle(tables).slice(0, 4).concat(singles).slice(0, size));
     },
 
     begin: function (item, area) {
@@ -398,27 +433,59 @@
   }
   // Rounds for noun + adjective. Full table: one pair per noun. Single
   // form: one cell of a fresh pair each time, no repeats.
+  // Lesson N only: a noun is paired only with an adjective that makes a
+  // pair with cells in play, and in the vocative's lesson an earlier pair is
+  // asked for its vocative alone, one form at a time, in either layout.
   function buildPhraseRound(list, size) {
     var adjs = adjectivesThrough(), out = [];
-    if (ctx.settings.phraseForm === "table") {
-      nounOrder(list, adjs).slice(0, size).forEach(function (e) {
-        var a = pickAdjective(e, adjs);
+    function partnersOf(e) {
+      return only() ? adjs.filter(function (a) { return pairCells(e, a).length > 0; }) : adjs;
+    }
+    var tableMode = ctx.settings.phraseForm === "table";
+    if (tableMode && !vocativeOnly()) {
+      nounOrder(list, partnersOf).slice(0, size).forEach(function (e) {
+        var a = pickAdjective(e, partnersOf(e));
         if (a) out.push({ entry: e, adj: a });
       });
       return out;
     }
-    var seen = {}, order = [];
+    var seen = {}, order = [], tables = 0;
     for (var tries = 0; out.length < size && tries < size * 30 && list.length; tries++) {
-      if (!order.length) order = nounOrder(list, adjs).reverse();
-      var e = order.pop(), a = pickAdjective(e, adjs);
+      if (!order.length) order = nounOrder(list, partnersOf).reverse();
+      var e = order.pop(), a = pickAdjective(e, partnersOf(e));
       if (!a) continue;
-      var p = S.pick(phraseCells(e, a));
-      var key = (e.id || e.lemma) + "|" + (a.id || a.lemma) + "|" + p.number + "." + p["case"];
+      var pair = (e.id || e.lemma) + "|" + (a.id || a.lemma);
+      if (tableMode && pairIsNew(e, a)) {          // (only reached in the vocative's lesson)
+        if (seen[pair] || tables >= 4) continue;
+        seen[pair] = true; tables++;
+        out.push({ entry: e, adj: a });
+        continue;
+      }
+      var p = S.pick(pairCells(e, a));
+      var key = pair + "|" + p.number + "." + p["case"];
       if (seen[key]) continue;
       seen[key] = true;
       out.push({ entry: e, adj: a, "case": p["case"], number: p.number, expected: phraseAnswers(p) });
     }
     return out;
+  }
+  // The pool note for "Lesson N only".
+  function onlyNote(n) {
+    var name = S.lessonName();
+    if (n === 0) return "No nouns of those declensions are new in " + name + ". Pick another lesson or other declensions.";
+    var pool = game.pool(), size = game.roundSize();
+    var short = asking() === "table" && !vocativeOnly() && n < size ? " (a round will be " + n + " long)" : "";
+    var voc = "";
+    if (isPhrase()) {
+      var adjs = adjectivesThrough().filter(function (a) { return pool.some(function (e) { return pairCells(e, a).length > 0; }); });
+      if (vocativeOnly()) voc = " " + name + " teaches the vocative: an earlier noun and adjective are asked for their vocative, one form at a time.";
+      return "Pairs new in " + name + ": " + n + " " + S.plural(n, "noun") + " and " + adjs.length + " " +
+        S.plural(adjs.length, "adjective") + " to draw from" + short + "." + voc;
+    }
+    var fresh = pool.filter(nounIsNew).length, earlier = n - fresh;
+    if (!earlier) return n + " " + S.plural(n, "noun") + " new in " + name + short + ".";
+    voc = name + " teaches the vocative: the vocative of " + earlier + " earlier " + S.plural(earlier, "noun") + " is asked one form at a time.";
+    return (fresh ? fresh + " " + S.plural(fresh, "noun") + " new in " + name + ". " : "") + voc;
   }
 
   function choice(type, name, value, text, checked) {
