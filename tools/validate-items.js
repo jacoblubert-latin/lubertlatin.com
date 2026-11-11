@@ -218,7 +218,8 @@ function validateCurriculum(c) {
       const walk = (obj, pathStr) => {
         for (const [k, v] of Object.entries(obj)) {
           const p = pathStr + "." + k;
-          if (isObj(v)) walk(v, p);
+          if (k === "like") { if (!L.CONJUGATIONS.includes(v) || v === "irregular") err("grammar" + p + " = " + JSON.stringify(v) + " should be a conjugation code"); }
+          else if (isObj(v)) walk(v, p);
           else if (v !== null && (!isInt(v) || v < 1 || v > max)) err("grammar" + p + " = " + JSON.stringify(v) + " should be a lesson number 1–" + max + " or null");
         }
       };
@@ -229,10 +230,13 @@ function validateCurriculum(c) {
           if (v[mood][voice]) Object.keys(v[mood][voice]).forEach((t) => {
             const allowed = mood === "indicative" ? L.IND_TENSES : L.SUBJ_TENSES;
             if (!allowed.includes(t)) err("grammar.verbs." + mood + "." + voice + " has unknown tense " + JSON.stringify(t));
+            const tv = v[mood][voice][t];
+            if (isObj(tv)) Object.keys(tv).forEach((k) => { if (!L.CONJUGATIONS.includes(k) || k === "irregular") err("grammar.verbs." + mood + "." + voice + "." + t + " has unknown conjugation code " + JSON.stringify(k)); });
           });
         });
       });
       if (v.conjugation) Object.keys(v.conjugation).forEach((k) => { if (!L.CONJUGATIONS.includes(k)) err("grammar.verbs.conjugation has unknown code " + JSON.stringify(k)); });
+      if (v.irregular) Object.keys(v.irregular).forEach((k) => { if (!L.IRREGULAR_LEMMAS.includes(k)) err("grammar.verbs.irregular has no hand table for " + JSON.stringify(k) + " (use one of: " + L.IRREGULAR_LEMMAS.join(", ") + ")"); });
       const n = c.grammar.nouns || {};
       if (n.declension) Object.keys(n.declension).forEach((k) => { if (!L.DECLENSIONS.includes(k)) err("grammar.nouns.declension has unknown code " + JSON.stringify(k)); });
     }

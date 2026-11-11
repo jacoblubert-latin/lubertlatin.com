@@ -4,21 +4,64 @@
   "short": "Henle",
   "lessons": 42,
   "lessonWord": "Lesson",
-  "_note": "grammar: the lesson in which each form is first taught. The typed games unlock a row or column once the lesson filter reaches that number. These numbers were seeded from the lessons already used in items.json; correct any that are off. A value of null means the form is never taught in this book.",
+  "_note": "grammar: the lesson in which each form is first taught, taken from the table of contents of Henle, First Year Latin (1958 printing). The typed games open a row or column once the lesson filter reaches that number. A tense is a single lesson number, or a map by conjugation where Henle teaches it one conjugation at a time. null means the form is never taught in this book. Compounds follow their base verb (absum like sum, adeō like eō).",
+  "_source": {
+    "L1-5": "the five declensions, one per lesson; L6 nouns with special meanings in the plural",
+    "L9": "first conjugation: present, imperfect, future indicative active of laudō",
+    "L10": "the same three tenses of moneō",
+    "L12": "present system active of the third conjugation (mittō)",
+    "L13": "present system active of the fourth conjugation",
+    "L14": "present system indicative of sum; compounds of sum",
+    "L15": "the perfect system active (perfect, pluperfect, future perfect; all conjugations and fuī)",
+    "L16": "puer, ager, vir",
+    "L17-20": "present system passive of the 1st, 2nd, 3rd, 4th conjugations, one per lesson",
+    "L21": "the perfect system of the indicative passive",
+    "L22": "the present subjunctive active",
+    "L23": "the imperfect subjunctive active; imperfect subjunctive of sum",
+    "L26": "perfect and pluperfect subjunctive active",
+    "L27": "the vocative; imperative mood",
+    "L29": "the passive subjunctive (present, imperfect, and the perfect system)",
+    "L35": "possum, indicative and subjunctive",
+    "L37": "-iō verbs: indicative and subjunctive, active and passive",
+    "L41": "deponent verbs",
+    "L42": "the irregular verb eō"
+  },
   "grammar": {
     "nouns": {
-      "declension": { "1": 1, "2": 2, "3": 4, "4": 8, "5": 9 },
-      "vocative": 28
+      "declension": { "1": 1, "2": 2, "3": 3, "4": 4, "5": 5 },
+      "vocative": 27
     },
     "verbs": {
-      "conjugation": { "1": 11, "2": 12, "3": 13, "3io": 14, "4": 14, "irregular": 1 },
+      "conjugation": { "1": 9, "2": 10, "3": 12, "4": 13, "3io": 37 },
+      "deponent": 41,
+      "irregular": {
+        "sum": 14,
+        "possum": 35,
+        "eō": 42,
+        "dō": { "start": 9, "like": "1" },
+        "ferō": null,
+        "volō": null,
+        "nōlō": null,
+        "mālō": null,
+        "fīō": null
+      },
       "indicative": {
-        "active":  { "present": 11, "imperfect": 15, "future": 16, "perfect": 17, "pluperfect": 18, "future perfect": 18 },
-        "passive": { "present": 19, "imperfect": 19, "future": 19, "perfect": 20, "pluperfect": 20, "future perfect": 20 }
+        "active": {
+          "present":   { "1": 9, "2": 10, "3": 12, "4": 13, "3io": 37 },
+          "imperfect": { "1": 9, "2": 10, "3": 12, "4": 13, "3io": 37 },
+          "future":    { "1": 9, "2": 10, "3": 12, "4": 13, "3io": 37 },
+          "perfect": 15, "pluperfect": 15, "future perfect": 15
+        },
+        "passive": {
+          "present":   { "1": 17, "2": 18, "3": 19, "4": 20, "3io": 37 },
+          "imperfect": { "1": 17, "2": 18, "3": 19, "4": 20, "3io": 37 },
+          "future":    { "1": 17, "2": 18, "3": 19, "4": 20, "3io": 37 },
+          "perfect": 21, "pluperfect": 21, "future perfect": 21
+        }
       },
       "subjunctive": {
-        "active":  { "present": 28, "imperfect": 29, "perfect": 34, "pluperfect": 32 },
-        "passive": { "present": 28, "imperfect": 29, "perfect": 34, "pluperfect": 32 }
+        "active":  { "present": 22, "imperfect": 23, "perfect": 26, "pluperfect": 26 },
+        "passive": { "present": 29, "imperfect": 29, "perfect": 29, "pluperfect": 29 }
       }
     }
   }
