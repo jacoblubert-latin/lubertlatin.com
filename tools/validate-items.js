@@ -51,7 +51,7 @@ const ITEM_OPTIONAL = ["available"];
 // ---------- vocab entries ----------
 const POS = ["noun", "verb", "adjective", "pronoun", "adverb", "preposition", "conjunction", "indeclinable", "other"];
 const VOCAB_FIELDS = ["id", "curriculum", "lesson", "pos", "lemma"];
-const VOCAB_OPTIONAL = ["english", "flags", "available", "forms", "stem", "gen", "gender", "declension", "parts", "conjugation"];
+const VOCAB_OPTIONAL = ["english", "flags", "available", "forms", "stem", "gen", "gender", "declension", "parts", "conjugation", "nom"];
 
 const trim = (w) => w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
 const isStr = (v) => typeof v === "string" && v.trim().length > 0;
@@ -168,7 +168,7 @@ function validateVocab(vocab, ctx) {
     if (!POS.includes(e.pos)) { err("pos must be one of: " + POS.join(", ")); return; }
     if ("english" in e && typeof e.english !== "string") err("english must be a string");
     if ("flags" in e) {
-      const allowed = e.pos === "noun" ? L.NOUN_FLAGS : e.pos === "verb" ? L.VERB_FLAGS : [];
+      const allowed = e.pos === "noun" ? L.NOUN_FLAGS : e.pos === "verb" ? L.VERB_FLAGS : e.pos === "adjective" ? L.ADJ_FLAGS : [];
       if (!Array.isArray(e.flags)) err("flags must be an array");
       else e.flags.forEach((f) => { if (!allowed.includes(f)) err("flag " + JSON.stringify(f) + " is not one of: " + (allowed.join(", ") || "(no flags for " + e.pos + ")")); });
     }
@@ -194,9 +194,22 @@ function validateVocab(vocab, ctx) {
       if (Array.isArray(e.parts) && e.parts.length >= 2 && isStr(e.lemma)) {
         try { L.synopsis(e); } catch (x) { err("cannot conjugate: " + x.message); }
       }
+    } else if (e.pos === "adjective" && ("declension" in e || "nom" in e)) {
+      // A declined adjective: "nom" + "declension". (quot, duo, mīlle… have neither and fall through below.)
+      if (!L.ADJ_DECLENSIONS.includes(String(e.declension))) { err("adjective declension " + JSON.stringify(e.declension) + " is not one of: " + L.ADJ_DECLENSIONS.join(", ")); return; }
+      const want = String(e.declension) === "3" ? 2 : 3;
+      if (!Array.isArray(e.nom) || e.nom.length !== want || !e.nom.every(isStr)) err("a declension " + e.declension + " adjective needs \"nom\" with " + want + " forms (" + (want === 2 ? "gravis, grave" : "magnus, magna, magnum") + ")");
+      else {
+        if (isStr(e.lemma) && e.nom[0] !== e.lemma) err("nom[0] is " + JSON.stringify(e.nom[0]) + " but the lemma is " + JSON.stringify(e.lemma));
+        try { L.declineAdjective(e); } catch (x) { err("cannot decline: " + x.message); }
+      }
+      if ("forms" in e) err("a declined adjective takes no \"forms\" list (its forms come from \"nom\")");
+      if (Array.isArray(e.flags) && e.flags.includes("gen-ius") && String(e.declension) !== "1-2") err("flag \"gen-ius\" only goes with declension \"1-2\"");
+      for (const k of ["gen", "gender", "parts", "conjugation", "stem"]) if (k in e) err("\"" + k + "\" does not belong on an adjective");
     } else {
+      if ("flags" in e && e.pos === "adjective" && Array.isArray(e.flags) && e.flags.length) err("flags on an adjective need \"nom\" and \"declension\"");
       if ("forms" in e && (!Array.isArray(e.forms) || !e.forms.every(isStr))) err("forms must be an array of strings for a " + e.pos);
-      for (const k of ["gen", "gender", "declension", "parts", "conjugation"]) if (k in e) err("\"" + k + "\" only belongs on a noun or verb");
+      for (const k of ["gen", "gender", "declension", "parts", "conjugation", "nom"]) if (k in e) err("\"" + k + "\" only belongs on a noun, verb or declined adjective");
     }
   });
   return errors;
@@ -239,6 +252,11 @@ function validateCurriculum(c) {
       if (v.irregular) Object.keys(v.irregular).forEach((k) => { if (!L.IRREGULAR_LEMMAS.includes(k)) err("grammar.verbs.irregular has no hand table for " + JSON.stringify(k) + " (use one of: " + L.IRREGULAR_LEMMAS.join(", ") + ")"); });
       const n = c.grammar.nouns || {};
       if (n.declension) Object.keys(n.declension).forEach((k) => { if (!L.DECLENSIONS.includes(k)) err("grammar.nouns.declension has unknown code " + JSON.stringify(k)); });
+      const a = c.grammar.adjectives || {};
+      Object.keys(a).forEach((k) => { if (!["declension", "er", "gen-ius"].includes(k)) err("grammar.adjectives has unknown key " + JSON.stringify(k) + " (use declension, er, gen-ius)"); });
+      if ("declension" in a && !isObj(a.declension)) err("grammar.adjectives.declension must be an object like {\"1-2\": 7, \"3\": 8}");
+      if (isObj(a.declension)) Object.keys(a.declension).forEach((k) => { if (!L.ADJ_DECLENSIONS.includes(k)) err("grammar.adjectives.declension has unknown code " + JSON.stringify(k)); });
+      ["er", "gen-ius"].forEach((k) => { if (isObj(a[k])) err("grammar.adjectives." + k + " must be a lesson number or null"); });
     }
   }
   return errors;
@@ -277,7 +295,8 @@ function checkFile(file, ctx) {
     const errors = validateVocab(r.data, ctx);
     if (errors.length) return { errors };
     const v = r.data, nouns = v.filter((e) => e.pos === "noun").length, verbs = v.filter((e) => e.pos === "verb").length;
-    return { errors, summary: v.length + " entries (" + nouns + " nouns, " + verbs + " verbs, " + (v.length - nouns - verbs) + " other)." };
+    const adjs = v.filter(L.isDeclinedAdjective).length;
+    return { errors, summary: v.length + " entries (" + nouns + " nouns, " + verbs + " verbs, " + adjs + " declined adjectives, " + (v.length - nouns - verbs - adjs) + " other)." };
   }
   if (name === "curriculum.json") {
     const errors = validateCurriculum(r.data);
