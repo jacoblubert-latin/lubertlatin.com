@@ -352,13 +352,16 @@ eq("alius m sg", a.m.sg, { nom: "alius", gen: "alīus", dat: "aliī", acc: "aliu
 eq("alius f sg", a.f.sg, { nom: "alia", gen: "alīus", dat: "aliī", acc: "aliam", abl: "aliā", voc: "alia" });
 eq("alius n sg", a.n.sg, { nom: "aliud", gen: "alīus", dat: "aliī", acc: "aliud", abl: "aliō", voc: "aliud" });
 eq("alius n pl", a.n.pl, { nom: "alia", gen: "aliōrum", dat: "aliīs", acc: "alia", abl: "aliīs", voc: "alia" });
-// Henle's Grammar prints alterīus (i long or short) beside alīus, and aliae for the feminine dative.
-const ALIUS_GEN = ["alterīus", "alterius", "alīus"];
-const aliusHenle = Object.assign({}, alius, { forms: { "m.sg.gen": ALIUS_GEN, "f.sg.gen": ALIUS_GEN, "n.sg.gen": ALIUS_GEN, "f.sg.dat": ["aliae", "aliī"] } });
-a = L.declineAdjective(aliusHenle);
-eq("alius overrides", [a.m.sg.gen, a.f.sg.gen, a.n.sg.gen, a.m.sg.dat, a.f.sg.dat, a.n.sg.dat], [ALIUS_GEN, ALIUS_GEN, ALIUS_GEN, "aliī", ["aliae", "aliī"], "aliī"]);
-eq("alius overrides in formsOf", ["alterius", "alius", "aliae", "alii"].every((f) => L.formsOf(aliusHenle).includes(f)), true);
-eq("alius gen graded strictly", [L.sameForm("alterius", a.m.sg.gen, true), L.sameForm("alterīus", a.m.sg.gen, true), L.sameForm("alīus", a.m.sg.gen, true), L.sameForm("alius", a.m.sg.gen, true)], [true, true, true, false]);
+// The genitive singular of alius as vocab.json has it: alterīus (i long or
+// short) is the usual form, alīus the regular one, aliī / aliae also found.
+const ALIUS_GEN = ["alterīus", "alterius", "alīus", "aliī"], ALIUS_GEN_F = ["alterīus", "alterius", "alīus", "aliae"];
+const aliusFull = Object.assign({}, alius, { forms: { "m.sg.gen": ALIUS_GEN, "f.sg.gen": ALIUS_GEN_F, "n.sg.gen": ALIUS_GEN } });
+a = L.declineAdjective(aliusFull);
+eq("alius overrides", [a.m.sg.gen, a.f.sg.gen, a.n.sg.gen, a.m.sg.dat, a.f.sg.dat, a.n.sg.dat], [ALIUS_GEN, ALIUS_GEN_F, ALIUS_GEN, "aliī", "aliī", "aliī"]);
+eq("alius overrides in formsOf", ["alterius", "alius", "aliae", "alii"].every((f) => L.formsOf(aliusFull).includes(f)), true);
+eq("alius gen graded strictly", [L.sameForm("alterius", a.m.sg.gen, true), L.sameForm("alterīus", a.m.sg.gen, true), L.sameForm("alīus", a.m.sg.gen, true), L.sameForm("alius", a.m.sg.gen, true), L.sameForm("aliae", a.f.sg.gen, true), L.sameForm("aliae", a.m.sg.gen, true)], [true, true, true, false, true, false]);
+const vAlius = JSON.parse(require("fs").readFileSync(require("path").join(__dirname, "..", "site", "practice", "data", "henle", "vocab.json"), "utf8").replace(/^﻿/, "")).find((e) => e.id === "adj-alius");
+eq("vocab.json alius", [L.declineAdjective(vAlius).m.sg, L.declineAdjective(vAlius).f.sg.gen, L.declineAdjective(vAlius).f.sg.dat], [{ nom: "alius", gen: ALIUS_GEN, dat: "aliī", acc: "alium", abl: "aliō", voc: "alie" }, ALIUS_GEN_F, "aliī"]);
 a = L.declineAdjective(ADJ(["uter", "utra", "utrum"], "1-2", ["gen-ius"]));
 eq("uter gen/dat", [a.m.sg.gen, a.f.sg.dat, a.n.sg.acc, a.m.pl.acc], ["utrīus", "utrī", "utrum", "utrōs"]);
 a = L.declineAdjective(ADJ(["alter", "altera", "alterum"], "1-2", ["gen-ius"]));
