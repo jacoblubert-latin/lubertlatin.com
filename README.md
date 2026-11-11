@@ -99,7 +99,7 @@ Three games share one shell (`site/js/practice.js`): the start screen with its l
 
 Every data file lives in a folder named for the textbook, and every item and entry carries a matching `"curriculum"` field. Only `henle` exists now. To add Wheelock, *Latin for the New Millennium* or *Ecce Romani* later: copy the folder, write its `curriculum.json`, `items.json` and `vocab.json`, and set `data-curriculum` on the `<div id="drill">` of each page (a textbook picker on the start screen will set that attribute; the games themselves don't change).
 
-`curriculum.json` holds the display name, the number of lessons, the word for a lesson ("Lesson" or "Chapter") and a **grammar schedule**: the lesson in which each declension, conjugation, tense, voice and mood is first taught. The typed games open a row or column once the lesson filter reaches that number. The Henle numbers were seeded from the lessons already used in `items.json`; correct any that are off.
+`curriculum.json` holds the display name, the number of lessons, the word for a lesson ("Lesson" or "Chapter") and a **grammar schedule**: the lesson in which each declension, conjugation, tense, voice and mood is first taught. The typed games open a row or column once the lesson filter reaches that number. The Henle numbers come from the book's table of contents. A tense is one lesson number, or a map by conjugation where the book teaches it one conjugation at a time (`"present": {"1": 9, "2": 10, "3": 12, "4": 13, "3io": 37}`); `conjugation` says when each conjugation starts, `deponent` when deponents start, and `irregular` when each hand-table verb starts (`null` = not taught in this book; compounds follow their base verb). Every cell opens at the later of the verb's start and the tense's lesson, so *capiō* shows nothing before Lesson 37 and *sequor* nothing before 41.
 
 ### Parsing-drill items (`items.json`)
 
@@ -116,7 +116,7 @@ Every data file lives in a folder named for the textbook, and every item and ent
 
 ### Dictionary entries (`vocab.json`)
 
-The typed games generate every form from these entries with the rules engine in `site/js/latin-forms.js`. The Henle file was transcribed (with macrons) from the First Year master list, which has no lesson numbers: each word's `lesson` is the earliest lesson of a sentence in `items.json` that uses one of its forms, or else the lesson the grammar schedule introduces its declension or conjugation. Adjust them as you go. One entry per line:
+The typed games generate every form from these entries with the rules engine in `site/js/latin-forms.js`. The Henle file was transcribed (with macrons) from the First Year master list, which has no lesson numbers: each noun's and verb's `lesson` is the lesson the grammar schedule introduces its declension or conjugation (plural-only nouns no earlier than Lesson 6, *puer*/*ager*/*vir* at 16), not yet the lesson whose vocabulary list it appears in. Adjust them as you go. One entry per line:
 
 ```json
 {"id":"terra","curriculum":"henle","lesson":1,"pos":"noun","lemma":"terra","gen":"terrae","gender":"f","declension":"1","english":"land"}

@@ -16,31 +16,30 @@
   function lesson() { return ctx.settings.lesson; }
   function entryText(e) { return T.spell(L.verbEntryText(e)); }
   function who(item) { return L.PERSON_NAMES[item.person] + " " + L.NUMBER_NAMES[item.number]; }
-  // Deponent columns follow the passive schedule.
-  function scheduleVoice(v) { return v === "deponent" ? "passive" : v; }
-  function tenseOpen(mood, voice, tense) {
-    var g = grammar.verbs && grammar.verbs[mood] && grammar.verbs[mood][scheduleVoice(voice)];
-    if (!g) return mood === "indicative"; // no schedule: indicative open, subjunctive closed
-    return g[tense] != null && g[tense] <= lesson();
-  }
-  function conjugationOpen(c) {
-    var g = grammar.verbs && grammar.verbs.conjugation;
-    return !g || g[c] == null || g[c] <= lesson();
-  }
-  function moodOpen(mood) {
-    return ["active", "passive"].some(function (v) {
-      return L.IND_TENSES.concat(L.SUBJ_TENSES).some(function (t) { return tenseOpen(mood, v, t); });
-    });
+  // The schedule (curriculum.json → grammar.verbs) is read through the
+  // engine: each cell opens per verb, because Henle teaches a tense one
+  // conjugation at a time (laudō in Lesson 9, -iō verbs not until 37).
+  function tenseOpen(entry, mood, voice, tense) {
+    var l = L.verbCellLesson(entry, mood, tense, voice, grammar);
+    return l != null && l <= lesson();
   }
   function verbsThrough() {
-    return verbs.filter(function (v) { return S.lessonOf(v) <= lesson() && conjugationOpen(String(v.conjugation)); });
+    return verbs.filter(function (v) {
+      var start = L.verbStartLesson(v, grammar);
+      return start != null && start <= lesson() && S.lessonOf(v) <= lesson();
+    });
   }
-  function moods() { return ctx.settings.subjunctive && moodOpen("subjunctive") ? ["indicative", "subjunctive"] : ["indicative"]; }
   function tensesFor(mood) { return mood === "indicative" ? L.IND_TENSES : L.SUBJ_TENSES; }
+  function hasOpenCell(entry, mood) {
+    return L.verbVoices(entry).some(function (v) { return tensesFor(mood).some(function (t) { return tenseOpen(entry, mood, v, t); }); });
+  }
+  // Is the subjunctive open for any verb at this lesson?
+  function moodOpen(mood) { return verbsThrough().some(function (v) { return hasOpenCell(v, mood); }); }
+  function moods() { return ctx.settings.subjunctive && moodOpen("subjunctive") ? ["indicative", "subjunctive"] : ["indicative"]; }
   // Voice columns shown for a verb: its own voices, minus any not yet taught.
   function columnsFor(entry) {
     return L.verbVoices(entry).filter(function (v) {
-      return moods().some(function (m) { return tensesFor(m).some(function (t) { return tenseOpen(m, v, t); }); });
+      return moods().some(function (m) { return tensesFor(m).some(function (t) { return tenseOpen(entry, m, v, t); }); });
     });
   }
   function cellText(mood, tense, voice) {
@@ -126,7 +125,7 @@
       for (var tries = 0; out.length < size && tries < size * 20; tries++) {
         var e = pool[tries % pool.length];
         var cols = columnsFor(e), mood = S.pick(moods()), tense = S.pick(tensesFor(mood)), voice = S.pick(cols);
-        if (!tenseOpen(mood, voice, tense)) continue;
+        if (!tenseOpen(e, mood, voice, tense)) continue;
         var set = L.conjugateSet(e, mood, tense, voice);
         if (!set) continue;
         var person = S.pick(L.PERSONS), number = S.pick(L.NUMBERS);
@@ -168,7 +167,7 @@
         thead.appendChild(hr); table.appendChild(thead);
         var tbody = S.make("tbody");
         moods().forEach(function (mood) {
-          var tenses = tensesFor(mood).filter(function (t) { return cols.some(function (v) { return tenseOpen(mood, v, t); }); });
+          var tenses = tensesFor(mood).filter(function (t) { return cols.some(function (v) { return tenseOpen(item.entry, mood, v, t); }); });
           if (!tenses.length) return;
           var sec = S.make("tr", "grid-section");
           var sth = S.make("th", null, mood.charAt(0).toUpperCase() + mood.slice(1)); sth.colSpan = cols.length + 1; sth.setAttribute("scope", "colgroup");
@@ -179,7 +178,7 @@
             tr.appendChild(th);
             cols.forEach(function (v) {
               var td = S.make("td");
-              var set = tenseOpen(mood, v, t) ? L.conjugateSet(item.entry, mood, t, v) : null;
+              var set = tenseOpen(item.entry, mood, v, t) ? L.conjugateSet(item.entry, mood, t, v) : null;
               if (set) {
                 var inp = T.input(cellText(mood, t, v));
                 td.appendChild(inp);

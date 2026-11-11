@@ -435,10 +435,10 @@
     var found = null;
     Object.keys(IRREGULAR).forEach(function (k) {
       var nk = normalize(k);
-      if (key === nk) found = { table: IRREGULAR[k], prefix: "" };
+      if (key === nk) found = { table: IRREGULAR[k], prefix: "", base: k };
       else if (!found && COMPOUND_BASES.indexOf(k) >= 0 && endsWith(key, nk) && key.length > nk.length) {
         var prefix = entry.lemma.slice(0, entry.lemma.length - k.length);
-        if (PREFIXES.some(function (p) { return normalize(p) === normalize(prefix); })) found = { table: IRREGULAR[k], prefix: prefix };
+        if (PREFIXES.some(function (p) { return normalize(p) === normalize(prefix); })) found = { table: IRREGULAR[k], prefix: prefix, base: k };
       }
     });
     return found;
@@ -614,6 +614,58 @@
     });
     return Object.keys(out);
   }
+  // ---------- the curriculum's grammar schedule ----------
+  // grammar.verbs: {
+  //   conjugation: { "1": 9, "2": 10, ... },        lesson each conjugation's paradigm starts
+  //   deponent: 41,                                 deponents start no earlier than this
+  //   irregular: { "sum": 14, "dō": { start: 9, like: "1" }, "ferō": null },
+  //   indicative: { active: { present: 9 | { "1": 9, "2": 10, ... }, ... }, passive: {...} },
+  //   subjunctive: {...}
+  // }
+  // A tense's lesson is a number, or a map by conjugation when the book
+  // teaches it one conjugation at a time. null = never taught in this book.
+  // Compounds follow their base verb (absum → sum, adeō → eō).
+  function verbScheduleInfo(entry, grammar) {
+    var g = (grammar && grammar.verbs) || null;
+    var c = String(entry.conjugation), like = c, start = 0;
+    if (!g) return { g: null, like: like, start: 0 };
+    if (c === "irregular") {
+      like = null;
+      if (g.irregular) {
+        var hit = irregularFor(entry);
+        var info = hit ? g.irregular[hit.base] : null;
+        if (info == null) return { g: g, like: null, start: null };
+        if (typeof info === "object") { start = info.start == null ? 0 : info.start; like = info.like || null; }
+        else start = info;
+      }
+    } else if (g.conjugation) {
+      var cs = g.conjugation[c];
+      if (cs === null) return { g: g, like: like, start: null };
+      start = cs == null ? 0 : cs;
+    }
+    if (hasFlag(entry, "deponent")) {
+      if (g.deponent === null) return { g: g, like: like, start: null };
+      start = Math.max(start, g.deponent || 0);
+    }
+    return { g: g, like: like, start: start };
+  }
+  // Lesson a verb's paradigm is first taught (null = not in this book).
+  function verbStartLesson(entry, grammar) { return verbScheduleInfo(entry, grammar).start; }
+  // Lesson one synopsis cell opens for this verb, or null if never.
+  // voice: active | passive | deponent (deponents follow the passive lessons).
+  function verbCellLesson(entry, mood, tense, voice, grammar) {
+    var info = verbScheduleInfo(entry, grammar);
+    if (info.start == null) return null;
+    if (!info.g) return mood === "indicative" ? 0 : null;   // no schedule: indicative open, subjunctive closed
+    var sv = voice === "deponent" ? "passive" : voice;
+    var table = info.g[mood] && info.g[mood][sv];
+    if (!table) return mood === "indicative" ? info.start : null;
+    var tv = table[tense];
+    if (tv != null && typeof tv === "object") tv = info.like == null ? 0 : tv[info.like];
+    if (tv == null) return null;
+    return Math.max(info.start, tv);
+  }
+
   // Every form with the lesson it can first be read: the entry's lesson,
   // raised to the lesson the curriculum's grammar schedule teaches that
   // form (declension, vocative, tense/voice/mood). Without a schedule the
@@ -639,25 +691,24 @@
       return out;
     }
     var s = synopsis(entry);
-    var conjL = at(g.verbs && g.verbs.conjugation && g.verbs.conjugation[String(entry.conjugation)]);
+    var start = verbStartLesson(entry, g);
+    // est and sunt are vocabulary from the first lessons, long before the
+    // paradigm of sum is taught, so sum's present indicative counts from
+    // the word's own lesson.
+    var isSum = normalize(entry.lemma) === "sum";
     s.voices.forEach(function (v) {
-      var sv = v === "deponent" ? "passive" : v;
       ["indicative", "subjunctive"].forEach(function (mood) {
         Object.keys(s[mood][v]).forEach(function (t) {
-          var tl = at(g.verbs && g.verbs[mood] && g.verbs[mood][sv] && g.verbs[mood][sv][t]);
-          // Irregular verbs (sum, possum, eō…) are met in the present system
-          // long before the regular conjugations: est and erat appear from
-          // Lesson 1, so their present-system indicative follows the
-          // "irregular" line of the conjugation schedule instead.
-          var earlyIrregular = endsWith(normalize(entry.lemma), "sum") && mood === "indicative" && IND_TENSES.indexOf(t) < 3;
-          var l = earlyIrregular ? Math.max(base, conjL) : Math.max(base, conjL, tl);
+          var cl = verbCellLesson(entry, mood, t, v, g);
+          if (cl == null) return;                       // not taught: these forms stay unknown
+          var l = isSum && mood === "indicative" && t === "present" ? base : Math.max(base, cl);
           (s[mood][v][t] || []).forEach(function (cell) {
             push(cell.form, l); cell.accept.forEach(function (a) { push(a, l); });
           });
         });
       });
     });
-    (entry.parts || []).forEach(function (p) { push(p, Math.max(base, conjL)); });
+    (entry.parts || []).forEach(function (p) { push(p, Math.max(base, start || 0)); });
     return out;
   }
   // Lesson a sentence becomes available in a curriculum: the lesson that
@@ -704,6 +755,7 @@
     declineNoun: declineNoun, nounEntryText: nounEntryText,
     conjugateSet: conjugateSet, synopsis: synopsis, verbVoices: verbVoices, verbEntryText: verbEntryText, personIndex: personIndex,
     parseEntry: parseEntry, formsOf: formsOf, formLessons: formLessons, availability: availability, lessonOf: lessonOf,
-    hasIrregularTable: function (entry) { return !!irregularFor(entry); }
+    hasIrregularTable: function (entry) { return !!irregularFor(entry); },
+    verbStartLesson: verbStartLesson, verbCellLesson: verbCellLesson
   };
 });

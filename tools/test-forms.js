@@ -272,5 +272,35 @@ eq("availability with grammar: sum alone stays early", L.availability("Terra est
 eq("lessonOf available", L.lessonOf({ lesson: 3, available: { henle: 7 } }, "henle"), 7);
 eq("lessonOf fallback", L.lessonOf({ lesson: 3, available: { henle: 7 } }, "wheelock"), 3);
 
+// ---------- grammar schedule: per conjugation ----------
+const G = JSON.parse(require("fs").readFileSync(require("path").join(__dirname, "..", "site", "practice", "data", "henle", "curriculum.json"), "utf8")).grammar;
+const cellL = (e, m, t, v) => L.verbCellLesson(e, m, t, v, G);
+eq("laudō present active L9", cellL(laudo, "indicative", "present", "active"), 9);
+eq("moneō present active L10", cellL(moneo, "indicative", "present", "active"), 10);
+eq("dūcō future active L12", cellL(duco, "indicative", "future", "active"), 12);
+eq("audiō imperfect active L13", cellL(audio, "indicative", "imperfect", "active"), 13);
+eq("laudō perfect active L15", cellL(laudo, "indicative", "perfect", "active"), 15);
+eq("laudō present passive L17", cellL(laudo, "indicative", "present", "passive"), 17);
+eq("moneō present passive L18", cellL(moneo, "indicative", "present", "passive"), 18);
+eq("dūcō present passive L19", cellL(duco, "indicative", "present", "passive"), 19);
+eq("audiō present passive L20", cellL(audio, "indicative", "present", "passive"), 20);
+eq("laudō perfect passive L21", cellL(laudo, "indicative", "perfect", "passive"), 21);
+eq("present subj active L22", cellL(duco, "subjunctive", "present", "active"), 22);
+eq("imperfect subj active L23", cellL(duco, "subjunctive", "imperfect", "active"), 23);
+eq("perfect subj active L26", cellL(duco, "subjunctive", "perfect", "active"), 26);
+eq("passive subj L29", cellL(duco, "subjunctive", "pluperfect", "passive"), 29);
+eq("capiō everything waits for L37", [cellL(capio, "indicative", "present", "active"), cellL(capio, "indicative", "perfect", "active"), cellL(capio, "subjunctive", "present", "passive")], [37, 37, 37]);
+eq("sum present system L14", cellL(sum, "indicative", "imperfect", "active"), 14);
+eq("sum perfect L15", cellL(sum, "indicative", "perfect", "active"), 15);
+eq("sum imperfect subj L23", cellL(sum, "subjunctive", "imperfect", "active"), 23);
+eq("absum follows sum", cellL(absum, "indicative", "present", "active"), 14);
+eq("possum L35", [cellL(possum, "indicative", "present", "active"), cellL(possum, "subjunctive", "present", "active")], [35, 35]);
+eq("eō L42", cellL(eo, "indicative", "present", "active"), 42);
+eq("adeō follows eō", cellL(adeo, "subjunctive", "imperfect", "active"), 42);
+eq("dō like the first conjugation", [cellL(do_, "indicative", "present", "active"), cellL(do_, "indicative", "present", "passive"), cellL(do_, "indicative", "perfect", "active")], [9, 17, 15]);
+eq("deponents L41", [cellL(sequor, "indicative", "present", "deponent"), cellL(patior, "subjunctive", "perfect", "deponent")], [41, 41]);
+eq("ferō not taught in First Year", cellL(fero, "indicative", "present", "active"), null);
+eq("start lessons", [laudo, moneo, duco, audio, capio, sequor, sum, eo, fero].map((e) => L.verbStartLesson(e, G)), [9, 10, 12, 13, 37, 41, 14, 42, null]);
+
 if (failures) { console.error("\n" + failures + " of " + checks + " checks failed."); process.exit(1); }
 console.log("OK: " + checks + " checks passed.");
