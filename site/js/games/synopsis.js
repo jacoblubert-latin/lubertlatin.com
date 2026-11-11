@@ -90,6 +90,18 @@
     return TENSE_SHORT[tense] + (mood === "imperative" ? " " + (item.number === "pl" ? "pl." : "sg.") : "");
   }
 
+  // ---------- missed list ----------
+  // A form is stored as lemma, mood (section), tense and voice, with the
+  // person and number it varies by: both for a finite form, the number alone
+  // for an imperative, neither for an infinitive or participle. The answer is
+  // generated again from the current vocab.json each time it is asked.
+  function formKey(entry, mood, tense, voice, person, number) {
+    var key = { lemma: entry.lemma, mood: mood, tense: tense, voice: voice };
+    if (FINITE[mood]) key.person = person;
+    if (FINITE[mood] || mood === "imperative") key.number = number;
+    return key;
+  }
+
   var game = {
     id: "synopsis",
     data: ["vocab"],
@@ -212,7 +224,8 @@
         var inp = T.input(cellText(item.mood, item.tense, item.voice));
         wrap.appendChild(inp);
         area.appendChild(wrap);
-        cells.push({ input: inp, expected: expectedList(item.expected), label: cellText(item.mood, item.tense, item.voice) });
+        cells.push({ input: inp, expected: expectedList(item.expected), label: cellText(item.mood, item.tense, item.voice),
+          key: formKey(item.entry, item.mood, item.tense, item.voice, item.person, item.number) });
       } else {
         var cols = columnsFor(item.entry);
         var shown = moods().filter(function (m) { return hasOpenCell(item.entry, m); });
@@ -243,7 +256,8 @@
               if (cell) {
                 var inp = T.input(cellText(mood, t, v));
                 td.appendChild(inp);
-                cells.push({ input: inp, expected: expectedList(cell), label: cellText(mood, t, v) });
+                cells.push({ input: inp, expected: expectedList(cell), label: cellText(mood, t, v),
+                  key: formKey(item.entry, mood, t, v, item.person, item.number) });
               } else { td.className = "cell-none"; td.textContent = "—"; }
               tr.appendChild(td);
             });
@@ -259,16 +273,32 @@
     },
     canCheck: function () { return cells.some(function (c) { return c.input.value.trim() !== ""; }); },
     check: function () {
-      var wrong = [];
+      var wrong = [], marks = [];
       cells.forEach(function (c) {
-        if (!T.grade(c.input, c.expected)) wrong.push({ label: c.label, typed: c.input.value, correct: c.expected[0] });
+        var ok = T.grade(c.input, c.expected);
+        marks.push({ key: c.key, right: ok });
+        if (!ok) wrong.push({ label: c.label, typed: c.input.value, correct: c.expected[0] });
       });
       var n = cells.length, right = n - wrong.length;
       var verdict = wrong.length === 0
         ? (n === 1 ? "Correct!" : "All " + n + " forms right.")
         : (n === 1 ? "Not quite." : right + " of " + n + " forms right.");
-      return { right: wrong.length === 0, verdict: verdict, wrong: wrong, total: n, feedback: [] };
+      return { right: wrong.length === 0, verdict: verdict, wrong: wrong, marks: marks, total: n, feedback: [] };
     },
+    // Missed list: every cell graded, right or wrong, so a missed cell of a
+    // synopsis comes back as a single form.
+    formKeys: function (item, result) { return result.marks || []; },
+    fromMissed: function (key) {
+      var e = null;
+      verbs.forEach(function (v) { if (!e && v.lemma === key.lemma) e = v; });
+      if (!e || tensesFor(key.mood).indexOf(key.tense) < 0 || L.verbVoices(e).indexOf(key.voice) < 0) return null;
+      // An infinitive or participle is the same in every person and number.
+      var person = key.person == null ? "3" : String(key.person), number = key.number == null ? "sg" : key.number;
+      if (L.PERSONS.indexOf(person) < 0 || L.NUMBERS.indexOf(number) < 0) return null;
+      var cell = L.synopsisCell(e, key.mood, key.tense, key.voice, person, number);
+      return cell ? { entry: e, person: person, number: number, mood: key.mood, tense: key.tense, voice: key.voice, expected: cell } : null;
+    },
+    missedRoundSize: function () { return 10; }, // single forms, whatever the mode
     review: function (item, result, li) {
       var p = S.make("p", "missed-sentence"); p.setAttribute("lang", "la");
       p.textContent = entryText(item.entry);
