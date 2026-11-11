@@ -4,10 +4,11 @@
 // itself with LatinPractice.register() and only supplies the parts that
 // differ: start-screen options, the pool, how an item is shown and graded,
 // and how a missed item is reviewed. The lesson filter is the shell's: the
-// slider sets ctx.settings.lesson, and a two-way choice beside it sets
+// slider sets ctx.settings.lesson. A game that sets lessonOnlyChoice: true
+// (the vocabulary game) also gets a two-way choice beside it, which sets
 // ctx.settings.lessonOnly ("Through Lesson N", the default, or "Lesson N
-// only"). A game asks shell.inLesson(l) whether material that first opens
-// at lesson l is in play. The shell also keeps the student's
+// only"); in every other game lessonOnly stays false. A game asks
+// shell.inLesson(l) whether material that first opens at lesson l is in play. The shell also keeps the student's
 // missed list (js/missed-list.js) and runs the two rounds made from it:
 // "Drill what I missed" after a round and "Drill my missed list" on the
 // start screen. A game takes part by supplying formKeys() and fromMissed().
@@ -226,14 +227,15 @@
     var saved = readJSON(game.storageKey);
     if (saved && typeof saved.lesson === "number" && isFinite(saved.lesson)) ctx.settings.lesson = saved.lesson;
     // Settings stored before the choice existed have no lessonOnly: "through".
-    ctx.settings.lessonOnly = !!(saved && saved.lessonOnly === true);
+    // So does every game that doesn't offer the choice, whatever is stored.
+    ctx.settings.lessonOnly = !!(game.lessonOnlyChoice && saved && saved.lessonOnly === true);
     if (saved && game.restore) game.restore(saved);
   }
   function saveSettings() { writeJSON(game.storageKey, ctx.settings); typed.save(); }
 
   function readStartForm() {
     ctx.settings.lesson = clampLesson(el.lessonNumber.value);
-    var scope = el.start.querySelector("input[name=lessonScope]:checked");
+    var scope = scopeUi && el.start.querySelector("input[name=lessonScope]:checked");
     ctx.settings.lessonOnly = !!scope && scope.value === "only";
     if (game.readStart) game.readStart(el.start);
     if (game.typed) typed.readSettings(el.start);
@@ -287,13 +289,15 @@
 
   function buildStartScreen() {
     clear(el.startOptions); clear(el.startExtra);
-    // The label names the lesson; the choice under the slider says whether
-    // it means everything through that lesson or that lesson alone.
-    el.lessonLabel.textContent = curriculum.short + " " + curriculum.lessonWord + " ";
-    el.lessonRange.setAttribute("aria-label", curriculum.lessonWord + " (slider)");
+    // Without the choice the slider means "through". With it, the label
+    // names the lesson and the choice under the slider says whether that is
+    // everything through the lesson or the lesson alone.
+    var through = game.lessonOnlyChoice ? "" : "Through ";
+    el.lessonLabel.textContent = through + curriculum.short + " " + curriculum.lessonWord + " ";
+    el.lessonRange.setAttribute("aria-label", through + curriculum.lessonWord.toLowerCase() + " (slider)");
     el.lessonRange.min = el.lessonNumber.min = bounds.min;
     el.lessonRange.max = el.lessonNumber.max = bounds.max;
-    if (!scopeUi) {
+    if (game.lessonOnlyChoice && !scopeUi) {
       var row = make("div", "choice-row lesson-scope");
       row.setAttribute("role", "radiogroup"); row.setAttribute("aria-label", "Which lessons");
       scopeUi = {};
