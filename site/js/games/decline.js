@@ -60,7 +60,7 @@
   // nauta bonus, mīles fortis, flūmen magnum: most of them).
   function mismatch(noun, adj) {
     function tail(w) { return L.normalize(w).slice(-2); }
-    return phraseCells(noun, adj).filter(function (p) { return tail(list(p.noun)[0]) !== tail(p.adj); }).length;
+    return phraseCells(noun, adj).filter(function (p) { return tail(list(p.noun)[0]) !== tail(list(p.adj)[0]); }).length;
   }
   // An adjective for this noun: usually one whose endings differ from the
   // noun's, since that is the point of the exercise.
@@ -90,7 +90,7 @@
   // noun then adjective, or adjective then noun.
   function phraseAnswers(p) {
     var a = [], b = [];
-    list(p.noun).forEach(function (n) { a.push(n + " " + p.adj); b.push(p.adj + " " + n); });
+    list(p.noun).forEach(function (n) { list(p.adj).forEach(function (j) { a.push(n + " " + j); b.push(j + " " + n); }); });
     return a.concat(b);
   }
   // For a wrong phrase: which of the two words is the wrong one, if the

@@ -213,6 +213,14 @@
         GENDERS.forEach(function (g) { out[g].sg.gen = gen; out[g].sg.dat = dat; });
       }
     }
+    // Hand overrides, as for nouns: forms: {"m.sg.gen": ["alterīus", "alīus"]}
+    // (a list means every spelling is accepted; the first is the one shown).
+    if (entry.forms && !Array.isArray(entry.forms)) {
+      Object.keys(entry.forms).forEach(function (k) {
+        var p = k.split(".");
+        if (out[p[0]] && out[p[0]][p[1]]) out[p[0]][p[1]][p[2]] = entry.forms[k];
+      });
+    }
     if (hasFlag(entry, "singular-only")) GENDERS.forEach(function (g) { CASES.forEach(function (c) { out[g].pl[c] = null; }); });
     return out;
   }
@@ -704,7 +712,7 @@
     else if (isDeclinedAdjective(entry)) {
       var ad = declineAdjective(entry);
       GENDERS.forEach(function (g) { NUMBERS.forEach(function (n) { CASES.forEach(function (c) {
-        if (ad[g][n][c]) forms.push(ad[g][n][c]);
+        if (ad[g][n][c]) forms = forms.concat(ad[g][n][c]);
       }); }); });
     } else if (entry.pos === "noun") {
       var d = declineNoun(entry);
@@ -802,7 +810,8 @@
       if (typeL == null) return out;                  // type not taught: forms stay unknown
       GENDERS.forEach(function (gd) { NUMBERS.forEach(function (n) { CASES.forEach(function (c) {
         var f = ad[gd][n][c]; if (!f) return;
-        push(f, Math.max(base, typeL, c === "voc" ? at(g.nouns && g.nouns.vocative) : 0));
+        var l = Math.max(base, typeL, c === "voc" ? at(g.nouns && g.nouns.vocative) : 0);
+        (Array.isArray(f) ? f : [f]).forEach(function (x) { push(x, l); });
       }); }); });
       return out;
     }

@@ -203,7 +203,11 @@ function validateVocab(vocab, ctx) {
         if (isStr(e.lemma) && e.nom[0] !== e.lemma) err("nom[0] is " + JSON.stringify(e.nom[0]) + " but the lemma is " + JSON.stringify(e.lemma));
         try { L.declineAdjective(e); } catch (x) { err("cannot decline: " + x.message); }
       }
-      if ("forms" in e) err("a declined adjective takes no \"forms\" list (its forms come from \"nom\")");
+      if ("forms" in e && !isObj(e.forms)) err("on a declined adjective, forms (overrides) must be an object like {\"m.sg.gen\": [\"alterīus\", \"alīus\"]}");
+      if (isObj(e.forms)) Object.entries(e.forms).forEach(([k, v]) => {
+        if (!/^(m|f|n)\.(sg|pl)\.(nom|gen|dat|acc|abl|voc)$/.test(k)) err("forms has a bad key " + JSON.stringify(k) + " (use m.sg.nom … n.pl.voc)");
+        if (!(isStr(v) || (Array.isArray(v) && v.length && v.every(isStr)))) err("forms." + k + " must be a form or a list of accepted forms");
+      });
       if (Array.isArray(e.flags) && e.flags.includes("gen-ius") && String(e.declension) !== "1-2") err("flag \"gen-ius\" only goes with declension \"1-2\"");
       for (const k of ["gen", "gender", "parts", "conjugation", "stem"]) if (k in e) err("\"" + k + "\" does not belong on an adjective");
     } else {
