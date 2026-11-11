@@ -103,6 +103,11 @@
 .chip.is-wrong { background: var(--bad); border-color: var(--bad); color: #fff; }
 .chip.is-answer { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); box-shadow: inset 0 0 0 1px var(--ok); }
 
+/* Vocabulary game: four glosses, one to a line (a gloss can run to a sentence). */
+.choice span { text-align: center; } /* "Latin → English" wraps to two lines on a phone */
+.gloss-options { flex-direction: column; }
+.gloss-options .chip { border-radius: 12px; padding: .6em 1em; text-align: left; overflow-wrap: anywhere; }
+
 .feedback { margin-top: 18px; padding: 16px 18px; border-radius: 8px; background: var(--bg-tint); border-left: 4px solid var(--line); }
 .feedback.is-right { border-left-color: var(--ok); }
 .feedback.is-wrong { border-left-color: var(--bad); }
