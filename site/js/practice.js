@@ -3,7 +3,10 @@
 // streak and the end-of-round review. Each game (js/games/*.js) registers
 // itself with LatinPractice.register() and only supplies the parts that
 // differ: start-screen options, the pool, how an item is shown and graded,
-// and how a missed item is reviewed.
+// and how a missed item is reviewed. The shell also keeps the student's
+// missed list (js/missed-list.js) and runs the two rounds made from it:
+// "Drill what I missed" after a round and "Drill my missed list" on the
+// start screen. A game takes part by supplying formKeys() and fromMissed().
 //
 // Page markup: <div id="drill" data-game="parse" data-curriculum="henle" data-root="/practice/data/">
 // Data files live at <root><curriculum>/<file>.json. Adding a textbook means
@@ -18,6 +21,8 @@
   var curriculumId = root.getAttribute("data-curriculum") || "henle";
   var dataRoot = root.getAttribute("data-root") || "/practice/data/";
   var TYPED_KEY = "lubertlatin.practice.typed";
+  var MISSED_KEY = "lubertlatin.practice.missed";
+  var M = window.LatinMissed;
 
   var el = {
     start: document.getElementById("screen-start"),
@@ -33,6 +38,14 @@
     lessonOutput: document.getElementById("lesson-output"),
     poolNote: document.getElementById("pool-note"),
     startButton: document.getElementById("start-button"),
+    missedStart: document.getElementById("missed-start"),
+    missedCount: document.getElementById("missed-count"),
+    missedDrill: document.getElementById("missed-drill"),
+    missedRule: document.getElementById("missed-rule"),
+    missedClear: document.getElementById("missed-clear"),
+    missedConfirm: document.getElementById("missed-confirm"),
+    missedClearYes: document.getElementById("missed-clear-yes"),
+    missedClearNo: document.getElementById("missed-clear-no"),
     progress: document.getElementById("progress"),
     streak: document.getElementById("streak"),
     area: document.getElementById("game-area"),
@@ -43,6 +56,7 @@
     resultsLine: document.getElementById("results-line"),
     missedBlock: document.getElementById("missed-block"),
     missedList: document.getElementById("missed-list"),
+    retry: document.getElementById("retry-button"),
     again: document.getElementById("again-button"),
     settings: document.getElementById("settings-button")
   };
@@ -183,7 +197,7 @@
   // ---------- state ----------
   var game = null, ctx = null, data = {}, curriculum = null;
   var bounds = { min: 1, max: 1 };
-  var round = null; // { items, index, correct, streak, missed:[{item,result}], phase }
+  var round = null; // { items, index, correct, streak, missed:[{item,result}], wrongKeys:[key], phase }
 
   function show(screen) {
     [el.start, el.play, el.results, el.message].forEach(function (s) { s.hidden = s !== screen; });
@@ -215,6 +229,7 @@
     var n = game.pool().length;
     el.poolNote.textContent = game.poolNote(n);
     el.startButton.disabled = n === 0;
+    showMissedLine();
   }
   function onStartChange() { readStartForm(); syncStartForm(); }
 
@@ -227,15 +242,111 @@
     if (game.typed) typed.renderSettings(el.startExtra);
   }
 
+  // ---------- missed list ----------
+  // The forms this student has answered wrong in this game and textbook,
+  // kept in localStorage under MISSED_KEY (format and rules: missed-list.js).
+  // Where storage doesn't work (private browsing, a full disk) the list is
+  // simply not kept: `stored` goes false, the start-screen line stays hidden
+  // and the end-of-round retry carries on from the round's own record.
+  var missed = {
+    list: [],
+    stored: false,
+    // A game takes part by supplying formKeys() and fromMissed().
+    supported: function () { return !!(M && game && game.formKeys && game.fromMissed); },
+    init: function () {
+      if (!missed.supported()) return;
+      try {
+        localStorage.setItem(MISSED_KEY + ".probe", "1");
+        localStorage.removeItem(MISSED_KEY + ".probe");
+        missed.stored = true;
+      } catch (e) { missed.stored = false; }
+      missed.load();
+      // Drop forms whose word or item is no longer in the data.
+      var kept = M.prune(missed.list, itemFor);
+      if (kept.length !== missed.list.length) { missed.list = kept; missed.save(); }
+    },
+    // Re-read before every change, so two open tabs don't undo each other.
+    load: function () {
+      if (!missed.stored) return;
+      try { missed.list = M.getList(M.parse(localStorage.getItem(MISSED_KEY)), curriculumId, gameId); }
+      catch (e) { missed.stored = false; }
+    },
+    save: function () {
+      if (!missed.stored) return;
+      try {
+        var state = M.setList(M.parse(localStorage.getItem(MISSED_KEY)), curriculumId, gameId, missed.list);
+        localStorage.setItem(MISSED_KEY, JSON.stringify(state));
+      } catch (e) { missed.stored = false; }
+    },
+    // marks: [{ key, right }] for the forms just graded.
+    record: function (marks) {
+      if (!missed.supported() || !marks.length) return;
+      missed.load();
+      missed.list = M.recordAll(missed.list, marks, new Date().toISOString());
+      missed.save();
+    },
+    clear: function () { missed.load(); missed.list = []; missed.save(); }
+  };
+  // The round item for a stored key, or null when the word, item or form is gone.
+  function itemFor(key) {
+    try { return game.fromMissed(key) || null; } catch (e) { return null; }
+  }
+  // What a graded item says about each form it asked: [{ key, right }].
+  function marksFor(item, result) {
+    if (!missed.supported()) return [];
+    try { return (game.formKeys(item, result) || []).filter(function (m) { return m && m.key; }); }
+    catch (e) { return []; }
+  }
+  function missedNoun(n) {
+    var words = game.missedNoun || ["form", "forms"];
+    return plural(n, words[0], words[1]);
+  }
+  // Start screen: "12 forms on your missed list" with its two controls.
+  function showMissedLine() {
+    if (!el.missedStart) return;
+    if (missed.supported()) missed.load();
+    var n = missed.stored ? missed.list.length : 0;
+    el.missedStart.hidden = n === 0;
+    if (n === 0) { askClear(false); return; }
+    el.missedCount.textContent = n + " " + missedNoun(n) + " on your missed list";
+    el.missedRule.textContent = "A " + missedNoun(1) + " comes off the list after " + M.RIGHT_IN_A_ROW_TO_CLEAR + " right answers in a row.";
+  }
+  function askClear(on) {
+    if (!el.missedConfirm) return;
+    el.missedConfirm.hidden = !on;
+    el.missedClear.hidden = on;
+  }
+
   // ---------- rounds ----------
   function defaultBuildRound(list, size) { return shuffle(list.slice()).slice(0, size); }
 
   function startRound() {
     var size = game.roundSize ? game.roundSize() : 10;
-    var items = (game.buildRound || defaultBuildRound)(game.pool(), size);
-    round = { items: items, index: 0, correct: 0, streak: 0, missed: [], phase: "play" };
+    beginRound((game.buildRound || defaultBuildRound)(game.pool(), size));
+  }
+  function beginRound(items) {
+    round = { items: items, index: 0, correct: 0, streak: 0, missed: [], wrongKeys: [], phase: "play" };
     show(el.play);
     showItem();
+  }
+  // A round made of missed forms. The keys are turned back into items from
+  // the current data, so the lesson filter and the game's other filters
+  // don't apply; a key that no longer has an item is left out.
+  function startMissedRound(keys) {
+    var items = keys.map(itemFor).filter(Boolean);
+    if (items.length) beginRound(items);
+    return items.length > 0;
+  }
+  // Results screen: only what was missed in the round just played, shuffled.
+  function retryMissed() {
+    if (!round || !startMissedRound(shuffle(round.wrongKeys.slice()))) el.retry.hidden = true;
+  }
+  // Start screen: up to a round's worth of the stored list, oldest misses first.
+  function drillMissedList() {
+    readStartForm(); saveSettings(); // the typed settings still apply
+    missed.load();
+    var size = game.missedRoundSize ? game.missedRoundSize() : (game.roundSize ? game.roundSize() : 10);
+    if (!startMissedRound(M.take(missed.list, size))) syncStartForm();
   }
   function current() { return round.items[round.index]; }
   function updateStatus() {
@@ -265,6 +376,12 @@
     round.phase = "done";
     if (right) { round.correct++; round.streak++; }
     else { round.streak = 0; round.missed.push({ item: item, result: result }); }
+    var marks = marksFor(item, result);
+    missed.record(marks);
+    marks.forEach(function (m) {
+      var id = M.keyId(m.key);
+      if (!m.right && !round.wrongKeys.some(function (k) { return M.keyId(k) === id; })) round.wrongKeys.push(m.key);
+    });
     updateStatus();
     clear(el.feedback);
     el.feedback.className = "feedback " + (right ? "is-right" : "is-wrong");
@@ -299,6 +416,7 @@
       game.review(m.item, m.result, li);
       el.missedList.appendChild(li);
     });
+    if (el.retry) el.retry.hidden = round.wrongKeys.length === 0;
     show(el.results);
     el.results.scrollIntoView({ block: "start", behavior: "smooth" });
   }
@@ -318,7 +436,14 @@
   el.check.addEventListener("click", onCheck);
   el.next.addEventListener("click", onNext);
   el.again.addEventListener("click", startRound);
-  el.settings.addEventListener("click", function () { syncStartForm(); show(el.start); });
+  el.settings.addEventListener("click", function () { askClear(false); syncStartForm(); show(el.start); });
+  if (el.retry) el.retry.addEventListener("click", retryMissed);
+  if (el.missedStart) {
+    el.missedDrill.addEventListener("click", drillMissedList);
+    el.missedClear.addEventListener("click", function () { askClear(true); el.missedClearNo.focus(); });
+    el.missedClearNo.addEventListener("click", function () { askClear(false); el.missedClear.focus(); });
+    el.missedClearYes.addEventListener("click", function () { missed.clear(); askClear(false); showMissedLine(); el.startButton.focus(); });
+  }
 
   // ---------- loading ----------
   function fetchJSON(file) {
@@ -352,6 +477,7 @@
         ctx.settings.lesson = bounds.max; // default: everything unlocked
         loadSettings();
         ctx.settings.lesson = clampLesson(ctx.settings.lesson);
+        missed.init();
         buildStartScreen();
         syncStartForm();
         show(el.start);

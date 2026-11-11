@@ -90,6 +90,21 @@
             <div class="drill-actions">
               <button class="btn" type="submit" id="start-button">Start</button>
             </div>
+            <!-- Shown by js/practice.js when this browser has a missed list for the game. -->
+            <div id="missed-start" class="missed-start" hidden>
+              <p class="missed-count" id="missed-count" aria-live="polite"></p>
+              <div class="drill-actions">
+                <button type="button" class="btn btn-outline" id="missed-drill">Drill my missed list</button>
+              </div>
+              <p class="fine missed-note">
+                <span id="missed-rule"></span>
+                <button type="button" class="link-button" id="missed-clear">Clear list</button>
+                <span id="missed-confirm" hidden>Clear the whole list?
+                  <button type="button" class="link-button" id="missed-clear-yes">Yes, clear it</button>
+                  <button type="button" class="link-button" id="missed-clear-no">Keep it</button>
+                </span>
+              </p>
+            </div>
           </form>
 
           <!-- ===== Play screen ===== -->
@@ -116,6 +131,7 @@
               <ul class="missed-list" id="missed-list"></ul>
             </div>
             <div class="drill-actions">
+              <button type="button" class="btn" id="retry-button" hidden>Drill what I missed</button>
               <button type="button" class="btn" id="again-button">Play again</button>
               <button type="button" class="btn btn-outline" id="settings-button">Change settings</button>
             </div>
@@ -143,6 +159,7 @@
 
   <script src="/js/main.js" defer></script>
   <script src="/js/latin-forms.js" defer></script>
+  <script src="/js/missed-list.js" defer></script>
   <script src="/js/practice.js" defer></script>
   <script src="/js/games/decline.js" defer></script>
 </body>

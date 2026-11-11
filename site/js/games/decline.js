@@ -11,7 +11,7 @@
   var SHORT = { nom: "Nom.", gen: "Gen.", dat: "Dat.", acc: "Acc.", abl: "Abl.", voc: "Voc." };
 
   var ctx, S, T, nouns = [], adjectives = [], grammar = {};
-  var cells = []; // current item: [{ input, expected, label, noun?, adj? }]
+  var cells = []; // current item: [{ input, expected, label, key, noun?, adj? }]
 
   function lesson() { return ctx.settings.lesson; }
   function cases() { return ctx.settings.vocative ? ROWS.concat(["voc"]) : ROWS; }
@@ -47,10 +47,11 @@
   function list(x) { return Array.isArray(x) ? x : [x]; }
   // Cells of a noun + adjective pair: [{case, number, noun, adj}] where
   // both words have a form (noun may be a list of accepted spellings).
-  function phraseCells(noun, adj) {
+  // `rows` defaults to the cases the start screen has on.
+  function phraseCells(noun, adj, rows) {
     var d = L.declineNoun(noun), ad = L.declineAdjective(adj)[noun.gender], out = [];
     if (!ad) return out;
-    L.NUMBERS.forEach(function (n) { cases().forEach(function (c) {
+    L.NUMBERS.forEach(function (n) { (rows || cases()).forEach(function (c) {
       var a = d[n][c] ? ad[n][c] : null;      // the same form L.agreeAdjective(adj, noun, c, n) gives
       if (a) out.push({ "case": c, number: n, noun: d[n][c], adj: a });
     }); });
@@ -109,6 +110,20 @@
     if (nounOk && !adjOk) return "the adjective is wrong";
     if (adjOk && !nounOk) return "the noun is wrong";
     return "";
+  }
+
+  // ---------- missed list ----------
+  // A form is stored as its noun's lemma, case and number, plus the
+  // adjective's lemma for a noun + adjective phrase; the answer is generated
+  // again from the current vocab.json each time it is asked.
+  function formKey(item, c, n) {
+    var key = { lemma: item.entry.lemma, "case": c, number: n };
+    if (item.adj) key.adj = item.adj.lemma;
+    return key;
+  }
+  function byLemma(entries, lemma) {
+    for (var i = 0; i < entries.length; i++) if (entries[i].lemma === lemma) return entries[i];
+    return null;
   }
 
   var game = {
@@ -265,11 +280,12 @@
       var macrons = T.settings.strict ? " Macrons count." : " Macrons are optional.";
       // phrase cells by "number.case" (noun-only items have none)
       var byCell = {};
-      if (item.adj) phraseCells(item.entry, item.adj).forEach(function (p) { byCell[p.number + "." + p["case"]] = p; });
+      // (every case, so a vocative from the missed list is known with the vocative row off)
+      if (item.adj) phraseCells(item.entry, item.adj, L.CASES).forEach(function (p) { byCell[p.number + "." + p["case"]] = p; });
       function addCell(parent, c, n, expected) {
         var inp = T.input(cellLabel(c, n));
         parent.appendChild(inp);
-        var cell = { input: inp, expected: expected, label: cellLabel(c, n) };
+        var cell = { input: inp, expected: expected, label: cellLabel(c, n), key: formKey(item, c, n) };
         var p = byCell[n + "." + c];
         if (p) { cell.expected = phraseAnswers(p); cell.noun = p.noun; cell.adj = p.adj; }
         cells.push(cell);
@@ -317,9 +333,11 @@
     },
     canCheck: function () { return cells.some(function (c) { return c.input.value.trim() !== ""; }); },
     check: function (item) {
-      var wrong = [];
+      var wrong = [], marks = [];
       cells.forEach(function (c) {
-        if (!T.grade(c.input, c.expected)) {
+        var ok = T.grade(c.input, c.expected);
+        marks.push({ key: c.key, right: ok });
+        if (!ok) {
           var w = { label: c.label, typed: c.input.value, correct: Array.isArray(c.expected) ? c.expected[0] : c.expected };
           if (c.adj) {
             w.note = whichWrong(c.input.value, c);
@@ -333,8 +351,23 @@
       var verdict = wrong.length === 0
         ? (n === 1 ? "Correct!" : "All " + n + " " + what + " right.")
         : (n === 1 ? "Not quite." : right + " of " + n + " " + what + " right.");
-      return { right: wrong.length === 0, verdict: verdict, wrong: wrong, total: n, feedback: [] };
+      return { right: wrong.length === 0, verdict: verdict, wrong: wrong, marks: marks, total: n, feedback: [] };
     },
+    // Missed list: every cell graded, right or wrong, so a missed cell of a
+    // table comes back as a single form.
+    formKeys: function (item, result) { return result.marks || []; },
+    fromMissed: function (key) {
+      var e = byLemma(nouns, key.lemma);
+      if (!e || L.CASES.indexOf(key["case"]) < 0 || L.NUMBERS.indexOf(key.number) < 0) return null;
+      if (key.adj != null) {
+        var a = byLemma(adjectives, key.adj);
+        var p = a && phraseCells(e, a, [key["case"]]).filter(function (x) { return x.number === key.number; })[0];
+        return p ? { entry: e, adj: a, "case": key["case"], number: key.number, expected: phraseAnswers(p) } : null;
+      }
+      var form = L.declineNoun(e)[key.number][key["case"]];
+      return form ? { entry: e, "case": key["case"], number: key.number, expected: form } : null;
+    },
+    missedRoundSize: function () { return 10; }, // single forms, whatever the mode
     review: function (item, result, li) {
       var p = S.make("p", "missed-sentence"); p.setAttribute("lang", "la");
       p.textContent = entryText(item.entry) + (item.adj ? " + " + adjText(item.adj) : "");

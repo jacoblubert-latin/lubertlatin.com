@@ -283,6 +283,15 @@
       phase = "done";
       return { right: allRight, verdict: allRight ? "Correct!" : "Not quite.", feedback: feedbackNodes(item) };
     },
+    // Missed list: a sentence is stored by its item id and asked again as it was.
+    missedNoun: ["word", "words"],
+    formKeys: function (item, result) {
+      return item.id == null ? [] : [{ key: { id: item.id }, right: !!result.right }];
+    },
+    fromMissed: function (key) {
+      for (var i = 0; i < items.length; i++) if (items[i].id === key.id) return items[i];
+      return null;
+    },
     review: function (item, result, li) {
       var s = S.make("p", "missed-sentence"); s.setAttribute("lang", "la");
       renderSentence(s, item);

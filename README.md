@@ -87,13 +87,49 @@ Open `site/css/styles.css`. The first block (`:root`) holds the colors. Change `
 
 ## The practice games (/practice)
 
-Three games share one shell (`site/js/practice.js`): the start screen with its lesson filter, scoring, streak, the end-of-round review, and the footer. Each game is a small file in `site/js/games/` that only says what its start-screen options are, which items are in the pool, how an item is shown and graded, and how a missed item is reviewed. Everything is static: the browser reads JSON from `site/practice/data/<textbook>/` and keeps nothing anywhere else (the last settings are remembered in the student's own browser only).
+Three games share one shell (`site/js/practice.js`): the start screen with its lesson filter, scoring, streak, the end-of-round review, and the footer. Each game is a small file in `site/js/games/` that only says what its start-screen options are, which items are in the pool, how an item is shown and graded, and how a missed item is reviewed. Everything is static: the browser reads JSON from `site/practice/data/<textbook>/` and keeps nothing anywhere else (the last settings and the missed list are remembered in the student's own browser only).
 
 | Page | Game | Data |
 |---|---|---|
 | `/practice/` | **Parsing drill** – noun or verb, then parse it with chips | `items.json` |
 | `/practice/decline/` | **Decline a noun** – type the whole table, or one form; or a noun with an adjective | `vocab.json` |
 | `/practice/synopsis/` | **Verb synopsis** – type a Henle-style synopsis, or one form | `vocab.json` |
+
+### The missed list ("drill only what I missed")
+
+Every form a student answers wrong goes on a missed list, one list per game and textbook, kept in their browser. Two buttons use it:
+
+- **Drill what I missed**, on the results screen whenever something was missed: a new round of only the forms missed in the round just played, shuffled. Its own results screen offers the button again until nothing is missed. A missed cell of a noun table or a synopsis comes back as that one form in the single-form layout, not as the whole grid; a missed parsing sentence is asked again as it was.
+- **Drill my missed list**, on the start screen whenever the list isn't empty ("12 forms on your missed list"): up to a normal round (10) of the stored list, oldest misses first. This round ignores the lesson slider and the other filters, since the student has already met these forms; strict macrons and the spelling setting still apply. **Clear list** beside it empties the list after a confirmation.
+
+The rules: a form joins the list when it is answered wrong in any round. Each right answer after that counts one, a wrong answer puts the count back to zero, and after **two right answers in a row** the form leaves the list (`RIGHT_IN_A_ROW_TO_CLEAR` in `site/js/missed-list.js`). The list holds at most 300 forms per game (`MAX_ENTRIES`); past that the oldest misses drop off.
+
+It is stored in `localStorage` under `lubertlatin.practice.missed`, apart from the settings keys:
+
+```json
+{ "v": 1,
+  "lists": {
+    "henle/parse":    [ { "k": { "id": "s31-w3" }, "missed": "2026-11-11T21:44:00.474Z", "right": 0 } ],
+    "henle/decline":  [ { "k": { "lemma": "nōmen", "case": "abl", "number": "sg" }, "missed": "…", "right": 1 },
+                        { "k": { "lemma": "vīta", "adj": "prīmus", "case": "voc", "number": "sg" }, "missed": "…", "right": 0 } ],
+    "henle/synopsis": [ { "k": { "lemma": "commoveō", "mood": "indicative", "tense": "future perfect", "voice": "passive", "person": "3", "number": "pl" }, "missed": "…", "right": 0 } ]
+  } }
+```
+
+`k` names the form, `missed` is the time of the last miss, `right` the right answers in a row since, and each list is in the order of the last miss. Only identifiers are stored, never a generated form: the answer is worked out again from the current `items.json` or `vocab.json` each time, so a correction to the data or the engine reaches the list too. A verb key leaves out what the form doesn't vary by (an imperative has no `person`, an infinitive or participle neither `person` nor `number`). When a page loads, entries whose item, word or form is no longer in the data are dropped. Nothing is sent anywhere. Where the browser refuses storage (private browsing, storage full), the end-of-round button still works and the start-screen line simply doesn't appear.
+
+The list, its storage, the buttons and the two kinds of round live in the shell. A game takes part by adding two functions to what it already gives the shell (`pool`, `buildRound`, `begin`, `check`, `review`…):
+
+| Function | Returns |
+|---|---|
+| `formKeys(item, result)` | `[{ key, right }]`: one entry for every form the graded item asked, with a plain-object `key` of identifiers and whether it was answered right. A table returns one per cell; the parsing drill returns one for the sentence. The right ones matter too: they are what counts a form off the list. |
+| `fromMissed(key)` | A round item for that key, in the game's one-form layout, built from the current data; or `null` if the word, item or form is gone. |
+
+Optional: `missedRoundSize()` when a missed-list round should be a different length from `roundSize()` (the typed games return 10, because their table rounds are 3 or 4 long), and `missedNoun: ["word", "words"]` for the start-screen line (default "form", "forms"). A game without `formKeys` and `fromMissed` runs as before, with no buttons. The list logic has its own test:
+
+```bash
+node tools/test-missed.js
+```
 
 ### Textbooks (curricula)
 
