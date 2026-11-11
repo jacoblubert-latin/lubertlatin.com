@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // Prints the full paradigm the practice games will use for any words you
-// name, so the generator's output can be proofed.
+// name, so the generator's output can be proofed. Verbs print every tense
+// of the indicative and subjunctive, then the imperative, infinitives and
+// participles.
 //
 //   node tools/paradigm.js mīles hostis laudō            words from vocab.json (macrons optional)
 //   node tools/paradigm.js "mare, maris, n. i"           any dictionary line (needn't be in vocab.json)
@@ -101,9 +103,20 @@ function printVerb(e) {
       });
     });
   });
+  // Imperative, infinitives, participles: one line per voice.
+  const one = (c) => c ? sp(c.form) : "—";
+  [["imperative", L.IMP_TENSES, (set) => set ? set.map(one).join(", ") : "—"],
+   ["infinitive", L.INF_TENSES, one], ["participle", L.PART_TENSES, one]].forEach(([section, tenses, show]) => {
+    s.voices.forEach((v) => {
+      console.log("\n  " + (section === "imperative" ? "IMPERATIVE" : section.toUpperCase() + "S") + " " + v.toUpperCase());
+      tenses.forEach((t) => console.log("  " + pad(t, 16) + show(s[section][v][t])));
+    });
+  });
+  const inf = s.voices.map((v) => s.infinitive[v].perfect || s.infinitive[v].future).find((c) => c && c.accept.length);
+  if (inf) console.log("\n  (compound infinitives also accept " + inf.accept.map(sp).join(" / ") + "; participles also accept the three nominatives, \"-us, -a, -um\")");
   // Perfect passive forms also accept the feminine and neuter participle.
   const pp = s.voices.map((v) => s.indicative[v].perfect).find((set) => set && set[0].accept.length);
-  if (pp) console.log("\n  (perfect-system passive cells also accept " + pp[0].accept.map(sp).join(" / ") + " etc.)");
+  if (pp) console.log("  (perfect-system passive cells also accept " + pp[0].accept.map(sp).join(" / ") + " etc.)");
 }
 
 let list = [];

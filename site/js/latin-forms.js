@@ -9,7 +9,8 @@
 //   adjective: { lemma, nom: [m, f, n] | [m/f, n], declension: "1-2"|"3", flags?: ["gen-ius","singular-only"] }
 // Rules handle 3rd-declension i-stems and neuters, 4th/5th declensions,
 // 2nd-declension -ius/-ium/-er nouns, -us/-er and third-declension
-// adjectives, deponents and 3rd -iō verbs. The verbs
+// adjectives, deponents and 3rd -iō verbs; verbs also get their present
+// imperative, infinitives and participles. The verbs
 // sum, possum, eō, ferō, volō, nōlō, mālō and fīō come from hand-entered tables.
 (function (root, factory) {
   if (typeof module === "object" && module.exports) module.exports = factory();
@@ -22,6 +23,10 @@
   var PERSONS = ["1", "2", "3"];
   var IND_TENSES = ["present", "imperfect", "future", "perfect", "pluperfect", "future perfect"];
   var SUBJ_TENSES = ["present", "imperfect", "perfect", "pluperfect"];
+  var IMP_TENSES = ["present"];
+  var INF_TENSES = ["present", "perfect", "future"];
+  var PART_TENSES = ["present", "perfect", "future"];
+  var SECTIONS = ["indicative", "subjunctive", "imperative", "infinitive", "participle"];
   var DECLENSIONS = ["1", "2", "3", "4", "5"];
   var CONJUGATIONS = ["1", "2", "3", "3io", "4", "irregular"];
   var NOUN_FLAGS = ["i-stem", "plural-only", "singular-only", "no-vocative"];
@@ -317,7 +322,18 @@
         else throw new Error("4th principal part should end in -us or -um: " + p4);
       }
     }
-    return { conj: c, pres: pres, perf: perf, ppl: ppl, impfSubj: pres + INF_ENDING[c].slice(0, -1) /* laudār, dūcer */ };
+    return { conj: c, pres: pres, perf: perf, ppl: ppl, fut: futureStem(dep ? parts[2] : parts[3]),
+             impfSubj: pres + INF_ENDING[c].slice(0, -1) /* laudār, dūcer */ };
+  }
+  // Stem of the future participle active, read from the last principal
+  // part however the dictionary gives it: laudātus → laudāt-, pugnātum →
+  // pugnāt-, mānsūrus → māns-, secūtus sum → secūt-. null when there is none.
+  function futureStem(part) {
+    var p = (part || "").replace(/\s+sum$/, "");
+    if (endsWith(p, "ūrus")) return cut(p, "ūrus");
+    if (endsWith(p, "us")) return cut(p, "us");
+    if (endsWith(p, "um")) return cut(p, "um");
+    return null;
   }
 
   // Participle agreeing with the subject: masculine by default; the
@@ -630,13 +646,177 @@
     return regularSet(entry, stems, mood, tense, voice);
   }
 
-  // Full synopsis: { indicative: { active: { present: [...6], ... }, passive: {...} }, subjunctive: {...} }
+  // ---------- verbs: imperative, infinitives, participles ----------
+  // Same voices as conjugateSet. A deponent's column has passive forms,
+  // except that its present and future participles and its future
+  // infinitive are active in form (sequēns, secūtūrus, secūtūrus esse).
+  // Not generated at all: the future infinitive passive (laudātum īrī) and
+  // the gerundive, which Henle's First Year leaves for later.
+  var IMPV_ACTIVE = { "1": ["ā", "āte"], "2": ["ē", "ēte"], "3": ["e", "ite"], "3io": ["e", "ite"], "4": ["ī", "īte"] };
+  var PRES_PART = { "1": "āns", "2": "ēns", "3": "ēns", "3io": "iēns", "4": "iēns" };
+  var NONFINITE = {
+    "sum": { imperative: ["es", "este"] },
+    "possum": { noFuture: true },
+    "eō": { imperative: ["ī", "īte"], presPart: "iēns", perfInfAlso: ["īsse"] },
+    "ferō": { imperative: ["fer", "ferte"], passImperative: ["ferre", "feriminī"], passInf: "ferrī", presPart: "ferēns" },
+    "volō": { presPart: "volēns", noFuture: true },
+    "nōlō": { imperative: ["nōlī", "nōlīte"], presPart: "nōlēns", noFuture: true },
+    "mālō": { noFuture: true },
+    "dō": { imperative: ["dā", "date"], passImperative: ["dare", "daminī"], passInf: "darī", presPart: "dāns" },
+    "fīō": { imperative: ["fī", "fīte"], noFuture: true }
+  };
+  // Everything the non-finite forms are built from, for a regular verb or
+  // a hand-table one: { impA, impP, infA, infP, perf, ppl, fut, presPart },
+  // each null when the verb lacks it. The voice rules are applied by the
+  // three functions below.
+  function nonFiniteParts(entry) {
+    var parts = entry.parts || [];
+    var noPassive = hasFlag(entry, "no-passive");
+    if (String(entry.conjugation) === "irregular") {
+      var hit = irregularFor(entry);
+      if (!hit) throw new Error("no hand-entered table for irregular verb " + entry.lemma);
+      var t = hit.table, nf = NONFINITE[hit.base] || {}, pre = hit.prefix;
+      var passive = !!t.passive && !noPassive;
+      var p4 = parts[3] || "";
+      var ppl = t.ppl ? pre + t.ppl : null;
+      if (endsWith(p4, "us") && !endsWith(p4, "ūrus")) ppl = cut(p4, "us");
+      var perf = parts[2] && endsWith(parts[2], "ī") ? cut(parts[2], "ī") : (t.perf ? pre + t.perf : null);
+      return {
+        impA: nf.imperative ? add(pre, nf.imperative) : null,
+        impP: passive && nf.passImperative ? add(pre, nf.passImperative) : null,
+        infA: parts[1] || null,
+        infP: passive && nf.passInf ? pre + nf.passInf : null,
+        perf: perf, perfInfAlso: nf.perfInfAlso ? add(pre, nf.perfInfAlso) : [],
+        ppl: passive || t.perfectFromParticiple ? ppl : null,
+        perfFromPpl: !!t.perfectFromParticiple,
+        fut: nf.noFuture ? null : (futureStem(p4) || ppl),
+        presPart: nf.presPart ? pre + nf.presPart : null
+      };
+    }
+    var s = verbStems(entry), c = s.conj, S = s.pres;
+    var dep = hasFlag(entry, "deponent");
+    var impA = add(S, IMPV_ACTIVE[c]);
+    // dīc, dūc, fac (and addūc, dēdūc, trādūc…): no final -e in the singular.
+    if (c === "3" && (endsWith(S, "dīc") || endsWith(S, "dūc"))) impA[0] = S;
+    if (c === "3io" && normalize(entry.lemma) === "facio") impA[0] = "fac";
+    return {
+      impA: dep ? null : impA,
+      impP: noPassive ? null : [S + INF_ENDING[c], S + P.pres[c][4]],        // laudāre, laudāminī; sequere, sequiminī
+      infA: dep ? null : S + INF_ENDING[c],
+      infP: noPassive ? null : S + DEP_INF_ENDING[c],
+      perf: s.perf, perfInfAlso: [],
+      // A neuter fourth part (pugnātum) is not a participle that can be asked for.
+      ppl: s.ppl && !noPassive && (dep || endsWith(parts[3] || "", "us")) ? s.ppl : null,
+      perfFromPpl: false,
+      fut: s.fut,
+      presPart: S + PRES_PART[c]
+    };
+  }
+  function nfVoiceOk(entry, voice) {
+    var dep = hasFlag(entry, "deponent");
+    if (voice === "deponent") return dep;
+    if (dep) return false;
+    return voice === "active" || voice === "passive";
+  }
+  function one(form, accept) { return form ? { form: form, accept: accept || [] } : null; }
+  // "laudātus esse": also the feminine and neuter, and the accusative that
+  // the accusative-with-infinitive construction needs (laudātum, laudātam esse).
+  function compoundInfinitive(stem) {
+    if (!stem) return null;
+    return one(stem + "us esse", ["a", "um", "am"].map(function (e) { return stem + e + " esse"; }));
+  }
+  // A participle is answered in the nominative singular masculine; the three
+  // nominatives are accepted too, in full or as the dictionary abbreviates them.
+  function participleCell(stem) {
+    if (!stem) return null;
+    var m = stem + "us", f = stem + "a", n = stem + "um";
+    return one(m, [m + ", " + f + ", " + n, m + " " + f + " " + n, m + ", a, um", m + " a um"]);
+  }
+
+  // Present imperative: [singular, plural] as {form, accept}, or null.
+  function imperativeSet(entry, voice) {
+    if (!nfVoiceOk(entry, voice)) return null;
+    var p = nonFiniteParts(entry);
+    var list = voice === "active" ? p.impA : p.impP;
+    return list ? plain(list) : null;
+  }
+  // One infinitive as {form, accept}, or null. tense: present | perfect | future.
+  function infinitive(entry, tense, voice) {
+    if (!nfVoiceOk(entry, voice)) return null;
+    var p = nonFiniteParts(entry);
+    var act = voice === "active";
+    if (tense === "present") return one(act ? p.infA : p.infP);
+    if (tense === "perfect") {
+      if (!act) return compoundInfinitive(p.ppl);
+      if (p.perfFromPpl) return compoundInfinitive(p.ppl);          // fīō: factus esse
+      return p.perf ? one(p.perf + "isse", p.perfInfAlso) : null;
+    }
+    if (tense === "future") return voice === "passive" || !p.fut ? null : compoundInfinitive(p.fut + "ūr");
+    return null;
+  }
+  // One participle as {form, accept}, or null. The present and future
+  // participles are active, the perfect passive; a deponent has all three.
+  function participle(entry, tense, voice) {
+    if (!nfVoiceOk(entry, voice)) return null;
+    var p = nonFiniteParts(entry);
+    if (tense === "present") return voice === "passive" ? null : one(p.presPart);
+    if (tense === "perfect") return voice === "active" && !p.perfFromPpl ? null : participleCell(p.ppl);
+    if (tense === "future") return voice === "passive" || !p.fut ? null : participleCell(p.fut + "ūr");
+    return null;
+  }
+  // One cell of any section of the synopsis for a person and number:
+  // section: indicative | subjunctive | imperative | infinitive | participle.
+  // The imperative uses the number only; infinitives and participles neither.
+  function synopsisCell(entry, section, tense, voice, person, number) {
+    if (section === "imperative") {
+      var imp = tense === "present" ? imperativeSet(entry, voice) : null;
+      return imp ? imp[number === "pl" ? 1 : 0] : null;
+    }
+    if (section === "infinitive") return infinitive(entry, tense, voice);
+    if (section === "participle") return participle(entry, tense, voice);
+    var set = conjugateSet(entry, section, tense, voice);
+    return set ? set[personIndex(person, number)] : null;
+  }
+  function sectionTenses(section) {
+    return { indicative: IND_TENSES, subjunctive: SUBJ_TENSES, imperative: IMP_TENSES, infinitive: INF_TENSES, participle: PART_TENSES }[section] || [];
+  }
+
+  // Full synopsis: { indicative: { active: { present: [...6], ... }, passive: {...} }, subjunctive: {...},
+  //   imperative: { active: { present: [sg, pl] } }, infinitive: { active: { present: cell, perfect, future } },
+  //   participle: { active: { present: cell, perfect, future } } }   (null where the verb has no form)
   function synopsis(entry) {
-    var out = { voices: verbVoices(entry), indicative: {}, subjunctive: {} };
+    var out = { voices: verbVoices(entry), indicative: {}, subjunctive: {}, imperative: {}, infinitive: {}, participle: {} };
     out.voices.forEach(function (v) {
       out.indicative[v] = {}; out.subjunctive[v] = {};
       IND_TENSES.forEach(function (t) { out.indicative[v][t] = conjugateSet(entry, "indicative", t, v); });
       SUBJ_TENSES.forEach(function (t) { out.subjunctive[v][t] = conjugateSet(entry, "subjunctive", t, v); });
+      out.imperative[v] = { present: imperativeSet(entry, v) };
+      out.infinitive[v] = {}; out.participle[v] = {};
+      INF_TENSES.forEach(function (t) { out.infinitive[v][t] = infinitive(entry, t, v); });
+      PART_TENSES.forEach(function (t) { out.participle[v][t] = participle(entry, t, v); });
+    });
+    return out;
+  }
+  // Every form a verb's non-finite cells stand for, with the section and
+  // tense that teach it: [{form, section, tense, voice}]. Infinitives count
+  // word by word; the perfect and future participles are declined in full
+  // like magnus, a, um. The present participle gives its nominative only.
+  function nonFiniteForms(entry) {
+    var out = [], s = synopsis(entry);
+    function push(f, section, tense, voice) { out.push({ form: f, section: section, tense: tense, voice: voice }); }
+    s.voices.forEach(function (v) {
+      (s.imperative[v].present || []).forEach(function (c) { push(c.form, "imperative", "present", v); });
+      INF_TENSES.forEach(function (t) {
+        var c = s.infinitive[v][t]; if (!c) return;
+        [c.form].concat(c.accept).forEach(function (f) { push(f, "infinitive", t, v); });
+      });
+      PART_TENSES.forEach(function (t) {
+        var c = s.participle[v][t]; if (!c) return;
+        if (t === "present") { push(c.form, "participle", t, v); return; }
+        var st = cut(c.form, "us");
+        var ad = declineAdjective({ pos: "adjective", lemma: c.form, nom: [c.form, st + "a", st + "um"], declension: "1-2" });
+        GENDERS.forEach(function (g) { NUMBERS.forEach(function (n) { CASES.forEach(function (k) { push(ad[g][n][k], "participle", t, v); }); }); });
+      });
     });
     return out;
   }
@@ -730,6 +910,7 @@
           });
         });
       });
+      nonFiniteForms(entry).forEach(function (x) { forms.push(x.form); });
       forms = forms.concat(entry.parts || []);
     } else {
       forms = [entry.lemma];
@@ -792,6 +973,36 @@
     if (tv == null) return null;
     return Math.max(info.start, tv);
   }
+  // The same for any section of the synopsis. The imperative, infinitives
+  // and participles are scheduled like the moods:
+  //   imperative: { active: { present: 27 | { "1": 27, …, "sum": null } }, passive: { present: null } },
+  //   infinitive: { active: { present: 35, perfect: 39, future: 39 }, passive: { present: 35, perfect: 39 } },
+  //   participle: { active: { present: null, future: 39 }, passive: { perfect: 30 } }
+  // A map may be keyed by conjugation and by the hand-table verbs
+  // ("sum": null = the book never teaches that form of sum or its compounds).
+  // Deponents follow the passive lessons, except for the forms that are
+  // active in form (present and future participles, future infinitive).
+  // Without a schedule, or a table for the section, these forms stay closed.
+  function verbFormLesson(entry, section, tense, voice, grammar) {
+    if (section === "indicative" || section === "subjunctive") return verbCellLesson(entry, section, tense, voice, grammar);
+    var info = verbScheduleInfo(entry, grammar);
+    if (info.start == null || !info.g) return null;
+    var sv = voice;
+    if (voice === "deponent") {
+      var activeForm = (section === "participle" && tense !== "perfect") || (section === "infinitive" && tense === "future");
+      sv = activeForm ? "active" : "passive";
+    }
+    var table = info.g[section] && info.g[section][sv];
+    if (!table) return null;
+    var tv = table[tense];
+    if (tv != null && typeof tv === "object") {
+      var hit = String(entry.conjugation) === "irregular" ? irregularFor(entry) : null;
+      if (hit && hit.base in tv) tv = tv[hit.base];
+      else tv = info.like == null ? 0 : tv[info.like];
+    }
+    if (tv == null) return null;
+    return Math.max(info.start, tv);
+  }
 
   // Every form with the lesson it can first be read: the entry's lesson,
   // raised to the lesson the curriculum's grammar schedule teaches that
@@ -847,6 +1058,10 @@
         });
       });
     });
+    nonFiniteForms(entry).forEach(function (x) {
+      var nl = verbFormLesson(entry, x.section, x.tense, x.voice, g);
+      if (nl != null) push(x.form, Math.max(base, nl));
+    });
     (entry.parts || []).forEach(function (p) { push(p, Math.max(base, start || 0)); });
     return out;
   }
@@ -887,6 +1102,7 @@
 
   return {
     CASES: CASES, NUMBERS: NUMBERS, PERSONS: PERSONS, IND_TENSES: IND_TENSES, SUBJ_TENSES: SUBJ_TENSES,
+    IMP_TENSES: IMP_TENSES, INF_TENSES: INF_TENSES, PART_TENSES: PART_TENSES, SECTIONS: SECTIONS, sectionTenses: sectionTenses,
     DECLENSIONS: DECLENSIONS, CONJUGATIONS: CONJUGATIONS, NOUN_FLAGS: NOUN_FLAGS, VERB_FLAGS: VERB_FLAGS,
     GENDERS: GENDERS, ADJ_DECLENSIONS: ADJ_DECLENSIONS, ADJ_FLAGS: ADJ_FLAGS,
     CASE_NAMES: CASE_NAMES, NUMBER_NAMES: NUMBER_NAMES, PERSON_NAMES: PERSON_NAMES,
@@ -895,9 +1111,10 @@
     declineNoun: declineNoun, nounEntryText: nounEntryText,
     declineAdjective: declineAdjective, agreeAdjective: agreeAdjective, adjectiveEntryText: adjectiveEntryText,
     isDeclinedAdjective: isDeclinedAdjective, adjectiveType: adjectiveType, adjectiveStartLesson: adjectiveStartLesson,
-    conjugateSet: conjugateSet, synopsis: synopsis, verbVoices: verbVoices, verbEntryText: verbEntryText, personIndex: personIndex,
+    conjugateSet: conjugateSet, imperativeSet: imperativeSet, infinitive: infinitive, participle: participle,
+    synopsisCell: synopsisCell, nonFiniteForms: nonFiniteForms, synopsis: synopsis, verbVoices: verbVoices, verbEntryText: verbEntryText, personIndex: personIndex,
     parseEntry: parseEntry, formsOf: formsOf, formLessons: formLessons, availability: availability, lessonOf: lessonOf,
     hasIrregularTable: function (entry) { return !!irregularFor(entry); },
-    verbStartLesson: verbStartLesson, verbCellLesson: verbCellLesson
+    verbStartLesson: verbStartLesson, verbCellLesson: verbCellLesson, verbFormLesson: verbFormLesson
   };
 });
