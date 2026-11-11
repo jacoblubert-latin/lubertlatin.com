@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Checks the practice data files under site/practice/data/<curriculum>/:
-// items.json (parsing drill), vocab.json (typed games) and curriculum.json.
+// items.json (parsing drill), vocab.json (typed games) and curriculum.json
+// (including its grammar schedule: moods, imperative, infinitives, participles).
 //
 //   node tools/validate-items.js                               checks every curriculum folder
 //   node tools/validate-items.js site/practice/data/henle/vocab.json   checks one file (by its name)
@@ -252,6 +253,30 @@ function validateCurriculum(c) {
           });
         });
       });
+      // imperative, infinitive, participle: the same shape, with their own
+      // tenses; a map may also name a hand-table verb ("sum": null).
+      const NONFINITE = {
+        imperative: { active: L.IMP_TENSES, passive: L.IMP_TENSES },
+        infinitive: { active: L.INF_TENSES, passive: L.INF_TENSES },
+        participle: { active: ["present", "future"], passive: ["perfect"] }
+      };
+      Object.keys(NONFINITE).forEach((section) => {
+        if (!(section in v)) return;
+        const where = "grammar.verbs." + section;
+        if (!isObj(v[section])) { err(where + " must be an object like {\"active\": {...}, \"passive\": {...}}"); return; }
+        Object.keys(v[section]).forEach((voice) => {
+          if (!(voice in NONFINITE[section])) { err(where + " has unknown voice " + JSON.stringify(voice) + " (use active, passive)"); return; }
+          if (!isObj(v[section][voice])) { err(where + "." + voice + " must be an object of tenses"); return; }
+          Object.keys(v[section][voice]).forEach((t) => {
+            if (!NONFINITE[section][voice].includes(t)) err(where + "." + voice + " has unknown tense " + JSON.stringify(t) + " (use " + NONFINITE[section][voice].join(", ") + ")");
+            const tv = v[section][voice][t];
+            if (isObj(tv)) Object.keys(tv).forEach((k) => {
+              if (k === "irregular" || !(L.CONJUGATIONS.includes(k) || L.IRREGULAR_LEMMAS.includes(k))) err(where + "." + voice + "." + t + " has unknown conjugation code or hand-table verb " + JSON.stringify(k));
+            });
+          });
+        });
+      });
+      Object.keys(v).forEach((k) => { if (!["conjugation", "deponent", "irregular"].concat(L.SECTIONS).includes(k)) err("grammar.verbs has unknown key " + JSON.stringify(k) + " (use conjugation, deponent, irregular, " + L.SECTIONS.join(", ") + ")"); });
       if (v.conjugation) Object.keys(v.conjugation).forEach((k) => { if (!L.CONJUGATIONS.includes(k)) err("grammar.verbs.conjugation has unknown code " + JSON.stringify(k)); });
       if (v.irregular) Object.keys(v.irregular).forEach((k) => { if (!L.IRREGULAR_LEMMAS.includes(k)) err("grammar.verbs.irregular has no hand table for " + JSON.stringify(k) + " (use one of: " + L.IRREGULAR_LEMMAS.join(", ") + ")"); });
       const n = c.grammar.nouns || {};

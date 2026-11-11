@@ -4,7 +4,7 @@
   "short": "Henle",
   "lessons": 42,
   "lessonWord": "Lesson",
-  "_note": "grammar: the lesson in which each form is first taught, taken from the table of contents of Henle, First Year Latin (1958 printing). The typed games open a row or column once the lesson filter reaches that number. A tense is a single lesson number, or a map by conjugation where Henle teaches it one conjugation at a time. null means the form is never taught in this book. Compounds follow their base verb (absum like sum, adeō like eō).",
+  "_note": "grammar: the lesson in which each form is first taught, taken from the table of contents of Henle, First Year Latin (1958 printing). The typed games open a row or column once the lesson filter reaches that number. A tense is a single lesson number, or a map by conjugation where Henle teaches it one conjugation at a time. null means the form is never taught in this book. Compounds follow their base verb (absum like sum, adeō like eō). Under imperative, infinitive and participle a map may also name a hand-table verb (\"sum\": null); deponents follow the passive lines, except for their future infinitive and future participle, which are active in form.",
   "_source": {
     "L1-5": "the five declensions, one per lesson; L6 nouns with special meanings in the plural",
     "L7": "adjectives of the first and second declensions (magnus, a, um); agreement",
@@ -21,13 +21,15 @@
     "L22": "the present subjunctive active",
     "L23": "the imperfect subjunctive active; imperfect subjunctive of sum",
     "L26": "perfect and pluperfect subjunctive active",
-    "L27": "the vocative; imperative mood",
+    "L27": "the vocative; present imperative active, singular and plural, of the four conjugations (p. 296). No passive imperative, and no imperative of sum, possum, eō or the deponents, anywhere in the book",
     "L29": "the passive subjunctive (present, imperfect, and the perfect system)",
-    "L35": "possum, indicative and subjunctive",
+    "L30": "the perfect participle passive, declined like magnus (p. 325); the future participle active is named on p. 326 but left for later",
+    "L35": "possum, indicative and subjunctive; the present infinitive active and passive (p. 352), with posse and esse",
     "L36": "adjectives with the genitive in -īus and the dative in -ī (ūnus, alius, tōtus…)",
     "L37": "-iō verbs: indicative and subjunctive, active and passive",
-    "L41": "deponent verbs",
-    "L42": "the irregular verb eō"
+    "L39": "perfect infinitive active, future participle active and future infinitive active of all verbs, regular and irregular (p. 412); perfect infinitive passive (p. 428). The future infinitive passive: 'you need not learn it now' (p. 428). The present participle and the gerundive are not in this book",
+    "L41": "deponent verbs: perfect participle (p. 450); present and perfect infinitives passive in form, future infinitive active in form (p. 453)",
+    "L42": "the irregular verb eō; its infinitives (p. 464)"
   },
   "grammar": {
     "nouns": {
@@ -70,6 +72,18 @@
       "subjunctive": {
         "active":  { "present": 22, "imperfect": 23, "perfect": 26, "pluperfect": 26 },
         "passive": { "present": 29, "imperfect": 29, "perfect": 29, "pluperfect": 29 }
+      },
+      "imperative": {
+        "active":  { "present": { "1": 27, "2": 27, "3": 27, "4": 27, "3io": 37, "sum": null, "possum": null, "eō": null } },
+        "passive": { "present": null }
+      },
+      "infinitive": {
+        "active":  { "present": 35, "perfect": 39, "future": 39 },
+        "passive": { "present": 35, "perfect": 39, "future": null }
+      },
+      "participle": {
+        "active":  { "present": null, "future": 39 },
+        "passive": { "perfect": 30 }
       }
     }
   }

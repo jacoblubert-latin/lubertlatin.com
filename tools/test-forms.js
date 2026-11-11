@@ -221,11 +221,92 @@ eq("dō perf pas", forms(L.conjugateSet(do_, "indicative", "perfect", "passive")
 eq("dō pres subj", forms(L.conjugateSet(do_, "subjunctive", "present", "active")), ["dem", "dēs", "det", "dēmus", "dētis", "dent"]);
 eq("parse fīnēs", L.parseEntry("fīnēs, fīnium, m.").flags, ["plural-only", "i-stem"]);
 
+// ---------- imperative, infinitives, participles ----------
+const cellForm = (c) => c ? c.form : null;
+const imp = (e, v) => { const s = L.imperativeSet(e, v || "active"); return s ? s.map(cellForm) : null; };
+const infs = (e, v) => L.INF_TENSES.map((t) => cellForm(L.infinitive(e, t, v || "active")));
+const parts3 = (e, v) => L.PART_TENSES.map((t) => cellForm(L.participle(e, t, v || "active")));
+const mitto = V(["mittō", "mittere", "mīsī", "missus"], "3");
+const dico = V(["dīcō", "dīcere", "dīxī", "dictus"], "3"), facio = V(["faciō", "facere", "fēcī", "factus"], "3io");
+eq("laudō imperative", imp(laudo), ["laudā", "laudāte"]);
+eq("moneō imperative", imp(moneo), ["monē", "monēte"]);
+eq("mittō imperative", imp(mitto), ["mitte", "mittite"]);
+eq("audiō imperative", imp(audio), ["audī", "audīte"]);
+eq("capiō imperative", imp(capio), ["cape", "capite"]);
+eq("dīc, dūc, fac", [imp(dico), imp(duco), imp(facio)], [["dīc", "dīcite"], ["dūc", "dūcite"], ["fac", "facite"]]);
+eq("dēdūc, addūc", [imp(V(["dēdūcō", "dēdūcere", "dēdūxī", "dēductus"], "3")), imp(V(["addūcō", "addūcere", "addūxī", "adductus"], "3"))], [["dēdūc", "dēdūcite"], ["addūc", "addūcite"]]);
+eq("interfice keeps its -e", imp(V(["interficiō", "interficere", "interfēcī", "interfectus"], "3io")), ["interfice", "interficite"]);
+eq("passive imperatives", [imp(laudo, "passive"), imp(moneo, "passive"), imp(mitto, "passive"), imp(capio, "passive"), imp(audio, "passive")],
+  [["laudāre", "laudāminī"], ["monēre", "monēminī"], ["mittere", "mittiminī"], ["capere", "capiminī"], ["audīre", "audīminī"]]);
+
+eq("laudō infinitives active", infs(laudo), ["laudāre", "laudāvisse", "laudātūrus esse"]);
+eq("laudō infinitives passive", infs(laudo, "passive"), ["laudārī", "laudātus esse", null]);
+eq("moneō infinitives", [infs(moneo), infs(moneo, "passive")], [["monēre", "monuisse", "monitūrus esse"], ["monērī", "monitus esse", null]]);
+eq("mittō infinitives", [infs(mitto), infs(mitto, "passive")], [["mittere", "mīsisse", "missūrus esse"], ["mittī", "missus esse", null]]);
+eq("audiō infinitives", [infs(audio), infs(audio, "passive")], [["audīre", "audīvisse", "audītūrus esse"], ["audīrī", "audītus esse", null]]);
+eq("capiō infinitives", [infs(capio), infs(capio, "passive")], [["capere", "cēpisse", "captūrus esse"], ["capī", "captus esse", null]]);
+eq("dūcō, dīcō, faciō passive infinitives", [duco, dico, facio].map((e) => infs(e, "passive")[0]), ["dūcī", "dīcī", "facī"]);
+eq("perfect passive infinitive accepts", L.infinitive(laudo, "perfect", "passive").accept, ["laudāta esse", "laudātum esse", "laudātam esse"]);
+eq("future active infinitive accepts", L.infinitive(laudo, "future", "active").accept, ["laudātūra esse", "laudātūrum esse", "laudātūram esse"]);
+eq("laudātum esse is graded right", [L.sameForm("laudatum esse", [L.infinitive(laudo, "perfect", "passive").form].concat(L.infinitive(laudo, "perfect", "passive").accept), false),
+  L.sameForm("laudātōs esse", [L.infinitive(laudo, "perfect", "passive").form].concat(L.infinitive(laudo, "perfect", "passive").accept), false)], [true, false]);
+
+eq("laudō participles active", parts3(laudo), ["laudāns", null, "laudātūrus"]);
+eq("laudō participles passive", parts3(laudo, "passive"), [null, "laudātus", null]);
+eq("present participles", [moneo, mitto, capio, audio].map((e) => parts3(e)[0]), ["monēns", "mittēns", "capiēns", "audiēns"]);
+eq("perfect participles passive", [moneo, mitto, capio, audio].map((e) => parts3(e, "passive")[1]), ["monitus", "missus", "captus", "audītus"]);
+eq("future participles", [moneo, mitto, capio, audio].map((e) => parts3(e)[2]), ["monitūrus", "missūrus", "captūrus", "audītūrus"]);
+eq("participle accepts the three nominatives", ["laudātus", "laudātus, laudāta, laudātum", "laudatus laudata laudatum", "laudātus, a, um", "laudāta"]
+  .map((typed) => L.sameForm(typed, [L.participle(laudo, "perfect", "passive").form].concat(L.participle(laudo, "perfect", "passive").accept), false)), [true, true, true, true, false]);
+
+// Deponents: passive forms, but the present and future participles and the future infinitive are active in form.
+eq("sequor imperative", imp(sequor, "deponent"), ["sequere", "sequiminī"]);
+eq("sequor infinitives", infs(sequor, "deponent"), ["sequī", "secūtus esse", "secūtūrus esse"]);
+eq("sequor participles", parts3(sequor, "deponent"), ["sequēns", "secūtus", "secūtūrus"]);
+eq("patior imperative", imp(patior, "deponent"), ["patere", "patiminī"]);
+eq("patior infinitives", infs(patior, "deponent"), ["patī", "passus esse", "passūrus esse"]);
+eq("patior participles", parts3(patior, "deponent"), ["patiēns", "passus", "passūrus"]);
+eq("hortor, vereor, orior infinitives", [hortor, vereor, V(["orior", "orīrī", "ortus sum"], "4", ["deponent"])].map((e) => infs(e, "deponent")),
+  [["hortārī", "hortātus esse", "hortātūrus esse"], ["verērī", "veritus esse", "veritūrus esse"], ["orīrī", "ortus esse", "ortūrus esse"]]);
+eq("deponent has no active column", [imp(sequor), infs(sequor), parts3(sequor)], [null, [null, null, null], [null, null, null]]);
+
+// Hand tables.
+eq("sum non-finite", [imp(sum), infs(sum), parts3(sum)], [["es", "este"], ["esse", "fuisse", "futūrus esse"], [null, null, "futūrus"]]);
+eq("sum has no passive", [imp(sum, "passive"), infs(sum, "passive"), parts3(sum, "passive")], [null, [null, null, null], [null, null, null]]);
+eq("possum non-finite", [imp(possum), infs(possum), parts3(possum)], [null, ["posse", "potuisse", null], [null, null, null]]);
+eq("eō non-finite", [imp(eo), infs(eo), parts3(eo)], [["ī", "īte"], ["īre", "iisse", "itūrus esse"], ["iēns", null, "itūrus"]]);
+eq("eō perfect infinitive also īsse", L.infinitive(eo, "perfect", "active").accept, ["īsse"]);
+eq("adeō non-finite", [imp(adeo), infs(adeo), parts3(adeo)], [["adī", "adīte"], ["adīre", "adiisse", "aditūrus esse"], ["adiēns", null, "aditūrus"]]);
+eq("absum non-finite", [imp(absum), infs(absum), parts3(absum)], [["abes", "abeste"], ["abesse", "āfuisse", "āfutūrus esse"], [null, null, "āfutūrus"]]);
+eq("ferō non-finite", [imp(fero), infs(fero), infs(fero, "passive"), parts3(fero), parts3(fero, "passive")],
+  [["fer", "ferte"], ["ferre", "tulisse", "lātūrus esse"], ["ferrī", "lātus esse", null], ["ferēns", null, "lātūrus"], [null, "lātus", null]]);
+eq("dō non-finite", [imp(do_), infs(do_), infs(do_, "passive"), parts3(do_, "passive")], [["dā", "date"], ["dare", "dedisse", "datūrus esse"], ["darī", "datus esse", null], [null, "datus", null]]);
+eq("volō, nōlō, mālō", [infs(volo), imp(volo), infs(nolo), imp(nolo), infs(malo)], [["velle", "voluisse", null], null, ["nōlle", "nōluisse", null], ["nōlī", "nōlīte"], ["mālle", "māluisse", null]]);
+eq("fīō", [infs(fio), parts3(fio)], [["fierī", "factus esse", null], [null, "factus", null]]);
+
+// No fourth principal part: nothing built on the participle. A neuter or
+// -ūrus fourth part gives the future forms only.
+const timeo = V(["timeō", "timēre", "timuī"], "2"), contendo = V(["contendō", "contendere", "contendī"], "3", ["no-passive"]);
+const pugno = V(["pugnō", "pugnāre", "pugnāvī", "pugnātum"], "1", ["no-passive"]), maneo = V(["maneō", "manēre", "mānsī", "mānsūrus"], "2", ["no-passive"]);
+eq("timeō: no fourth part", [infs(timeo), infs(timeo, "passive"), parts3(timeo), parts3(timeo, "passive")], [["timēre", "timuisse", null], ["timērī", null, null], ["timēns", null, null], [null, null, null]]);
+eq("contendō: no fourth part, no passive", [imp(contendo), infs(contendo), parts3(contendo), infs(contendo, "passive"), imp(contendo, "passive")], [["contende", "contendite"], ["contendere", "contendisse", null], ["contendēns", null, null], [null, null, null], null]);
+eq("pugnō: pugnātum gives pugnātūrus", [infs(pugno), parts3(pugno), parts3(pugno, "passive")], [["pugnāre", "pugnāvisse", "pugnātūrus esse"], ["pugnāns", null, "pugnātūrus"], [null, null, null]]);
+eq("maneō: mānsūrus", [infs(maneo), parts3(maneo)], [["manēre", "mānsisse", "mānsūrus esse"], ["manēns", null, "mānsūrus"]]);
+
+// One cell of any section.
+eq("synopsisCell", [L.synopsisCell(laudo, "indicative", "present", "active", "3", "pl"), L.synopsisCell(laudo, "imperative", "present", "active", "1", "pl"),
+  L.synopsisCell(laudo, "imperative", "present", "active", "3", "sg"), L.synopsisCell(laudo, "infinitive", "perfect", "active", "3", "pl"),
+  L.synopsisCell(laudo, "participle", "future", "active", "1", "sg"), L.synopsisCell(laudo, "participle", "future", "passive", "1", "sg")].map(cellForm),
+  ["laudant", "laudāte", "laudā", "laudāvisse", "laudātūrus", null]);
+
 // Whole synopsis shape.
 const syn = L.synopsis(laudo);
 eq("synopsis voices", syn.voices, ["active", "passive"]);
 eq("synopsis tenses", Object.keys(syn.indicative.active), L.IND_TENSES);
 eq("synopsis subj tenses", Object.keys(syn.subjunctive.passive), L.SUBJ_TENSES);
+eq("synopsis imperative", syn.imperative.active.present.map(cellForm), ["laudā", "laudāte"]);
+eq("synopsis infinitive tenses", Object.keys(syn.infinitive.passive), L.INF_TENSES);
+eq("synopsis participle tenses", Object.keys(syn.participle.active), L.PART_TENSES);
 
 // ---------- grading ----------
 eq("macrons ignored", L.sameForm("laudavi", "laudāvī", false), true);
@@ -301,6 +382,50 @@ eq("dō like the first conjugation", [cellL(do_, "indicative", "present", "activ
 eq("deponents L41", [cellL(sequor, "indicative", "present", "deponent"), cellL(patior, "subjunctive", "perfect", "deponent")], [41, 41]);
 eq("ferō not taught in First Year", cellL(fero, "indicative", "present", "active"), null);
 eq("start lessons", [laudo, moneo, duco, audio, capio, sequor, sum, eo, fero].map((e) => L.verbStartLesson(e, G)), [9, 10, 12, 13, 37, 41, 14, 42, null]);
+
+// ---------- grammar schedule: imperative, infinitives, participles ----------
+// Henle, First Year Latin: imperative active L27 (p. 296); perfect participle
+// passive L30 (p. 325); present infinitives L35 (p. 352); perfect and future
+// infinitive active and future participle active L39 (p. 412); perfect
+// infinitive passive L39 (p. 428); deponents L41 (pp. 450, 453); eō L42 (p. 464).
+const formL = (e, s, t, v) => L.verbFormLesson(e, s, t, v, G);
+const infL = (e, v) => L.INF_TENSES.map((t) => formL(e, "infinitive", t, v));
+const partL = (e, v) => L.PART_TENSES.map((t) => formL(e, "participle", t, v));
+eq("imperative active L27", [laudo, moneo, mitto, audio].map((e) => formL(e, "imperative", "present", "active")), [27, 27, 27, 27]);
+eq("imperative of -iō verbs L37", [formL(capio, "imperative", "present", "active"), formL(facio, "imperative", "present", "active")], [37, 37]);
+eq("imperative passive not taught", [laudo, capio].map((e) => formL(e, "imperative", "present", "passive")), [null, null]);
+eq("imperative of dō L27", formL(do_, "imperative", "present", "active"), 27);
+eq("imperative of sum, possum, eō and compounds not taught", [sum, absum, possum, eo, adeo].map((e) => formL(e, "imperative", "present", "active")), [null, null, null, null, null]);
+eq("imperative of deponents not taught", formL(sequor, "imperative", "present", "deponent"), null);
+eq("infinitives active L35, L39, L39", infL(laudo, "active"), [35, 39, 39]);
+eq("infinitives passive L35, L39, never", infL(laudo, "passive"), [35, 39, null]);
+eq("infinitives of -iō verbs L37, L39", [infL(capio, "active"), infL(capio, "passive")], [[37, 39, 39], [37, 39, null]]);
+eq("participles: perfect passive L30, future active L39, present never", [partL(laudo, "active"), partL(laudo, "passive")], [[null, null, 39], [null, 30, null]]);
+eq("participles of -iō verbs wait for L37", [partL(capio, "active"), partL(capio, "passive")], [[null, null, 39], [null, 37, null]]);
+eq("sum infinitives L35, L39", infL(sum, "active"), [35, 39, 39]);
+eq("absum follows sum", [infL(absum, "active"), partL(absum, "active")], [[35, 39, 39], [null, null, 39]]);
+eq("possum infinitives L35, L39", infL(possum, "active"), [35, 39, 39]);
+eq("eō and adeō infinitives L42", [infL(eo, "active"), infL(adeo, "active"), partL(eo, "active")], [[42, 42, 42], [42, 42, 42], [null, null, 42]]);
+eq("deponent infinitives and participles L41", [infL(sequor, "deponent"), partL(patior, "deponent")], [[41, 41, 41], [null, 41, 41]]);
+eq("ferō still not taught", [formL(fero, "imperative", "present", "active"), infL(fero, "active")], [null, [null, null, null]]);
+eq("verbFormLesson passes the moods through", [formL(laudo, "indicative", "present", "active"), formL(duco, "subjunctive", "pluperfect", "passive")], [9, 29]);
+eq("no schedule: non-finite forms closed", [L.verbFormLesson(laudo, "imperative", "present", "active", {}), L.verbFormLesson(laudo, "infinitive", "present", "active", grammar)], [null, null]);
+
+// formsOf and availability see the new forms.
+eq("formsOf has imperatives, infinitives, declined participles", ["lauda", "laudate", "laudauisse", "laudari", "laudatos", "laudaturam", "laudans"].every((f) => L.formsOf(laudo).includes(f)), true);
+eq("formsOf has no stray words from the accepted spellings", ["a", "um", "laudatus,"].some((f) => L.formsOf(laudo).includes(f)), false);
+const nvocab = [...vocab, { lemma: "sum", parts: ["sum", "esse", "fuī", "futūrus"], conjugation: "irregular", pos: "verb", lesson: 1, curriculum: "henle", flags: ["no-passive"] },
+  { lemma: "capiō", parts: ["capiō", "capere", "cēpī", "captus"], conjugation: "3io", pos: "verb", lesson: 14, curriculum: "henle" }];
+const avail = (s) => L.availability(s, nvocab, "henle", G).lesson;
+eq("availability: imperative L27", [avail("Laudāte mīlitēs."), avail("Laudā terram.")], [27, 27]);
+eq("availability: cape waits for L37", avail("Cape terram."), 37);
+eq("availability: present infinitive stays at the verb's start (a principal part)", avail("laudāre"), 11);
+eq("availability: present passive infinitive L35", avail("laudārī"), 35);
+eq("availability: perfect infinitive L39", [avail("laudāvisse"), avail("fuisse")], [39, 39]);
+eq("availability: participle in an oblique case L30", avail("mīlitēs laudātōs"), 30);
+eq("availability: laudātus itself is a principal part, known from the verb's start", avail("laudātus"), 11);
+eq("availability: future participle L39", [avail("laudātūrōs esse"), avail("futūram")], [39, 39]);
+eq("availability: forms the book never teaches stay unknown", [L.availability("laudāns", nvocab, "henle", G).unknown, L.availability("laudāminī", nvocab, "henle", G).lesson], [["laudāns"], 17]);
 
 // ---------- adjectives ----------
 function ADJ(nom, declension, flags) { return { pos: "adjective", lemma: nom[0], nom, declension, flags }; }
