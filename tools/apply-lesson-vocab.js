@@ -36,6 +36,29 @@ const rows = fs.readFileSync(listPath, "utf8").replace(/^﻿/, "").split(/\r?\n/
 const KEEP = {
   sum: "est and sunt are used from the first lessons (table on p. 28); the lists have only erat/erant (L3) and sum (L14)",
 };
+// Words the book teaches outside a VOCABULARY list (a rule box, the
+// lesson's own text, or a footnote gloss): id -> [lesson, where].
+// Used only when the word is in no list.
+const OUTSIDE = {
+  "con-ut": [22, "rule box, p. 227"],
+  "con-ne": [22, "rule box, p. 230"],
+  "con-quo": [24, "section 4, p. 263"],
+  "con-cum": [29, "p. 318"],
+  "con-utinam": [27, "section 3, p. 300"],
+  "oth-nonne": [25, "section 2, pp. 269-270"],
+  "oth-num": [25, "section 2, pp. 269-270"],
+  "pro-hic": [31, "the lesson's model word, p. 331"],
+  "pro-meus": [16, "section 3, p. 173"],
+  "pro-tuus": [16, "section 3, p. 173"],
+  "pro-noster": [16, "section 3, p. 173"],
+  "pro-uester": [16, "section 3, p. 173"],
+  "adj-unus": [36, "assignment, p. 370"],
+  "adj-duo": [36, "assignment, p. 370"],
+  "adj-tres": [36, "assignment, p. 370"],
+  "con-si": [11, "footnote gloss, p. 129 (earliest found)"],
+  "adv-tandem": [16, "footnote gloss, p. 167 (earliest found)"],
+  "pre-praeter": [37, "footnote gloss, p. 403 (earliest found)"],
+};
 // Homographs the printed entry does not tell apart: "lesson|lemma" -> id.
 // (The book lists cōnsuēscō only in the perfect: cōnsuēvī, cōnsuētus.)
 const PICK = { "25|quō": "adv-quo", "2|dedit": "do", "35|cōnsuēvī": "consuesco" };
@@ -161,9 +184,10 @@ rows.forEach((r) => {
 });
 
 let moved = 0;
-const moves = [], kept = [];
+const moves = [], kept = [], outside = [];
 vocab.forEach((v) => {
-  const f = first[v.id];
+  let f = first[v.id];
+  if (!f && OUTSIDE[v.id]) { f = first[v.id] = { lesson: OUTSIDE[v.id][0] }; outside.push(v); }
   if (!f) return;
   if (KEEP[v.id]) { kept.push(v); return; }
   if (v.lesson !== f.lesson) { moves.push(v.id + ": " + v.lesson + " -> " + f.lesson); v.lesson = f.lesson; moved++; }
@@ -175,6 +199,8 @@ console.log(rows.length + " list entries, " + vocab.length + " vocab.json entrie
 console.log("\nLessons changed (" + moved + "):\n  " + (moves.join("\n  ") || "none"));
 console.log("\nKept as they are (" + kept.length + "):");
 kept.forEach((v) => console.log("  " + v.id + " stays at " + v.lesson + ": " + KEEP[v.id]));
+console.log("\nTaught outside a VOCABULARY list, lesson set by hand (" + outside.length + "):");
+outside.forEach((v) => console.log("  " + v.id + "  " + v.lemma + ": lesson " + OUTSIDE[v.id][0] + ", " + OUTSIDE[v.id][1]));
 console.log("\nBare verb forms counted for their verb (" + formOnly.length + "):");
 formOnly.forEach((x) => console.log("  " + line(x.r) + "  => " + x.v.lemma));
 console.log("\nBook entries with no vocab.json entry (" + unmatched.length + "):");
