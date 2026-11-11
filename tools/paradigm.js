@@ -5,6 +5,7 @@
 //   node tools/paradigm.js mīles hostis laudō            words from vocab.json (macrons optional)
 //   node tools/paradigm.js "mare, maris, n. i"           any dictionary line (needn't be in vocab.json)
 //   node tools/paradigm.js "sequor, sequī, secūtus sum"
+//   node tools/paradigm.js fortis "gravis, grave" "magnus, a, um" "tōtus, a, um, -īus"   adjectives, three genders side by side
 //   node tools/paradigm.js '{"pos":"noun","lemma":"vīs",...}'  a full vocab.json entry (for words needing "forms" overrides)
 //   node tools/paradigm.js --all                         every word in vocab.json
 //   node tools/paradigm.js --irregular                   the hand-entered verbs
@@ -12,7 +13,9 @@
 //   node tools/paradigm.js --classical ...               show i instead of j
 //
 // Dictionary lines: "lemma, genitive, m|f|n" for nouns (add " i" for an
-// i-stem, " pl" for a plural-only noun); principal parts for verbs.
+// i-stem, " pl" for a plural-only noun); principal parts for verbs;
+// the nominatives for adjectives ("gravis, grave", "miser, misera, miserum";
+// add ", -īus" for the ūnus group).
 "use strict";
 const fs = require("fs");
 const path = require("path");
@@ -70,6 +73,18 @@ function printNoun(e) {
     console.log("  " + pad(c + ".", 6) + pad(sp(cell(d.sg[c])), 16) + sp(cell(d.pl[c])));
   });
 }
+function printAdjective(e) {
+  const d = L.declineAdjective(e);
+  const flags = e.flags && e.flags.length ? "  [" + e.flags.join(", ") + "]" : "";
+  console.log("\n" + sp(L.adjectiveEntryText(e)) + "   declension " + e.declension + flags + (e.lesson ? "   lesson " + e.lesson : ""));
+  const w = 2 + Math.max(9, ...L.GENDERS.map((g) => Math.max(...L.NUMBERS.map((n) => Math.max(...L.CASES.map((c) => sp(cell(d[g][n][c])).length))))));
+  L.NUMBERS.forEach((n) => {
+    console.log("  " + pad(L.NUMBER_NAMES[n], 10) + pad("masculine", w) + pad("feminine", w) + "neuter");
+    L.CASES.forEach((c) => {
+      console.log("  " + pad(c + ".", 10) + pad(sp(cell(d.m[n][c])), w) + pad(sp(cell(d.f[n][c])), w) + sp(cell(d.n[n][c])));
+    });
+  });
+}
 function printVerb(e) {
   const s = L.synopsis(e);
   const flags = e.flags && e.flags.length ? "  [" + e.flags.join(", ") + "]" : "";
@@ -93,7 +108,7 @@ function printVerb(e) {
 
 let list = [];
 try {
-  if (all) list = vocab.filter((e) => e.pos === "noun" || e.pos === "verb");
+  if (all) list = vocab.filter((e) => e.pos === "noun" || e.pos === "verb" || L.isDeclinedAdjective(e));
   if (irregular) list = list.concat(Object.keys(IRREGULAR_ENTRIES).map((k) => ({ pos: "verb", lemma: k, parts: IRREGULAR_ENTRIES[k], conjugation: "irregular" })));
   list = list.concat(words.map(findEntry));
 } catch (e) { console.error(e.message); process.exit(1); }
@@ -103,6 +118,7 @@ list.forEach((e) => {
   try {
     if (e.pos === "noun") printNoun(e);
     else if (e.pos === "verb") printVerb(e);
+    else if (L.isDeclinedAdjective(e)) printAdjective(e);
     else console.log("\n" + e.lemma + ": " + e.pos + " (no paradigm; forms: " + (e.forms || [e.lemma]).join(", ") + ")");
   } catch (err) { failed++; console.error("\n" + (e.lemma || e.id) + ": " + err.message); }
 });

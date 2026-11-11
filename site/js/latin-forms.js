@@ -1,13 +1,15 @@
 // Latin inflection engine shared by the typed practice games (browser) and
-// the tools in /tools (Node). Generates noun paradigms and verb synopses
-// from dictionary entries in a curriculum's vocab.json, and normalizes
+// the tools in /tools (Node). Generates noun and adjective paradigms and
+// verb synopses from dictionary entries in a curriculum's vocab.json, and normalizes
 // typed answers for grading.
 //
 // Entry format (vocab.json):
 //   noun: { lemma, gen, gender: m|f|n, declension: "1".."5", flags?: ["i-stem","plural-only"], forms?: {...} }
 //   verb: { lemma, parts: [..], conjugation: "1"|"2"|"3"|"3io"|"4"|"irregular", flags?: ["deponent","no-passive"] }
+//   adjective: { lemma, nom: [m, f, n] | [m/f, n], declension: "1-2"|"3", flags?: ["gen-ius","singular-only"] }
 // Rules handle 3rd-declension i-stems and neuters, 4th/5th declensions,
-// 2nd-declension -ius/-ium/-er nouns, deponents and 3rd -iō verbs. The verbs
+// 2nd-declension -ius/-ium/-er nouns, -us/-er and third-declension
+// adjectives, deponents and 3rd -iō verbs. The verbs
 // sum, possum, eō, ferō, volō, nōlō, mālō and fīō come from hand-entered tables.
 (function (root, factory) {
   if (typeof module === "object" && module.exports) module.exports = factory();
@@ -24,6 +26,9 @@
   var CONJUGATIONS = ["1", "2", "3", "3io", "4", "irregular"];
   var NOUN_FLAGS = ["i-stem", "plural-only", "singular-only", "no-vocative"];
   var VERB_FLAGS = ["deponent", "no-passive"];
+  var GENDERS = ["m", "f", "n"];
+  var ADJ_DECLENSIONS = ["1-2", "3"];
+  var ADJ_FLAGS = ["gen-ius", "singular-only"];
 
   var CASE_NAMES = { nom: "nominative", gen: "genitive", dat: "dative", acc: "accusative", abl: "ablative", voc: "vocative" };
   var NUMBER_NAMES = { sg: "singular", pl: "plural" };
@@ -142,6 +147,110 @@
     var g = entry.gender;
     if (hasFlag(entry, "plural-only")) return entry.lemma + ", " + entry.gen + ", " + g + ". (pl.)";
     return entry.lemma + ", " + entry.gen + ", " + g + ".";
+  }
+
+  // ---------- adjectives ----------
+  // nom lists the nominative singular as the dictionary prints it:
+  //   "1-2": [magnus, magna, magnum], [miser, misera, miserum], [integer, integra, integrum]
+  //   "3":   [gravis, grave]
+  // The stem is read from the feminine, so integer and noster drop the e
+  // and miser keeps it. Third-declension adjectives decline as i-stems.
+  // Flag "gen-ius": genitive singular -īus and dative singular -ī in all
+  // genders (ūnus, sōlus, tōtus, alius…); the neuter nominative is taken
+  // as printed, so alius has aliud.
+  function isDeclinedAdjective(entry) { return !!entry && entry.pos === "adjective" && entry.declension != null; }
+  function adjectiveNom(entry) {
+    var d = String(entry.declension), nom = entry.nom;
+    if (ADJ_DECLENSIONS.indexOf(d) < 0) throw new Error("unknown adjective declension code " + JSON.stringify(entry.declension));
+    var want = d === "3" ? 2 : 3;
+    if (!Array.isArray(nom) || nom.length !== want) {
+      throw new Error(d === "3" ? 'a third-declension adjective needs "nom": [gravis, grave]' : 'a 1-2 adjective needs "nom": [magnus, magna, magnum]');
+    }
+    return nom;
+  }
+  // "1-2" | "er" | "3": which paradigm the book teaches it under.
+  function adjectiveType(entry) {
+    var nom = adjectiveNom(entry);
+    if (String(entry.declension) === "3") return "3";
+    return endsWith(nom[0], "us") ? "1-2" : "er";
+  }
+  // Returns { m: {sg:{nom..voc}, pl:{...}}, f: {...}, n: {...} }. Missing cells are null.
+  function declineAdjective(entry) {
+    var nom = adjectiveNom(entry), out = {};
+    if (String(entry.declension) === "3") {
+      var s3 = cut(nom[0], "is");
+      if (nom[1] !== s3 + "e") throw new Error('the neuter of "' + nom[0] + '" should be ' + s3 + "e, not " + nom[1]);
+      var mf = {
+        sg: { nom: nom[0], gen: s3 + "is", dat: s3 + "ī", acc: s3 + "em", abl: s3 + "ī", voc: nom[0] },
+        pl: { nom: s3 + "ēs", gen: s3 + "ium", dat: s3 + "ibus", acc: s3 + "ēs", abl: s3 + "ibus", voc: s3 + "ēs" }
+      };
+      out.m = mf;
+      out.f = { sg: Object.assign({}, mf.sg), pl: Object.assign({}, mf.pl) };
+      out.n = {
+        sg: { nom: nom[1], gen: s3 + "is", dat: s3 + "ī", acc: nom[1], abl: s3 + "ī", voc: nom[1] },
+        pl: { nom: s3 + "ia", gen: s3 + "ium", dat: s3 + "ibus", acc: s3 + "ia", abl: s3 + "ibus", voc: s3 + "ia" }
+      };
+    } else {
+      var st = cut(nom[1], "a");
+      var voc = nom[0];                                              // miser, integer, noster
+      if (normalize(nom[0]) === "meus") voc = "mī";
+      else if (endsWith(nom[0], "us")) voc = cut(nom[0], "us") + "e"; // magnus → magne
+      out.m = {
+        sg: { nom: nom[0], gen: st + "ī", dat: st + "ō", acc: st + "um", abl: st + "ō", voc: voc },
+        pl: { nom: st + "ī", gen: st + "ōrum", dat: st + "īs", acc: st + "ōs", abl: st + "īs", voc: st + "ī" }
+      };
+      out.f = {
+        sg: { nom: nom[1], gen: st + "ae", dat: st + "ae", acc: st + "am", abl: st + "ā", voc: nom[1] },
+        pl: { nom: st + "ae", gen: st + "ārum", dat: st + "īs", acc: st + "ās", abl: st + "īs", voc: st + "ae" }
+      };
+      out.n = {
+        sg: { nom: nom[2], gen: st + "ī", dat: st + "ō", acc: nom[2], abl: st + "ō", voc: nom[2] },
+        pl: { nom: st + "a", gen: st + "ōrum", dat: st + "īs", acc: st + "a", abl: st + "īs", voc: st + "a" }
+      };
+      if (hasFlag(entry, "gen-ius")) {
+        // tōtīus, tōtī; alterīus, alterī; alius: alīus, aliī
+        var gen = (endsWith(st, "i") ? cut(st, "i") : st) + "īus", dat = st + "ī";
+        GENDERS.forEach(function (g) { out[g].sg.gen = gen; out[g].sg.dat = dat; });
+      }
+    }
+    // Hand overrides, as for nouns: forms: {"m.sg.gen": ["alterīus", "alīus"]}
+    // (a list means every spelling is accepted; the first is the one shown).
+    if (entry.forms && !Array.isArray(entry.forms)) {
+      Object.keys(entry.forms).forEach(function (k) {
+        var p = k.split(".");
+        if (out[p[0]] && out[p[0]][p[1]]) out[p[0]][p[1]][p[2]] = entry.forms[k];
+      });
+    }
+    if (hasFlag(entry, "singular-only")) GENDERS.forEach(function (g) { CASES.forEach(function (c) { out[g].pl[c] = null; }); });
+    return out;
+  }
+  // The form of an adjective that agrees with a noun entry in a given case
+  // and number (the noun's gender decides the table). null if the
+  // adjective has no such form.
+  function agreeAdjective(adj, noun, c, number) {
+    if (GENDERS.indexOf(noun.gender) < 0) throw new Error("noun " + noun.lemma + " has no gender (m, f or n)");
+    return declineAdjective(adj)[noun.gender][number][c];
+  }
+  function adjectiveEntryText(entry) {
+    return isDeclinedAdjective(entry) ? adjectiveNom(entry).join(", ") : entry.lemma;
+  }
+  // Lesson an adjective's paradigm is taught: its declension, raised for
+  // the -er adjectives and the -īus group. grammar.adjectives:
+  //   { declension: { "1-2": 7, "3": 8 }, er: 16, "gen-ius": 36 }
+  // 0 when the curriculum has no schedule; null when the type is never taught.
+  function adjectiveStartLesson(entry, grammar) {
+    var g = grammar && grammar.adjectives;
+    if (!g) return 0;
+    var type = adjectiveType(entry);
+    var parts = [g.declension ? g.declension[String(entry.declension)] : 0];
+    if (type === "er") parts.push(g.er);
+    if (hasFlag(entry, "gen-ius")) parts.push(g["gen-ius"]);
+    var start = 0;
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i] === null) return null;
+      if (parts[i] != null && parts[i] > start) start = parts[i];
+    }
+    return start;
   }
 
   // ---------- verbs: regular ----------
@@ -566,6 +675,19 @@
       if (flags.length) e.flags = flags;
       return e;
     }
+    // adjective: "gravis, grave"  "gravis, e"  "magnus, a, um"  "miser, misera, miserum"
+    // "tōtus, a, um, -īus" (genitive in -īus)
+    var ius = raw.length === 4 && /^-?[iī]us$/.test(raw[3]);
+    if (raw.length === 2 && endsWith(raw[0], "is") && (raw[1] === "e" || raw[1] === cut(raw[0], "is") + "e")) {
+      return { pos: "adjective", lemma: raw[0], nom: [raw[0], cut(raw[0], "is") + "e"], declension: "3" };
+    }
+    if ((raw.length === 3 || ius) && ((raw[1] === "a" && raw[2] === "um" && endsWith(raw[0], "us")) ||
+        (raw[1].length > 1 && endsWith(raw[1], "a") && (endsWith(raw[2], "um") || endsWith(raw[2], "ud"))))) {
+      var short = raw[1] === "a";
+      var a = { pos: "adjective", lemma: raw[0], nom: short ? [raw[0], cut(raw[0], "us") + "a", cut(raw[0], "us") + "um"] : [raw[0], raw[1], raw[2]], declension: "1-2" };
+      if (ius) a.flags = ["gen-ius"];
+      return a;
+    }
     // verb
     var parts = raw.slice(), vflags = [];
     var inf = parts[1], conj;
@@ -587,7 +709,12 @@
   function formsOf(entry) {
     var forms = [];
     if (Array.isArray(entry.forms)) forms = entry.forms.slice();
-    else if (entry.pos === "noun") {
+    else if (isDeclinedAdjective(entry)) {
+      var ad = declineAdjective(entry);
+      GENDERS.forEach(function (g) { NUMBERS.forEach(function (n) { CASES.forEach(function (c) {
+        if (ad[g][n][c]) forms = forms.concat(ad[g][n][c]);
+      }); }); });
+    } else if (entry.pos === "noun") {
       var d = declineNoun(entry);
       NUMBERS.forEach(function (n) { CASES.forEach(function (c) {
         var f = d[n][c]; if (f) forms = forms.concat(Array.isArray(f) ? f : [f]);
@@ -676,6 +803,18 @@
     var out = [];
     function push(f, l) { f.split(/\s+/).forEach(function (w) { out.push({ form: normalize(w), lesson: l }); }); }
     function at(x) { return x == null ? 0 : x; }
+    if (!Array.isArray(entry.forms) && isDeclinedAdjective(entry)) {
+      // From the later of the word's lesson and the lesson its type is taught.
+      var ad = declineAdjective(entry);
+      var typeL = adjectiveStartLesson(entry, g);
+      if (typeL == null) return out;                  // type not taught: forms stay unknown
+      GENDERS.forEach(function (gd) { NUMBERS.forEach(function (n) { CASES.forEach(function (c) {
+        var f = ad[gd][n][c]; if (!f) return;
+        var l = Math.max(base, typeL, c === "voc" ? at(g.nouns && g.nouns.vocative) : 0);
+        (Array.isArray(f) ? f : [f]).forEach(function (x) { push(x, l); });
+      }); }); });
+      return out;
+    }
     if (Array.isArray(entry.forms) || (entry.pos !== "noun" && entry.pos !== "verb")) {
       (Array.isArray(entry.forms) ? entry.forms : [entry.lemma]).forEach(function (f) { push(f, base); });
       return out;
@@ -749,10 +888,13 @@
   return {
     CASES: CASES, NUMBERS: NUMBERS, PERSONS: PERSONS, IND_TENSES: IND_TENSES, SUBJ_TENSES: SUBJ_TENSES,
     DECLENSIONS: DECLENSIONS, CONJUGATIONS: CONJUGATIONS, NOUN_FLAGS: NOUN_FLAGS, VERB_FLAGS: VERB_FLAGS,
+    GENDERS: GENDERS, ADJ_DECLENSIONS: ADJ_DECLENSIONS, ADJ_FLAGS: ADJ_FLAGS,
     CASE_NAMES: CASE_NAMES, NUMBER_NAMES: NUMBER_NAMES, PERSON_NAMES: PERSON_NAMES,
     IRREGULAR_LEMMAS: Object.keys(IRREGULAR),
     stripMacrons: stripMacrons, normalize: normalize, sameForm: sameForm, spell: spell, hasFlag: hasFlag,
     declineNoun: declineNoun, nounEntryText: nounEntryText,
+    declineAdjective: declineAdjective, agreeAdjective: agreeAdjective, adjectiveEntryText: adjectiveEntryText,
+    isDeclinedAdjective: isDeclinedAdjective, adjectiveType: adjectiveType, adjectiveStartLesson: adjectiveStartLesson,
     conjugateSet: conjugateSet, synopsis: synopsis, verbVoices: verbVoices, verbEntryText: verbEntryText, personIndex: personIndex,
     parseEntry: parseEntry, formsOf: formsOf, formLessons: formLessons, availability: availability, lessonOf: lessonOf,
     hasIrregularTable: function (entry) { return !!irregularFor(entry); },

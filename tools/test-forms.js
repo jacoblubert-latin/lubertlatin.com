@@ -302,5 +302,111 @@ eq("deponents L41", [cellL(sequor, "indicative", "present", "deponent"), cellL(p
 eq("ferō not taught in First Year", cellL(fero, "indicative", "present", "active"), null);
 eq("start lessons", [laudo, moneo, duco, audio, capio, sequor, sum, eo, fero].map((e) => L.verbStartLesson(e, G)), [9, 10, 12, 13, 37, 41, 14, 42, null]);
 
+// ---------- adjectives ----------
+function ADJ(nom, declension, flags) { return { pos: "adjective", lemma: nom[0], nom, declension, flags }; }
+const magnus = ADJ(["magnus", "magna", "magnum"], "1-2");
+let a = L.declineAdjective(magnus);
+eq("magnus m sg", a.m.sg, { nom: "magnus", gen: "magnī", dat: "magnō", acc: "magnum", abl: "magnō", voc: "magne" });
+eq("magnus m pl", a.m.pl, { nom: "magnī", gen: "magnōrum", dat: "magnīs", acc: "magnōs", abl: "magnīs", voc: "magnī" });
+eq("magnus f sg", a.f.sg, { nom: "magna", gen: "magnae", dat: "magnae", acc: "magnam", abl: "magnā", voc: "magna" });
+eq("magnus f pl", a.f.pl, { nom: "magnae", gen: "magnārum", dat: "magnīs", acc: "magnās", abl: "magnīs", voc: "magnae" });
+eq("magnus n sg", a.n.sg, { nom: "magnum", gen: "magnī", dat: "magnō", acc: "magnum", abl: "magnō", voc: "magnum" });
+eq("magnus n pl", a.n.pl, { nom: "magna", gen: "magnōrum", dat: "magnīs", acc: "magna", abl: "magnīs", voc: "magna" });
+
+a = L.declineAdjective(ADJ(["miser", "misera", "miserum"], "1-2"));
+eq("miser m sg", a.m.sg, { nom: "miser", gen: "miserī", dat: "miserō", acc: "miserum", abl: "miserō", voc: "miser" });
+eq("miser f sg", a.f.sg, { nom: "misera", gen: "miserae", dat: "miserae", acc: "miseram", abl: "miserā", voc: "misera" });
+eq("miser n pl", a.n.pl, { nom: "misera", gen: "miserōrum", dat: "miserīs", acc: "misera", abl: "miserīs", voc: "misera" });
+
+a = L.declineAdjective(ADJ(["integer", "integra", "integrum"], "1-2"));
+eq("integer m sg", a.m.sg, { nom: "integer", gen: "integrī", dat: "integrō", acc: "integrum", abl: "integrō", voc: "integer" });
+eq("integer m pl", a.m.pl, { nom: "integrī", gen: "integrōrum", dat: "integrīs", acc: "integrōs", abl: "integrīs", voc: "integrī" });
+eq("integer f sg", a.f.sg, { nom: "integra", gen: "integrae", dat: "integrae", acc: "integram", abl: "integrā", voc: "integra" });
+eq("integer n sg", a.n.sg, { nom: "integrum", gen: "integrī", dat: "integrō", acc: "integrum", abl: "integrō", voc: "integrum" });
+
+a = L.declineAdjective(ADJ(["noster", "nostra", "nostrum"], "1-2"));
+eq("noster m sg", a.m.sg, { nom: "noster", gen: "nostrī", dat: "nostrō", acc: "nostrum", abl: "nostrō", voc: "noster" });
+eq("noster f pl", a.f.pl, { nom: "nostrae", gen: "nostrārum", dat: "nostrīs", acc: "nostrās", abl: "nostrīs", voc: "nostrae" });
+eq("noster n sg nom", a.n.sg.nom, "nostrum");
+eq("meus voc", L.declineAdjective(ADJ(["meus", "mea", "meum"], "1-2")).m.sg.voc, "mī");
+eq("tuus voc", L.declineAdjective(ADJ(["tuus", "tua", "tuum"], "1-2")).m.sg.voc, "tue");
+
+const gravis = ADJ(["gravis", "grave"], "3");
+a = L.declineAdjective(gravis);
+eq("gravis m sg", a.m.sg, { nom: "gravis", gen: "gravis", dat: "gravī", acc: "gravem", abl: "gravī", voc: "gravis" });
+eq("gravis m pl", a.m.pl, { nom: "gravēs", gen: "gravium", dat: "gravibus", acc: "gravēs", abl: "gravibus", voc: "gravēs" });
+eq("gravis f = m", [a.f.sg, a.f.pl], [a.m.sg, a.m.pl]);
+eq("gravis n sg", a.n.sg, { nom: "grave", gen: "gravis", dat: "gravī", acc: "grave", abl: "gravī", voc: "grave" });
+eq("gravis n pl", a.n.pl, { nom: "gravia", gen: "gravium", dat: "gravibus", acc: "gravia", abl: "gravibus", voc: "gravia" });
+
+const totus = ADJ(["tōtus", "tōta", "tōtum"], "1-2", ["gen-ius"]);
+a = L.declineAdjective(totus);
+eq("tōtus m sg", a.m.sg, { nom: "tōtus", gen: "tōtīus", dat: "tōtī", acc: "tōtum", abl: "tōtō", voc: "tōte" });
+eq("tōtus f sg", a.f.sg, { nom: "tōta", gen: "tōtīus", dat: "tōtī", acc: "tōtam", abl: "tōtā", voc: "tōta" });
+eq("tōtus n sg", a.n.sg, { nom: "tōtum", gen: "tōtīus", dat: "tōtī", acc: "tōtum", abl: "tōtō", voc: "tōtum" });
+eq("tōtus plural is regular", a.f.pl, { nom: "tōtae", gen: "tōtārum", dat: "tōtīs", acc: "tōtās", abl: "tōtīs", voc: "tōtae" });
+
+const alius = ADJ(["alius", "alia", "aliud"], "1-2", ["gen-ius"]);
+a = L.declineAdjective(alius);
+eq("alius m sg", a.m.sg, { nom: "alius", gen: "alīus", dat: "aliī", acc: "alium", abl: "aliō", voc: "alie" });
+eq("alius f sg", a.f.sg, { nom: "alia", gen: "alīus", dat: "aliī", acc: "aliam", abl: "aliā", voc: "alia" });
+eq("alius n sg", a.n.sg, { nom: "aliud", gen: "alīus", dat: "aliī", acc: "aliud", abl: "aliō", voc: "aliud" });
+eq("alius n pl", a.n.pl, { nom: "alia", gen: "aliōrum", dat: "aliīs", acc: "alia", abl: "aliīs", voc: "alia" });
+// The genitive singular of alius as vocab.json has it: alterīus (i long or
+// short) is the usual form, alīus the regular one, aliī / aliae also found.
+// The dative shows aliī and also accepts aliō (m., n.) and aliae (f.).
+const ALIUS_GEN = ["alterīus", "alterius", "alīus", "aliī"], ALIUS_GEN_F = ["alterīus", "alterius", "alīus", "aliae"];
+const ALIUS_DAT = ["aliī", "aliō"], ALIUS_DAT_F = ["aliī", "aliae"];
+const aliusFull = Object.assign({}, alius, { forms: { "m.sg.gen": ALIUS_GEN, "f.sg.gen": ALIUS_GEN_F, "n.sg.gen": ALIUS_GEN, "m.sg.dat": ALIUS_DAT, "f.sg.dat": ALIUS_DAT_F, "n.sg.dat": ALIUS_DAT } });
+a = L.declineAdjective(aliusFull);
+eq("alius overrides", [a.m.sg.gen, a.f.sg.gen, a.n.sg.gen, a.m.sg.dat, a.f.sg.dat, a.n.sg.dat], [ALIUS_GEN, ALIUS_GEN_F, ALIUS_GEN, ALIUS_DAT, ALIUS_DAT_F, ALIUS_DAT]);
+eq("alius dat graded strictly", [L.sameForm("aliī", a.m.sg.dat, true), L.sameForm("aliō", a.m.sg.dat, true), L.sameForm("aliae", a.m.sg.dat, true), L.sameForm("aliae", a.f.sg.dat, true), L.sameForm("aliō", a.f.sg.dat, true)], [true, true, false, true, false]);
+eq("alius overrides in formsOf", ["alterius", "alius", "aliae", "alii"].every((f) => L.formsOf(aliusFull).includes(f)), true);
+eq("alius gen graded strictly", [L.sameForm("alterius", a.m.sg.gen, true), L.sameForm("alterīus", a.m.sg.gen, true), L.sameForm("alīus", a.m.sg.gen, true), L.sameForm("alius", a.m.sg.gen, true), L.sameForm("aliae", a.f.sg.gen, true), L.sameForm("aliae", a.m.sg.gen, true)], [true, true, true, false, true, false]);
+const vAlius = JSON.parse(require("fs").readFileSync(require("path").join(__dirname, "..", "site", "practice", "data", "henle", "vocab.json"), "utf8").replace(/^﻿/, "")).find((e) => e.id === "adj-alius");
+eq("vocab.json alius", [L.declineAdjective(vAlius).m.sg, L.declineAdjective(vAlius).f.sg.gen, L.declineAdjective(vAlius).f.sg.dat], [{ nom: "alius", gen: ALIUS_GEN, dat: ALIUS_DAT, acc: "alium", abl: "aliō", voc: "alie" }, ALIUS_GEN_F, ALIUS_DAT_F]);
+a = L.declineAdjective(ADJ(["uter", "utra", "utrum"], "1-2", ["gen-ius"]));
+eq("uter gen/dat", [a.m.sg.gen, a.f.sg.dat, a.n.sg.acc, a.m.pl.acc], ["utrīus", "utrī", "utrum", "utrōs"]);
+a = L.declineAdjective(ADJ(["alter", "altera", "alterum"], "1-2", ["gen-ius"]));
+eq("alter gen/dat", [a.m.sg.gen, a.n.sg.dat, a.f.sg.acc], ["alterīus", "alterī", "alteram"]);
+a = L.declineAdjective(ADJ(["ūnus", "ūna", "ūnum"], "1-2", ["gen-ius", "singular-only"]));
+eq("ūnus singular only", [a.f.sg.gen, a.m.pl.nom, a.n.pl.acc], ["ūnīus", null, null]);
+
+// agreement: the noun's gender picks the table
+const bonus = ADJ(["bonus", "bona", "bonum"], "1-2"), fortis = ADJ(["fortis", "forte"], "3");
+const nauta = N("nauta", "nautae", "m", "1"), miles = N("mīles", "mīlitis", "m", "3");
+const flumen = N("flūmen", "flūminis", "n", "3"), manus = N("manus", "manūs", "f", "4");
+const agree = (adj, noun) => L.NUMBERS.map((n) => L.CASES.map((c) => L.agreeAdjective(adj, noun, c, n)));
+eq("nauta bonus", agree(bonus, nauta), [["bonus", "bonī", "bonō", "bonum", "bonō", "bone"], ["bonī", "bonōrum", "bonīs", "bonōs", "bonīs", "bonī"]]);
+eq("mīles fortis", agree(fortis, miles), [["fortis", "fortis", "fortī", "fortem", "fortī", "fortis"], ["fortēs", "fortium", "fortibus", "fortēs", "fortibus", "fortēs"]]);
+eq("flūmen magnum", agree(magnus, flumen), [["magnum", "magnī", "magnō", "magnum", "magnō", "magnum"], ["magna", "magnōrum", "magnīs", "magna", "magnīs", "magna"]]);
+eq("manus magna", agree(magnus, manus), [["magna", "magnae", "magnae", "magnam", "magnā", "magna"], ["magnae", "magnārum", "magnīs", "magnās", "magnīs", "magnae"]]);
+eq("flūmen forte", [L.agreeAdjective(fortis, flumen, "acc", "sg"), L.agreeAdjective(fortis, flumen, "nom", "pl")], ["forte", "fortia"]);
+
+// dictionary lines
+eq("parse gravis, grave", L.parseEntry("gravis, grave"), { pos: "adjective", lemma: "gravis", nom: ["gravis", "grave"], declension: "3" });
+eq("parse gravis, e", L.parseEntry("gravis, e").nom, ["gravis", "grave"]);
+eq("parse magnus, a, um", L.parseEntry("magnus, a, um"), { pos: "adjective", lemma: "magnus", nom: ["magnus", "magna", "magnum"], declension: "1-2" });
+eq("parse integer", L.parseEntry("integer, integra, integrum").nom, ["integer", "integra", "integrum"]);
+eq("parse alius -īus", L.parseEntry("alius, alia, aliud, -īus"), { pos: "adjective", lemma: "alius", nom: ["alius", "alia", "aliud"], declension: "1-2", flags: ["gen-ius"] });
+eq("entry text", [L.adjectiveEntryText(fortis), L.adjectiveEntryText(magnus)], ["fortis, forte", "magnus, magna, magnum"]);
+eq("adjective types", [magnus, gravis, ADJ(["miser", "misera", "miserum"], "1-2"), totus].map(L.adjectiveType), ["1-2", "3", "er", "1-2"]);
+
+// schedule and availability
+eq("adjective start lessons", [magnus, gravis, ADJ(["miser", "misera", "miserum"], "1-2"), ADJ(["noster", "nostra", "nostrum"], "1-2"), totus, ADJ(["alter", "altera", "alterum"], "1-2", ["gen-ius"])]
+  .map((e) => L.adjectiveStartLesson(e, G)), [7, 8, 16, 16, 36, 36]);
+eq("no schedule: open", L.adjectiveStartLesson(magnus, {}), 0);
+const avocab = [
+  { lemma: "via", gen: "viae", gender: "f", declension: "1", pos: "noun", lesson: 3, curriculum: "henle" },
+  Object.assign({ lesson: 7, curriculum: "henle" }, magnus),
+  Object.assign({ lesson: 1, curriculum: "henle" }, gravis),
+  Object.assign({ lesson: 9, curriculum: "henle" }, ADJ(["aliēnus", "aliēna", "aliēnum"], "1-2"))
+];
+eq("formsOf adjective", ["magna", "magnarum", "magne", "magnum"].every((f) => L.formsOf(magnus).includes(f)), true);
+eq("availability sees magna", L.availability("Via magna.", avocab, "henle", G), { lesson: 7, unknown: [] });
+eq("adjective waits for its type", L.availability("gravia", avocab, "henle", G).lesson, 8);
+eq("adjective waits for its own lesson", L.availability("aliēnīs", avocab, "henle", G).lesson, 9);
+eq("adjective vocative waits for the vocative", L.availability("magne", avocab, "henle", G).lesson, 27);
+
 if (failures) { console.error("\n" + failures + " of " + checks + " checks failed."); process.exit(1); }
 console.log("OK: " + checks + " checks passed.");
