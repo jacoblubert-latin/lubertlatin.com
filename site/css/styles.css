@@ -179,6 +179,7 @@ p { margin: 0 0 1em; }
 }
 .card h3 { font-size: 1.35rem; }
 .card p { color: var(--muted); margin: 0; }
+.section .lede + .cards { margin-top: 28px; } /* intro sentence above a row of cards (home practice section) */
 
 /* Sessions */
 .features { display: grid; gap: 32px; grid-template-columns: 1fr; }
