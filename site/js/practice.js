@@ -3,7 +3,11 @@
 // streak and the end-of-round review. Each game (js/games/*.js) registers
 // itself with LatinPractice.register() and only supplies the parts that
 // differ: start-screen options, the pool, how an item is shown and graded,
-// and how a missed item is reviewed. The shell also keeps the student's
+// and how a missed item is reviewed. The lesson filter is the shell's: the
+// slider sets ctx.settings.lesson, and a two-way choice beside it sets
+// ctx.settings.lessonOnly ("Through Lesson N", the default, or "Lesson N
+// only"). A game asks shell.inLesson(l) whether material that first opens
+// at lesson l is in play. The shell also keeps the student's
 // missed list (js/missed-list.js) and runs the two rounds made from it:
 // "Drill what I missed" after a round and "Drill my missed list" on the
 // start screen. A game takes part by supplying formKeys() and fromMissed().
@@ -88,6 +92,14 @@
     return thing.lesson;
   }
   function plural(n, one, many) { return n === 1 ? one : (many || one + "s"); }
+  // The lesson filter as the games ask it. `l` is the lesson a piece of
+  // material first opens (null = never): through Lesson N takes everything
+  // that has opened by N, Lesson N only what opens at N itself.
+  function inLesson(l) {
+    if (l == null) return false;
+    return ctx.settings.lessonOnly ? l === ctx.settings.lesson : l <= ctx.settings.lesson;
+  }
+  function lessonName(n) { return curriculum.lessonWord + " " + (n == null ? ctx.settings.lesson : n); }
 
   // ---------- typed-answer kit (used by the decline and synopsis games) ----------
   var typed = {
@@ -197,6 +209,7 @@
   // ---------- state ----------
   var game = null, ctx = null, data = {}, curriculum = null;
   var bounds = { min: 1, max: 1 };
+  var scopeUi = null; // the "Through Lesson N" / "Lesson N only" radios: { through: {input, text}, only: {input, text} }
   var round = null; // { items, index, correct, streak, missed:[{item,result}], wrongKeys:[key], phase }
 
   function show(screen) {
@@ -212,12 +225,16 @@
   function loadSettings() {
     var saved = readJSON(game.storageKey);
     if (saved && typeof saved.lesson === "number" && isFinite(saved.lesson)) ctx.settings.lesson = saved.lesson;
+    // Settings stored before the choice existed have no lessonOnly: "through".
+    ctx.settings.lessonOnly = !!(saved && saved.lessonOnly === true);
     if (saved && game.restore) game.restore(saved);
   }
   function saveSettings() { writeJSON(game.storageKey, ctx.settings); typed.save(); }
 
   function readStartForm() {
     ctx.settings.lesson = clampLesson(el.lessonNumber.value);
+    var scope = el.start.querySelector("input[name=lessonScope]:checked");
+    ctx.settings.lessonOnly = !!scope && scope.value === "only";
     if (game.readStart) game.readStart(el.start);
     if (game.typed) typed.readSettings(el.start);
   }
@@ -225,19 +242,69 @@
     el.lessonRange.value = ctx.settings.lesson;
     el.lessonNumber.value = ctx.settings.lesson;
     el.lessonOutput.textContent = ctx.settings.lesson;
+    if (scopeUi) {
+      scopeUi.through.input.checked = !ctx.settings.lessonOnly;
+      scopeUi.only.input.checked = ctx.settings.lessonOnly;
+      scopeUi.through.text.textContent = "Through " + lessonName();
+      scopeUi.only.text.textContent = lessonName() + " only";
+    }
     if (game.updateStart) game.updateStart(el.start);
     var n = game.pool().length;
-    el.poolNote.textContent = game.poolNote(n);
+    // "Only" with nothing in it: say so and point at the nearest lessons that
+    // have material. With none anywhere the game's own note explains why.
+    el.poolNote.textContent = (n === 0 && ctx.settings.lessonOnly && nothingNewNote()) || game.poolNote(n);
     el.startButton.disabled = n === 0;
     showMissedLine();
   }
   function onStartChange() { readStartForm(); syncStartForm(); }
 
+  // How many items the game's pool would have at another lesson, the other
+  // settings staying as they are.
+  function poolSizeAt(n) {
+    var keep = ctx.settings.lesson, size = 0;
+    ctx.settings.lesson = n;
+    try { size = game.pool().length; } catch (e) { size = 0; }
+    ctx.settings.lesson = keep;
+    return size;
+  }
+  // "Nothing new for this game in Lesson 11. Try Lesson 10 or 12." The
+  // lessons named are the nearest below and above that have material; null
+  // when no lesson has any. (Kept per setting: the slider asks on every step.)
+  var nothingNewCache = {};
+  function nothingNewNote() {
+    var key = JSON.stringify(ctx.settings);
+    if (key in nothingNewCache) return nothingNewCache[key];
+    var n = ctx.settings.lesson, below = null, above = null, i;
+    for (i = n - 1; i >= bounds.min && below == null; i--) if (poolSizeAt(i)) below = i;
+    for (i = n + 1; i <= bounds.max && above == null; i++) if (poolSizeAt(i)) above = i;
+    var note = null;
+    if (below != null || above != null) {
+      var near = below != null && above != null ? below + " or " + above : (below != null ? below : above);
+      note = "Nothing new for this game in " + lessonName() + ". Try " + lessonName(near) + ".";
+    }
+    return (nothingNewCache[key] = note);
+  }
+
   function buildStartScreen() {
     clear(el.startOptions); clear(el.startExtra);
-    el.lessonLabel.textContent = "Through " + curriculum.short + " " + curriculum.lessonWord + " ";
+    // The label names the lesson; the choice under the slider says whether
+    // it means everything through that lesson or that lesson alone.
+    el.lessonLabel.textContent = curriculum.short + " " + curriculum.lessonWord + " ";
+    el.lessonRange.setAttribute("aria-label", curriculum.lessonWord + " (slider)");
     el.lessonRange.min = el.lessonNumber.min = bounds.min;
     el.lessonRange.max = el.lessonNumber.max = bounds.max;
+    if (!scopeUi) {
+      var row = make("div", "choice-row lesson-scope");
+      row.setAttribute("role", "radiogroup"); row.setAttribute("aria-label", "Which lessons");
+      scopeUi = {};
+      ["through", "only"].forEach(function (v) {
+        var label = choice("radio", "lessonScope", v, "", v === "through");
+        scopeUi[v] = { input: label.querySelector("input"), text: label.querySelector("span") };
+        row.appendChild(label);
+      });
+      var controls = el.lessonRange.parentNode;
+      controls.parentNode.insertBefore(row, controls.nextSibling);
+    }
     game.renderStart(el.startOptions, el.startExtra);
     if (game.typed) typed.renderSettings(el.startExtra);
   }
@@ -461,10 +528,11 @@
         if (!curriculum || !curriculum.lessons) throw new Error("bad curriculum.json");
         ctx = {
           curriculum: curriculumId, curriculumInfo: curriculum, data: data,
-          settings: Object.assign({ lesson: curriculum.lessons }, g.defaults || {}),
+          settings: Object.assign({ lesson: curriculum.lessons, lessonOnly: false }, g.defaults || {}),
           area: el.area,
           shell: {
             make: make, clear: clear, shuffle: shuffle, pick: pick, plural: plural, lessonOf: lessonOf, typed: typed,
+            inLesson: inLesson, lessonName: lessonName,
             setCheckEnabled: function (on) { el.check.hidden = false; el.check.disabled = !on; },
             finish: function (right, item, result) { el.check.hidden = true; finish(right, item, result); },
             check: onCheck
