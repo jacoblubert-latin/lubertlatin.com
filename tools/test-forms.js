@@ -533,5 +533,27 @@ eq("adjective waits for its type", L.availability("gravia", avocab, "henle", G).
 eq("adjective waits for its own lesson", L.availability("aliēnīs", avocab, "henle", G).lesson, 9);
 eq("adjective vocative waits for the vocative", L.availability("magne", avocab, "henle", G).lesson, 27);
 
+// "first opens at": the later of the word's lesson and its grammar's
+const at = (lesson, e) => Object.assign({ lesson, curriculum: "henle" }, e);
+eq("noun opens at its own lesson", L.nounOpenLesson(at(3, N("mīles", "mīlitis", "m", "3")), "henle", G), 3);
+eq("noun waits for its declension", L.nounOpenLesson(at(1, N("mīles", "mīlitis", "m", "3")), "henle", G), 3);
+eq("noun after its declension", L.nounOpenLesson(at(22, N("terra", "terrae", "f", "1")), "henle", G), 22);
+eq("noun: available wins over lesson", L.nounOpenLesson(Object.assign(at(1, N("terra", "terrae", "f", "1")), { available: { henle: 6 } }), "henle", G), 6);
+eq("noun: no schedule", L.nounOpenLesson(at(4, N("terra", "terrae", "f", "1")), "henle", {}), 4);
+eq("vocative lesson", [L.vocativeLesson(G), L.vocativeLesson({})], [27, 0]);
+eq("noun cells: the vocative waits", ["nom", "abl", "voc"].map((c) => L.nounCellOpenLesson(at(2, N("servus", "servī", "m", "2")), c, "henle", G)), [2, 2, 27]);
+eq("noun cells: a late noun's vocative", L.nounCellOpenLesson(at(37, N("servus", "servī", "m", "2")), "voc", "henle", G), 37);
+eq("adjective open lessons", [at(7, magnus), at(1, gravis), at(9, magnus), at(16, ADJ(["noster", "nostra", "nostrum"], "1-2")), at(8, totus)]
+  .map((e) => L.adjectiveOpenLesson(e, "henle", G)), [7, 8, 9, 16, 36]);
+eq("adjective type never taught", L.adjectiveOpenLesson(at(7, magnus), "henle", { adjectives: { declension: { "1-2": null } } }), null);
+const openL = (lesson, e, s, t, v) => L.verbCellOpenLesson(at(lesson, e), s, t, v, "henle", G);
+eq("verb cell: grammar later than the word", [openL(1, laudo, "indicative", "present", "active"), openL(1, laudo, "indicative", "present", "passive"),
+  openL(1, laudo, "indicative", "perfect", "active"), openL(11, laudo, "subjunctive", "present", "active")], [9, 17, 15, 22]);
+eq("verb cell: word later than the grammar", [openL(24, laudo, "indicative", "present", "active"), openL(24, laudo, "indicative", "perfect", "passive"),
+  openL(24, laudo, "imperative", "present", "active"), openL(24, laudo, "infinitive", "perfect", "active")], [24, 24, 27, 39]);
+eq("verb cell: -iō verbs and deponents", [openL(14, capio, "indicative", "present", "active"), openL(14, capio, "indicative", "perfect", "active"),
+  openL(41, sequor, "indicative", "present", "deponent")], [37, 37, 41]);
+eq("verb cell: never taught", [openL(1, laudo, "imperative", "present", "passive"), openL(1, fero, "indicative", "present", "active")], [null, null]);
+
 if (failures) { console.error("\n" + failures + " of " + checks + " checks failed."); process.exit(1); }
 console.log("OK: " + checks + " checks passed.");

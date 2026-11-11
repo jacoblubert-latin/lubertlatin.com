@@ -32,9 +32,13 @@
   // conjugation at a time (laudō in Lesson 9, -iō verbs not until 37).
   // "mood" below is any section of the synopsis: indicative, subjunctive,
   // imperative, infinitive, participle.
+  // A cell first opens at the later of the verb's own lesson and the lesson
+  // its form is taught (L.verbCellOpenLesson). "Through Lesson N" takes the
+  // cells open by N; "Lesson N only" the cells that open at N, so the grid
+  // then shows only the rows and columns that are new in that lesson
+  // (Lesson 17: the present-system passive of the first-conjugation verbs).
   function tenseOpen(entry, mood, voice, tense) {
-    var l = L.verbFormLesson(entry, mood, tense, voice, grammar);
-    return l != null && l <= lesson();
+    return S.inLesson(L.verbCellOpenLesson(entry, mood, tense, voice, ctx.curriculum, grammar));
   }
   // The form for one cell, or null: not yet taught, or the verb has none.
   function cellFor(entry, mood, tense, voice, person, number) {
@@ -62,7 +66,7 @@
   // is kept per lesson.)
   var openCache = {};
   function moodOpen(mood) {
-    var key = lesson() + "|" + mood;
+    var key = lesson() + "|" + !!ctx.settings.lessonOnly + "|" + mood;
     if (!(key in openCache)) openCache[key] = verbsThrough().some(function (v) { return hasOpenCell(v, mood); });
     return openCache[key];
   }
@@ -171,9 +175,13 @@
       return verbsThrough().filter(function (v) { return columnsFor(v).length > 0; });
     },
     poolNote: function (n) {
-      if (n === 0) return "No verbs through Lesson " + lesson() + " yet. Raise the lesson number.";
+      var only = ctx.settings.lessonOnly;
+      if (n === 0) {
+        return only ? "No verb forms are new in " + S.lessonName() + " with these rows. Pick another lesson."
+          : "No verbs through Lesson " + lesson() + " yet. Raise the lesson number.";
+      }
       var size = game.roundSize();
-      var what = n + " " + S.plural(n, "verb") + " to draw from";
+      var what = n + " " + S.plural(n, "verb") + (only ? " with forms new in " + S.lessonName() : " to draw from");
       if (ctx.settings.mode === "synopsis" && n < size) what += " (a round will be " + n + " long)";
       return what + ".";
     },

@@ -96,6 +96,33 @@ Four games share one shell (`site/js/practice.js`): the start screen with its le
 | `/practice/synopsis/` | **Verb synopsis** – type a Henle-style synopsis, or one form | `vocab.json` |
 | `/practice/vocab/` | **Vocabulary** – the meaning of a word: Latin → English by multiple choice, English → Latin typed | `vocab.json` |
 
+### The lesson filter: through Lesson N, or Lesson N only
+
+Every start screen has the lesson slider and, under it, a two-way choice: **Through Lesson N** (the default: everything the book has taught by that lesson) and **Lesson N only** (just what Lesson N introduced). Both are the shell's: the slider is `ctx.settings.lesson`, the choice is `ctx.settings.lessonOnly`, and both are saved with the game's other settings under its own storage key. Settings saved before the choice existed have no `lessonOnly` and mean "through".
+
+**What belongs to a lesson.** A piece of material belongs to the lesson at which it *first opens*: the later of the word's own lesson and the lesson its grammar is taught. That covers both kinds of lesson. A vocabulary lesson brings its new words (Lesson 3 only: the nouns of Lesson 3). A grammar lesson brings new forms of words already met (Lesson 17 only: the present, imperfect and future passive of the first-conjugation verbs, though the verbs are from earlier lessons). A word that arrives after its grammar brings everything already taught for it (*appellō*, a Lesson 17 word, has its active tenses in Lesson 17 only as well).
+
+"Through" and "only" read the same number; one takes what opens at N or before, the other what opens at N exactly. The number comes from one place per kind of material, in `site/js/latin-forms.js`:
+
+| Material | First opens at | Function |
+|---|---|---|
+| Parsing sentence | its `available` lesson for the textbook, else its `lesson` | `lessonOf` |
+| Vocabulary word | the word's `lesson` | `lessonOf` |
+| Noun (its table) | the later of the noun's lesson and its declension's | `nounOpenLesson` |
+| Noun's vocative | the later of that and the vocative's lesson | `nounCellOpenLesson`, `vocativeLesson` |
+| Adjective | the later of the adjective's lesson and its type's | `adjectiveOpenLesson` |
+| Synopsis cell | the later of the verb's lesson and the lesson that tense, voice and mood (or imperative, infinitive, participle) is taught for that verb | `verbCellOpenLesson` |
+
+A game asks the shell `shell.inLesson(l)` with one of these numbers; the shell answers for whichever choice is on. What "Lesson N only" gives in each game:
+
+- **Parsing drill:** the sentences first usable in Lesson N.
+- **Decline a noun:** the nouns that open in Lesson N, as full tables or single forms. In the lesson that teaches the vocative (Henle 27) the vocatives of the earlier nouns are that lesson's new material: they are asked one form at a time, in either mode and whether or not "Include vocative" is on, alongside the nouns new in that lesson, and the note under the slider says so.
+- **Noun + adjective:** the pairs that open in Lesson N, a pair opening at the later of its two words. So a new adjective is paired with every earlier noun (Lesson 7 only: *magnus* and the other first adjectives, with the nouns of Lessons 1–7) and a new noun with every open adjective. In the vocative's lesson the earlier pairs are asked for their vocative, one form at a time.
+- **Verb synopsis:** the cells that open in Lesson N. The full synopsis shows only the rows and columns that are new for that verb, single-form mode draws only from those cells, and a verb is in the pool if it has at least one. "Include subjunctive" and the other Rows boxes are struck through when the lesson has nothing of that kind.
+- **Vocabulary:** the words whose lesson is N. The wrong options in multiple choice, and the "either word" answers, still come from every word through Lesson N.
+
+The note under the slider counts what is in play. When "only" leaves nothing it says so and names the nearest lessons that have something, with the other settings as they are ("Nothing new for this game in Lesson 11. Try Lesson 10 or 12."), and Start is off. When a lesson has less than a round's worth, the round is shorter; it is never filled out from other lessons. A round from the missed list ignores the choice, as it ignores the slider.
+
 ### The missed list ("drill only what I missed")
 
 Every form a student answers wrong goes on a missed list, one list per game and textbook, kept in their browser. Two buttons use it:
@@ -136,7 +163,7 @@ node tools/test-missed.js
 
 Every data file lives in a folder named for the textbook, and every item and entry carries a matching `"curriculum"` field. Only `henle` exists now. To add Wheelock, *Latin for the New Millennium* or *Ecce Romani* later: copy the folder, write its `curriculum.json`, `items.json` and `vocab.json`, and set `data-curriculum` on the `<div id="drill">` of each page (a textbook picker on the start screen will set that attribute; the games themselves don't change).
 
-`curriculum.json` holds the display name, the number of lessons, the word for a lesson ("Lesson" or "Chapter") and a **grammar schedule**: the lesson in which each declension, conjugation, tense, voice and mood is first taught. The typed games open a row or column once the lesson filter reaches that number. The Henle numbers come from the book's table of contents. A tense is one lesson number, or a map by conjugation where the book teaches it one conjugation at a time (`"present": {"1": 9, "2": 10, "3": 12, "4": 13, "3io": 37}`); `conjugation` says when each conjugation starts, `deponent` when deponents start, and `irregular` when each hand-table verb starts (`null` = not taught in this book; compounds follow their base verb). Every cell opens at the later of the verb's start and the tense's lesson, so *capiō* shows nothing before Lesson 37 and *sequor* nothing before 41.
+`curriculum.json` holds the display name, the number of lessons, the word for a lesson ("Lesson" or "Chapter") and a **grammar schedule**: the lesson in which each declension, conjugation, tense, voice and mood is first taught. The typed games open a row or column once the lesson filter reaches that number (or, with "Lesson N only", when it is that number). The Henle numbers come from the book's table of contents. A tense is one lesson number, or a map by conjugation where the book teaches it one conjugation at a time (`"present": {"1": 9, "2": 10, "3": 12, "4": 13, "3io": 37}`); `conjugation` says when each conjugation starts, `deponent` when deponents start, and `irregular` when each hand-table verb starts (`null` = not taught in this book; compounds follow their base verb). Every cell opens at the later of the verb's start and the tense's lesson, so *capiō* shows nothing before Lesson 37 and *sequor* nothing before 41.
 
 The imperative, the infinitives and the participles are scheduled the same way, under `grammar.verbs`:
 
@@ -197,7 +224,7 @@ Adjectives have their own lines in the schedule:
 
 - **Mode.** *Latin → English* shows the dictionary entry (*mīles, mīlitis, m.*; *laudō, laudāre, laudāvī, laudātus*; the nominatives of an adjective; the lemma of anything else) and four glosses to pick from. *English → Latin* shows the gloss and the part of speech, and the student types the first dictionary form (*mīles*, *laudō*). A full dictionary entry typed in the box is graded on its first word.
 - **Parts of speech.** Nouns, Verbs, Adjectives, Other (pronouns, adverbs, prepositions, conjunctions, phrases); all on to begin with. A box is struck through until the chosen lesson has a word of that kind.
-- **Lesson.** The words through the chosen lesson, by each word's `lesson`. The note under the slider says how many are in play.
+- **Lesson.** The words through the chosen lesson, by each word's `lesson`, or with "Lesson N only" the words of that lesson alone. The note under the slider says how many are in play.
 - **Typing and Spelling** are the shared settings of the typed games: macrons optional unless strict macrons is on, i/j and u/v accepted either way, Henle (j) or classical (i) spelling on screen.
 - **Wrong options** in multiple choice are the glosses of three other words open at the chosen lesson: the same part of speech where there are enough, never a gloss that is the same as the right one or shares a meaning with it (a word glossed "fear, dread" would never be offered beside *timor*, "fear"), and no two alike. A word with fewer than three such options is left out of multiple choice, and if that leaves nothing the start screen says there are too few words; with the Henle data every word has them from Lesson 1.
 - **Two words, one gloss.** Where two open words of the same part of speech are asked by the same gloss (*exīstimō* and *putō*, "think"; *et* and *atque*, "and"), English → Latin accepts either, shows both in the feedback and asks that gloss only once in a round.
@@ -261,7 +288,7 @@ node tools/paradigm.js --all
 node tools/paradigm.js fortis "gravis, grave" "magnus, a, um" "tōtus, a, um, -īus"
 ```
 
-Adjectives print with the three genders side by side; a dictionary line gives the nominatives, in full or as Henle abbreviates them, with `, -īus` added for the *ūnus* group. `--irregular` prints the eight hand-entered verbs; `--classical` shows i instead of j. A word that needs `forms` overrides (*vīs*, *deus*, *Jēsūs*, *domus*) can be given as a full JSON entry in quotes instead of a dictionary line. A verb prints every tense of the indicative and subjunctive, then its imperative, infinitives and participles (including the forms Henle's schedule leaves closed, such as the passive imperative and the present participle). The engine also has a fixed test of known paradigms (every declension type, the adjective types and noun-adjective agreement, all conjugations, deponents, the irregulars, the imperative, infinitives and participles with the lesson each opens, and the grading rules):
+Adjectives print with the three genders side by side; a dictionary line gives the nominatives, in full or as Henle abbreviates them, with `, -īus` added for the *ūnus* group. `--irregular` prints the eight hand-entered verbs; `--classical` shows i instead of j. A word that needs `forms` overrides (*vīs*, *deus*, *Jēsūs*, *domus*) can be given as a full JSON entry in quotes instead of a dictionary line. A verb prints every tense of the indicative and subjunctive, then its imperative, infinitives and participles (including the forms Henle's schedule leaves closed, such as the passive imperative and the present participle). The engine also has a fixed test of known paradigms (every declension type, the adjective types and noun-adjective agreement, all conjugations, deponents, the irregulars, the imperative, infinitives and participles with the lesson each opens, the lesson each noun, adjective and synopsis cell first opens for the lesson filter, and the grading rules):
 
 ```bash
 node tools/test-forms.js

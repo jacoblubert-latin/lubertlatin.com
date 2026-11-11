@@ -51,6 +51,9 @@
 .lesson-controls input[type="range"]:focus { outline: none; }
 .lesson-controls input[type="range"]:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 .lesson-controls input[type="number"] { width: 5.5em; text-align: center; font-size: 1.1rem; }
+/* "Through Lesson N" / "Lesson N only", under the slider */
+.lesson-scope { margin-top: 12px; }
+.lesson-scope .choice { flex-basis: 170px; } /* one above the other on a phone, so neither label wraps */
 
 /* The missed list, under the Start button */
 .missed-start { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
