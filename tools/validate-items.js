@@ -167,7 +167,7 @@ function validateVocab(vocab, ctx) {
     if (!isStr(e.lemma)) err("lemma must be a non-empty string");
     checkLessons(e, err, ctx.curriculumId, ctx.lessonMax, ctx.lessonMaxFor);
     if (!POS.includes(e.pos)) { err("pos must be one of: " + POS.join(", ")); return; }
-    if ("english" in e && typeof e.english !== "string") err("english must be a string");
+    if ("english" in e && (typeof e.english !== "string" || !e.english.trim())) err("english must be a non-empty string (leave the field out if the gloss is not known yet)");
     if ("flags" in e) {
       const allowed = e.pos === "noun" ? L.NOUN_FLAGS : e.pos === "verb" ? L.VERB_FLAGS : e.pos === "adjective" ? L.ADJ_FLAGS : [];
       if (!Array.isArray(e.flags)) err("flags must be an array");
@@ -325,7 +325,10 @@ function checkFile(file, ctx) {
     if (errors.length) return { errors };
     const v = r.data, nouns = v.filter((e) => e.pos === "noun").length, verbs = v.filter((e) => e.pos === "verb").length;
     const adjs = v.filter(L.isDeclinedAdjective).length;
-    return { errors, summary: v.length + " entries (" + nouns + " nouns, " + verbs + " verbs, " + adjs + " declined adjectives, " + (v.length - nouns - verbs - adjs) + " other)." };
+    // Not an error: a word without a gloss is only left out of the vocabulary game.
+    const noGloss = v.filter((e) => !("english" in e)).length;
+    const warnings = noGloss ? [noGloss + (noGloss === 1 ? " entry has" : " entries have") + " no \"english\" gloss and " + (noGloss === 1 ? "is" : "are") + " left out of the vocabulary game."] : [];
+    return { errors, warnings, summary: v.length + " entries (" + nouns + " nouns, " + verbs + " verbs, " + adjs + " declined adjectives, " + (v.length - nouns - verbs - adjs) + " other)." };
   }
   if (name === "curriculum.json") {
     const errors = validateCurriculum(r.data);
@@ -362,6 +365,7 @@ files.forEach(({ file, ctx, missing }) => {
     console.error("");
   } else {
     console.log("OK " + rel + ": " + r.summary);
+    (r.warnings || []).forEach((w) => console.warn("  warning: " + w));
   }
 });
 process.exit(bad ? 1 : 0);
