@@ -1004,6 +1004,40 @@
     return Math.max(info.start, tv);
   }
 
+  // ---------- "first opens at" ----------
+  // The lesson a piece of material belongs to: the later of the word's own
+  // lesson and the lesson its grammar is taught. The games' lesson filter
+  // reads these numbers both ways: "through Lesson N" takes what opens at N
+  // or before, "Lesson N only" what opens at N exactly.
+  //
+  // A noun: its own lesson, or its declension's if that is later.
+  function nounOpenLesson(entry, curriculum, grammar) {
+    var g = grammar && grammar.nouns && grammar.nouns.declension;
+    var d = g ? g[String(entry.declension)] : null;
+    return Math.max(lessonOf(entry, curriculum), d == null ? 0 : d);
+  }
+  // Lesson the vocative is taught (0 when the curriculum doesn't say).
+  function vocativeLesson(grammar) {
+    var v = grammar && grammar.nouns ? grammar.nouns.vocative : null;
+    return v == null ? 0 : v;
+  }
+  // One cell of a noun's table: the vocative waits for the vocative lesson.
+  function nounCellOpenLesson(entry, c, curriculum, grammar) {
+    return Math.max(nounOpenLesson(entry, curriculum, grammar), c === "voc" ? vocativeLesson(grammar) : 0);
+  }
+  // A declined adjective: its own lesson, or the lesson its type is taught
+  // if that is later. null = the type is never taught in this book.
+  function adjectiveOpenLesson(entry, curriculum, grammar) {
+    var start = adjectiveStartLesson(entry, grammar);
+    return start == null ? null : Math.max(lessonOf(entry, curriculum), start);
+  }
+  // One cell of a verb's synopsis (any section): the verb's own lesson, or
+  // the lesson verbFormLesson gives if that is later. null = never.
+  function verbCellOpenLesson(entry, section, tense, voice, curriculum, grammar) {
+    var l = verbFormLesson(entry, section, tense, voice, grammar);
+    return l == null ? null : Math.max(lessonOf(entry, curriculum), l);
+  }
+
   // Every form with the lesson it can first be read: the entry's lesson,
   // raised to the lesson the curriculum's grammar schedule teaches that
   // form (declension, vocative, tense/voice/mood). Without a schedule the
@@ -1115,6 +1149,8 @@
     synopsisCell: synopsisCell, nonFiniteForms: nonFiniteForms, synopsis: synopsis, verbVoices: verbVoices, verbEntryText: verbEntryText, personIndex: personIndex,
     parseEntry: parseEntry, formsOf: formsOf, formLessons: formLessons, availability: availability, lessonOf: lessonOf,
     hasIrregularTable: function (entry) { return !!irregularFor(entry); },
-    verbStartLesson: verbStartLesson, verbCellLesson: verbCellLesson, verbFormLesson: verbFormLesson
+    verbStartLesson: verbStartLesson, verbCellLesson: verbCellLesson, verbFormLesson: verbFormLesson,
+    nounOpenLesson: nounOpenLesson, nounCellOpenLesson: nounCellOpenLesson, vocativeLesson: vocativeLesson,
+    adjectiveOpenLesson: adjectiveOpenLesson, verbCellOpenLesson: verbCellOpenLesson
   };
 });
