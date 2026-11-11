@@ -101,6 +101,37 @@ Every data file lives in a folder named for the textbook, and every item and ent
 
 `curriculum.json` holds the display name, the number of lessons, the word for a lesson ("Lesson" or "Chapter") and a **grammar schedule**: the lesson in which each declension, conjugation, tense, voice and mood is first taught. The typed games open a row or column once the lesson filter reaches that number. The Henle numbers come from the book's table of contents. A tense is one lesson number, or a map by conjugation where the book teaches it one conjugation at a time (`"present": {"1": 9, "2": 10, "3": 12, "4": 13, "3io": 37}`); `conjugation` says when each conjugation starts, `deponent` when deponents start, and `irregular` when each hand-table verb starts (`null` = not taught in this book; compounds follow their base verb). Every cell opens at the later of the verb's start and the tense's lesson, so *capiō* shows nothing before Lesson 37 and *sequor* nothing before 41.
 
+The imperative, the infinitives and the participles are scheduled the same way, under `grammar.verbs`:
+
+```json
+"imperative": {
+  "active":  { "present": { "1": 27, "2": 27, "3": 27, "4": 27, "3io": 37, "sum": null, "possum": null, "eō": null } },
+  "passive": { "present": null }
+},
+"infinitive": {
+  "active":  { "present": 35, "perfect": 39, "future": 39 },
+  "passive": { "present": 35, "perfect": 39, "future": null }
+},
+"participle": {
+  "active":  { "present": null, "future": 39 },
+  "passive": { "perfect": 30 }
+}
+```
+
+Each value is a lesson number, `null` for a form the book never teaches, or a map by conjugation; in these three sections a map may also name a hand-table verb (`"sum": null`: Henle gives no imperative of *sum*, and *absum* follows it). The rule for a cell is the same as for the tenses: the later of the verb's start and the form's lesson, so *capiō* has no infinitives before Lesson 37 and *eō* none before 42. Deponents follow the `passive` lines, except for their future infinitive and their present and future participles, which are active in form and follow the `active` lines. The Henle numbers, with the page each form is taught on:
+
+| Form | Lesson | Page |
+|---|---|---|
+| Present imperative active, singular and plural | 27 | 296 |
+| Perfect participle passive (*laudātus, -a, -um*) | 30 | 325 |
+| Present infinitive, active and passive | 35 | 352 |
+| Perfect infinitive active; future participle active; future infinitive active | 39 | 412 |
+| Perfect infinitive passive | 39 | 428 |
+| Deponents: perfect participle; the three infinitives | 41 | 450, 453 |
+| Infinitives of *eō* | 42 | 464 |
+
+Not in First Year, so `null` or left out: the passive imperative, the imperative of *sum*, *possum*, *eō* and the deponents, the present participle, the future infinitive passive ("you need not learn it now", p. 428) and the gerundive. The engine does not generate the last two at all.
+
 Adjectives have their own lines in the schedule:
 
 ```json
@@ -114,6 +145,14 @@ Adjectives have their own lines in the schedule:
 `declension` is the lesson each kind of adjective is taught (*magnus, -a, -um* in Lesson 7, *gravis, grave* in Lesson 8), `er` the lesson for *miser* and *integer*, and `gen-ius` the lesson for the group with the genitive in *-īus* (*ūnus, tōtus, alius*…). An adjective opens at the latest of its own lesson and the lines that apply to it, so *noster* (Lesson 16) waits for Lesson 16 and *tōtus* for Lesson 36. Its vocative follows the nouns' `vocative` lesson.
 
 **Noun + adjective mode.** The Mode row of *Decline a noun* has a third choice, "Noun + adjective", with its own "Full table / Single form" choice. The game shows both dictionary entries (*mīles, mīlitis, m.* and *fortis, forte*) and the student types the two words together in each cell, in either order. It pairs a noun from the pool with an adjective that is open at the chosen lesson, and most of the time picks a pair whose endings differ (*nauta bonus, mīles fortis, flūmen magnum*). A wrong cell shows the correct phrase with macrons and says which word was wrong when the other was right. The mode is closed, with a note, below the first adjective lesson (Henle Lesson 7). On a phone the grid stacks each case's singular over its plural so the phrases fit.
+
+**Verb synopsis: imperative, infinitives, participles.** After the Indicative and Subjunctive sections the synopsis grid has three more, in the order of Henle's *Grammar* (Nos. 208–215): **Imperative** (one row, which follows the round's number, "Pres. sg." or "Pres. pl.", and ignores its person), **Infinitives** (present, perfect, future) and **Participles** (perfect, future), under the same Active and Passive columns. A section appears once the chosen lesson has opened one of its cells for that verb, and a cell the verb doesn't have shows a dash (*laudō* has no passive imperative in this book, *timeō* no perfect participle). Under **Rows** on the start screen, "Include imperative" and "Include infinitives and participles" sit beside "Include subjunctive"; each is struck through until the lesson reaches it (27 and 30 for Henle). Single-form mode draws from the same cells: "Give the perfect passive infinitive.", "Give the present active imperative, plural." How the forms are graded:
+
+- Compound infinitives are shown in the nominative masculine (*laudātus esse*, *laudātūrus esse*); the feminine, the neuter and the accusative (*laudātum esse*, *laudātam esse*) are accepted too.
+- A participle is answered in the nominative singular masculine (*laudātus*); the three nominatives are also accepted, in full or abbreviated (*laudātus, laudāta, laudātum* or *laudātus, a, um*).
+- The short imperatives are *dīc*, *dūc* (and *addūc*, *dēdūc*, *trādūc*…) and *fac*; compounds of *faciō* in *-ficiō* keep the *-e* (*interfice*).
+- A verb with no fourth principal part (*timeō*, *contendō*) has nothing built on the participle; a neuter or *-ūrus* fourth part (*pugnātum*, *mānsūrus*) gives the future participle and infinitive only.
+- The perfect infinitive of *eō* is *iisse* (*īsse* is accepted); its compounds have *adiisse*, *rediisse*.
 
 ### Parsing-drill items (`items.json`)
 
@@ -138,7 +177,7 @@ The typed games generate every form from these entries with the rules engine in 
 {"id":"castra","curriculum":"henle","lesson":3,"pos":"noun","lemma":"castra","gen":"castrōrum","gender":"n","declension":"2","flags":["plural-only"],"english":"camp"}
 {"id":"laudo","curriculum":"henle","lesson":11,"pos":"verb","lemma":"laudō","parts":["laudō","laudāre","laudāvī","laudātus"],"conjugation":"1","english":"praise"}
 {"id":"capio","curriculum":"henle","lesson":14,"pos":"verb","lemma":"capiō","parts":["capiō","capere","cēpī","captus"],"conjugation":"3io","english":"take"}
-{"id":"sequor","curriculum":"henle","lesson":30,"pos":"verb","lemma":"sequor","parts":["sequor","sequī","secūtus sum"],"conjugation":"3","flags":["deponent"],"english":"follow"}
+{"id":"sequor","curriculum":"henle","lesson":41,"pos":"verb","lemma":"sequor","parts":["sequor","sequī","secūtus sum"],"conjugation":"3","flags":["deponent"],"english":"follow"}
 {"id":"sum","curriculum":"henle","lesson":1,"pos":"verb","lemma":"sum","parts":["sum","esse","fuī","futūrus"],"conjugation":"irregular","flags":["no-passive"],"english":"be"}
 {"id":"adj-magnus","curriculum":"henle","lesson":7,"pos":"adjective","lemma":"magnus","nom":["magnus","magna","magnum"],"declension":"1-2","english":"great, large"}
 {"id":"adj-grauis","curriculum":"henle","lesson":8,"pos":"adjective","lemma":"gravis","nom":["gravis","grave"],"declension":"3","english":"heavy, severe, serious"}
@@ -169,7 +208,7 @@ node tools/paradigm.js --all
 node tools/paradigm.js fortis "gravis, grave" "magnus, a, um" "tōtus, a, um, -īus"
 ```
 
-Adjectives print with the three genders side by side; a dictionary line gives the nominatives, in full or as Henle abbreviates them, with `, -īus` added for the *ūnus* group. `--irregular` prints the eight hand-entered verbs; `--classical` shows i instead of j. A word that needs `forms` overrides (*vīs*, *deus*, *Jēsūs*, *domus*) can be given as a full JSON entry in quotes instead of a dictionary line. The engine also has a fixed test of known paradigms (every declension type, the adjective types and noun-adjective agreement, all conjugations, deponents, the irregulars, and the grading rules):
+Adjectives print with the three genders side by side; a dictionary line gives the nominatives, in full or as Henle abbreviates them, with `, -īus` added for the *ūnus* group. `--irregular` prints the eight hand-entered verbs; `--classical` shows i instead of j. A word that needs `forms` overrides (*vīs*, *deus*, *Jēsūs*, *domus*) can be given as a full JSON entry in quotes instead of a dictionary line. A verb prints every tense of the indicative and subjunctive, then its imperative, infinitives and participles (including the forms Henle's schedule leaves closed, such as the passive imperative and the present participle). The engine also has a fixed test of known paradigms (every declension type, the adjective types and noun-adjective agreement, all conjugations, deponents, the irregulars, the imperative, infinitives and participles with the lesson each opens, and the grading rules):
 
 ```bash
 node tools/test-forms.js
