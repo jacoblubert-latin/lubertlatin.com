@@ -15,7 +15,7 @@ site/                 ← everything Netlify publishes
   thank-you.html      ← "thank you" page after the contact form
   404.html            ← page-not-found
   practice/index.html          ← game 1: the parsing drill (lubertlatin.com/practice/)
-  practice/decline/index.html  ← game 2: decline a noun (typed)
+  practice/decline/index.html  ← game 2: decline a noun, alone or with an adjective (typed)
   practice/synopsis/index.html ← game 3: verb synopsis (typed)
   practice/data/henle/         ← one folder per textbook (see "The practice games")
     curriculum.json            ← name, lesson count, and which forms each lesson teaches
@@ -26,7 +26,7 @@ site/                 ← everything Netlify publishes
   css/fonts.css       ← self-hosted font files (don't edit)
   js/main.js          ← mobile menu, footer year, FAQ search markup
   js/practice.js      ← the shared game shell (start screen, lesson filter, scoring, review)
-  js/latin-forms.js   ← the rules engine that declines nouns and conjugates verbs
+  js/latin-forms.js   ← the rules engine that declines nouns and adjectives and conjugates verbs
   js/games/*.js       ← one file per game: parse.js, decline.js, synopsis.js
   assets/             ← images, fonts, and the PDF
   robots.txt, sitemap.xml
@@ -92,7 +92,7 @@ Three games share one shell (`site/js/practice.js`): the start screen with its l
 | Page | Game | Data |
 |---|---|---|
 | `/practice/` | **Parsing drill** – noun or verb, then parse it with chips | `items.json` |
-| `/practice/decline/` | **Decline a noun** – type the whole table, or one form | `vocab.json` |
+| `/practice/decline/` | **Decline a noun** – type the whole table, or one form; or a noun with an adjective | `vocab.json` |
 | `/practice/synopsis/` | **Verb synopsis** – type a Henle-style synopsis, or one form | `vocab.json` |
 
 ### Textbooks (curricula)
@@ -100,6 +100,20 @@ Three games share one shell (`site/js/practice.js`): the start screen with its l
 Every data file lives in a folder named for the textbook, and every item and entry carries a matching `"curriculum"` field. Only `henle` exists now. To add Wheelock, *Latin for the New Millennium* or *Ecce Romani* later: copy the folder, write its `curriculum.json`, `items.json` and `vocab.json`, and set `data-curriculum` on the `<div id="drill">` of each page (a textbook picker on the start screen will set that attribute; the games themselves don't change).
 
 `curriculum.json` holds the display name, the number of lessons, the word for a lesson ("Lesson" or "Chapter") and a **grammar schedule**: the lesson in which each declension, conjugation, tense, voice and mood is first taught. The typed games open a row or column once the lesson filter reaches that number. The Henle numbers come from the book's table of contents. A tense is one lesson number, or a map by conjugation where the book teaches it one conjugation at a time (`"present": {"1": 9, "2": 10, "3": 12, "4": 13, "3io": 37}`); `conjugation` says when each conjugation starts, `deponent` when deponents start, and `irregular` when each hand-table verb starts (`null` = not taught in this book; compounds follow their base verb). Every cell opens at the later of the verb's start and the tense's lesson, so *capiō* shows nothing before Lesson 37 and *sequor* nothing before 41.
+
+Adjectives have their own lines in the schedule:
+
+```json
+"adjectives": {
+  "declension": { "1-2": 7, "3": 8 },
+  "er": 16,
+  "gen-ius": 36
+}
+```
+
+`declension` is the lesson each kind of adjective is taught (*magnus, -a, -um* in Lesson 7, *gravis, grave* in Lesson 8), `er` the lesson for *miser* and *integer*, and `gen-ius` the lesson for the group with the genitive in *-īus* (*ūnus, tōtus, alius*…). An adjective opens at the latest of its own lesson and the lines that apply to it, so *noster* (Lesson 16) waits for Lesson 16 and *tōtus* for Lesson 36. Its vocative follows the nouns' `vocative` lesson.
+
+**Noun + adjective mode.** The Mode row of *Decline a noun* has a third choice, "Noun + adjective", with its own "Full table / Single form" choice. The game shows both dictionary entries (*mīles, mīlitis, m.* and *fortis, forte*) and the student types the two words together in each cell, in either order. It pairs a noun from the pool with an adjective that is open at the chosen lesson, and most of the time picks a pair whose endings differ (*nauta bonus, mīles fortis, flūmen magnum*). A wrong cell shows the correct phrase with macrons and says which word was wrong when the other was right. The mode is closed, with a note, below the first adjective lesson (Henle Lesson 7). On a phone the grid stacks each case's singular over its plural so the phrases fit.
 
 ### Parsing-drill items (`items.json`)
 
@@ -126,12 +140,16 @@ The typed games generate every form from these entries with the rules engine in 
 {"id":"capio","curriculum":"henle","lesson":14,"pos":"verb","lemma":"capiō","parts":["capiō","capere","cēpī","captus"],"conjugation":"3io","english":"take"}
 {"id":"sequor","curriculum":"henle","lesson":30,"pos":"verb","lemma":"sequor","parts":["sequor","sequī","secūtus sum"],"conjugation":"3","flags":["deponent"],"english":"follow"}
 {"id":"sum","curriculum":"henle","lesson":1,"pos":"verb","lemma":"sum","parts":["sum","esse","fuī","futūrus"],"conjugation":"irregular","flags":["no-passive"],"english":"be"}
+{"id":"adj-magnus","curriculum":"henle","lesson":7,"pos":"adjective","lemma":"magnus","nom":["magnus","magna","magnum"],"declension":"1-2","english":"great, large"}
+{"id":"adj-grauis","curriculum":"henle","lesson":8,"pos":"adjective","lemma":"gravis","nom":["gravis","grave"],"declension":"3","english":"heavy, severe, serious"}
+{"id":"adj-totus","curriculum":"henle","lesson":36,"pos":"adjective","lemma":"tōtus","nom":["tōtus","tōta","tōtum"],"declension":"1-2","flags":["gen-ius"],"english":"whole, all of"}
 {"id":"in","curriculum":"henle","lesson":1,"pos":"indeclinable","lemma":"in","english":"in, on; into"}
 ```
 
 - **Nouns:** `lemma`, `gen` (genitive singular; genitive plural for a plural-only noun), `gender` (m, f, n), `declension` ("1"–"5"). The stem comes from the genitive, so *ager, agrī* and *fīlius, fīliī* work by themselves; 2nd-declension -ius nouns get the vocative in -ī, 3rd-declension neuters and i-stems (`"i-stem"` flag: gen. pl. -ium; neuters also abl. -ī and nom./acc. pl. -ia), and the 4th and 5th declensions are all handled. Flags: `i-stem`, `plural-only`, `singular-only`, `no-vocative`. For an odd word, `"forms": {"sg.voc": "deus", "pl.nom": ["dī", "deī"]}` overrides single cells (a list means every spelling is accepted).
 - **Verbs:** `parts` (principal parts; three for a deponent, ending in "… sum"), `conjugation` ("1", "2", "3", "3io", "4" or "irregular"). Flags: `deponent`, `no-passive` (intransitive verbs: only the active column is shown). The verbs **sum, possum, eō, ferō, volō, nōlō, mālō, fīō** are hand-entered tables, not rules; give them `"conjugation": "irregular"`.
-- **Other words** (`adjective`, `pronoun`, `adverb`, `preposition`, `conjunction`, `indeclinable`, `other`) are only used to work out sentence availability; give an optional `"forms": [...]` list for anything that inflects.
+- **Adjectives:** `nom` (the nominative singular forms as the dictionary gives them, written out in full: three for `"declension": "1-2"`, two for `"declension": "3"`). The stem comes from the feminine, so *miser, misera* keeps its e and *integer, integra* and *noster, nostra* drop it. `-us` adjectives get the vocative in *-e* (*mī* for *meus*); third-declension adjectives decline as i-stems (abl. sg. *-ī*, gen. pl. *-ium*, neuter pl. *-ia*). Flags: `gen-ius` (genitive singular *-īus* and dative singular *-ī* in all genders; the neuter is taken as written, so *alius* has *aliud*), `singular-only` (*ūnus*). The possessives *meus, tuus, suus, noster, vester* are entered as adjectives. An adjective with no `nom` and `declension` (*quot*, *duo*, *mīlle*) is not declined and counts as one of the "other words" below.
+- **Other words** (`pronoun`, `adverb`, `preposition`, `conjunction`, `indeclinable`, `other`, and adjectives that aren't declined by rule) are only used to work out sentence availability; give an optional `"forms": [...]` list for anything that inflects.
 - Spelling: write consonantal i as **j** the way Henle does (*jubeō*, *cūjus*). The games show it as j or i according to the student's spelling setting, and grading accepts i/j and u/v either way. Macrons are ignored unless the student turns on "strict macrons", and every correct form is shown with macrons.
 
 ### Proofing the generator
@@ -147,8 +165,11 @@ node tools/paradigm.js "mare, maris, n. i" "sequor, sequī, secūtus sum" "capi�
 ```bash
 node tools/paradigm.js --all
 ```
+```bash
+node tools/paradigm.js fortis "gravis, grave" "magnus, a, um" "tōtus, a, um, -īus"
+```
 
-`--irregular` prints the eight hand-entered verbs; `--classical` shows i instead of j. A word that needs `forms` overrides (*vīs*, *deus*, *Jēsūs*, *domus*) can be given as a full JSON entry in quotes instead of a dictionary line. The engine also has a fixed test of known paradigms (every declension type, all conjugations, deponents, the irregulars, and the grading rules):
+Adjectives print with the three genders side by side; a dictionary line gives the nominatives, in full or as Henle abbreviates them, with `, -īus` added for the *ūnus* group. `--irregular` prints the eight hand-entered verbs; `--classical` shows i instead of j. A word that needs `forms` overrides (*vīs*, *deus*, *Jēsūs*, *domus*) can be given as a full JSON entry in quotes instead of a dictionary line. The engine also has a fixed test of known paradigms (every declension type, the adjective types and noun-adjective agreement, all conjugations, deponents, the irregulars, and the grading rules):
 
 ```bash
 node tools/test-forms.js
@@ -160,7 +181,7 @@ node tools/test-forms.js
 node tools/validate-items.js
 ```
 
-With no arguments it checks every textbook folder: `curriculum.json` (shape and lesson numbers), `items.json` (missing fields, values outside the allowed lists, a use that doesn't go with the case, a `target_index` that doesn't point at the target word, lesson and `available` numbers outside the book, duplicate ids) and `vocab.json` (missing fields, unknown declension/conjugation codes and flags, entries the engine can't decline or conjugate, irregular verbs without a hand table). "OK" on every line means the data is good. To check one file, give its path: `node tools/validate-items.js site/practice/data/henle/vocab.json`.
+With no arguments it checks every textbook folder: `curriculum.json` (shape and lesson numbers), `items.json` (missing fields, values outside the allowed lists, a use that doesn't go with the case, a `target_index` that doesn't point at the target word, lesson and `available` numbers outside the book, duplicate ids) and `vocab.json` (missing fields, unknown declension/conjugation codes and flags, adjectives whose `nom` doesn't fit their declension, entries the engine can't decline or conjugate, irregular verbs without a hand table). "OK" on every line means the data is good. To check one file, give its path: `node tools/validate-items.js site/practice/data/henle/vocab.json`.
 
 ## Publishing a change
 
