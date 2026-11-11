@@ -164,6 +164,7 @@
     typed: true,
     storageKey: "lubertlatin.practice.vocab",
     defaults: { dir: "la-en", pos: GROUP_IDS.slice() },
+    lessonOnlyChoice: true,      // "Through Lesson N" / "Lesson N only" under the slider
     hideCheckUntilReady: true,   // multiple choice has no Check button; the typed direction shows it in begin()
 
     setup: function (c) {
@@ -254,9 +255,12 @@
         }
         return "No words through Lesson " + lesson() + " for those parts of speech yet. Raise the lesson number or pick other parts of speech.";
       }
-      return n + " " + S.plural(n, "word") + (only ? " new in " + S.lessonName() : " in play") + (n < ROUND_SIZE ? " (a round will be " + n + " long)" : "") + ".";
+      if (only) return n + " " + S.plural(n, "word") + " new in " + S.lessonName() + ". A round asks " + (n === 1 ? "it" : n === 2 ? "both" : "all " + n) + ".";
+      return n + " " + S.plural(n, "word") + " in play" + (n < ROUND_SIZE ? " (a round will be " + n + " long)" : "") + ".";
     },
-    roundSize: function () { return ROUND_SIZE; },
+    // Ten to a round; "Lesson N only" asks every word of the lesson once.
+    roundSize: function () { return ctx.settings.lessonOnly ? Math.max(game.pool().length, 1) : ROUND_SIZE; },
+    missedRoundSize: function () { return ROUND_SIZE; },
     // No repeats; in English → Latin, no two words asked by the same gloss.
     buildRound: function (list, size) {
       var dir = ctx.settings.dir, used = {}, out = [];
