@@ -87,13 +87,14 @@ Open `site/css/styles.css`. The first block (`:root`) holds the colors. Change `
 
 ## The practice games (/practice)
 
-Three games share one shell (`site/js/practice.js`): the start screen with its lesson filter, scoring, streak, the end-of-round review, and the footer. Each game is a small file in `site/js/games/` that only says what its start-screen options are, which items are in the pool, how an item is shown and graded, and how a missed item is reviewed. Everything is static: the browser reads JSON from `site/practice/data/<textbook>/` and keeps nothing anywhere else (the last settings and the missed list are remembered in the student's own browser only).
+Four games share one shell (`site/js/practice.js`): the start screen with its lesson filter, scoring, streak, the end-of-round review, and the footer. Each game is a small file in `site/js/games/` that only says what its start-screen options are, which items are in the pool, how an item is shown and graded, and how a missed item is reviewed. Everything is static: the browser reads JSON from `site/practice/data/<textbook>/` and keeps nothing anywhere else (the last settings and the missed list are remembered in the student's own browser only).
 
 | Page | Game | Data |
 |---|---|---|
 | `/practice/` | **Parsing drill** – noun or verb, then parse it with chips | `items.json` |
 | `/practice/decline/` | **Decline a noun** – type the whole table, or one form; or a noun with an adjective | `vocab.json` |
 | `/practice/synopsis/` | **Verb synopsis** – type a Henle-style synopsis, or one form | `vocab.json` |
+| `/practice/vocab/` | **Vocabulary** – the meaning of a word: Latin → English by multiple choice, English → Latin typed | `vocab.json` |
 
 ### The missed list ("drill only what I missed")
 
@@ -190,6 +191,21 @@ Adjectives have their own lines in the schedule:
 - A verb with no fourth principal part (*timeō*, *contendō*) has nothing built on the participle; a neuter or *-ūrus* fourth part (*pugnātum*, *mānsūrus*) gives the future participle and infinitive only.
 - The perfect infinitive of *eō* is *iisse* (*īsse* is accepted); its compounds have *adiisse*, *rediisse*.
 
+### The vocabulary game (/practice/vocab/)
+
+`site/js/games/vocab.js` asks the meaning of the words in `vocab.json`, ten to a round. It uses each entry's `english` gloss; an entry without one is left out of the game (the validator prints how many there are).
+
+- **Mode.** *Latin → English* shows the dictionary entry (*mīles, mīlitis, m.*; *laudō, laudāre, laudāvī, laudātus*; the nominatives of an adjective; the lemma of anything else) and four glosses to pick from. *English → Latin* shows the gloss and the part of speech, and the student types the first dictionary form (*mīles*, *laudō*). A full dictionary entry typed in the box is graded on its first word.
+- **Parts of speech.** Nouns, Verbs, Adjectives, Other (pronouns, adverbs, prepositions, conjunctions, phrases); all on to begin with. A box is struck through until the chosen lesson has a word of that kind.
+- **Lesson.** The words through the chosen lesson, by each word's `lesson`. The note under the slider says how many are in play.
+- **Typing and Spelling** are the shared settings of the typed games: macrons optional unless strict macrons is on, i/j and u/v accepted either way, Henle (j) or classical (i) spelling on screen.
+- **Wrong options** in multiple choice are the glosses of three other words open at the chosen lesson: the same part of speech where there are enough, never a gloss that is the same as the right one or shares a meaning with it (a word glossed "fear, dread" would never be offered beside *timor*, "fear"), and no two alike. A word with fewer than three such options is left out of multiple choice, and if that leaves nothing the start screen says there are too few words; with the Henle data every word has them from Lesson 1.
+- **Two words, one gloss.** Where two open words of the same part of speech are asked by the same gloss (*exīstimō* and *putō*, "think"; *et* and *atque*, "and"), English → Latin accepts either, shows both in the feedback and asks that gloss only once in a round.
+- After each answer the feedback shows the full entry with macrons and the whole gloss, and the end-of-round review lists each missed word the same way.
+- The settings are kept under `lubertlatin.practice.vocab` (mode, parts of speech, lesson). The missed list stores a word as its lemma, part of speech and direction, so a word missed in one direction is asked again in that direction.
+
+**How to write a gloss.** Separate meanings with commas or semicolons (`"carry, carry on; wage (war)"`). Put notes in parentheses (`"with (with the ablative)"`, `"grain; (plural) crops"`): they are shown, but they are not meanings. Write verbs without "to" (`"praise"`); a leading "to" is ignored when meanings are compared, and so are `?` and `!`. Two glosses share a meaning when any one of their comma- or semicolon-separated meanings is the same, so keep the wording of a shared meaning identical across words. Two kinds of note would give the answer away and are left out of the question (the feedback still shows them): a later semicolon part that begins with the Latin word itself (`"or; aut … aut, either … or"` is asked as "or") and a parenthesis that is the Latin word (`"to inform (certiōrem facere)"`).
+
 ### Parsing-drill items (`items.json`)
 
 ```json
@@ -224,7 +240,8 @@ The typed games generate every form from these entries with the rules engine in 
 - **Nouns:** `lemma`, `gen` (genitive singular; genitive plural for a plural-only noun), `gender` (m, f, n), `declension` ("1"–"5"). The stem comes from the genitive, so *ager, agrī* and *fīlius, fīliī* work by themselves; 2nd-declension -ius nouns get the vocative in -ī, 3rd-declension neuters and i-stems (`"i-stem"` flag: gen. pl. -ium; neuters also abl. -ī and nom./acc. pl. -ia), and the 4th and 5th declensions are all handled. Flags: `i-stem`, `plural-only`, `singular-only`, `no-vocative`. For an odd word, `"forms": {"sg.voc": "deus", "pl.nom": ["dī", "deī"]}` overrides single cells (a list means every spelling is accepted).
 - **Verbs:** `parts` (principal parts; three for a deponent, ending in "… sum"), `conjugation` ("1", "2", "3", "3io", "4" or "irregular"). Flags: `deponent`, `no-passive` (intransitive verbs: only the active column is shown). The verbs **sum, possum, eō, ferō, volō, nōlō, mālō, fīō** are hand-entered tables, not rules; give them `"conjugation": "irregular"`.
 - **Adjectives:** `nom` (the nominative singular forms as the dictionary gives them, written out in full: three for `"declension": "1-2"`, two for `"declension": "3"`). The stem comes from the feminine, so *miser, misera* keeps its e and *integer, integra* and *noster, nostra* drop it. `-us` adjectives get the vocative in *-e* (*mī* for *meus*); third-declension adjectives decline as i-stems (abl. sg. *-ī*, gen. pl. *-ium*, neuter pl. *-ia*). Flags: `gen-ius` (genitive singular *-īus* and dative singular *-ī* in all genders; the neuter is taken as written, so *alius* has *aliud*), `singular-only` (*ūnus*). For an odd word, `"forms": {"f.sg.gen": ["alterīus", "alterius", "alīus", "aliae"]}` overrides single cells, keyed gender.number.case; a list means every spelling is accepted and the first is the one shown (the genitive and dative singular of *alius* are entered this way). The possessives *meus, tuus, suus, noster, vester* are entered as adjectives. An adjective with no `nom` and `declension` (*quot*, *duo*, *mīlle*) is not declined and counts as one of the "other words" below.
-- **Other words** (`pronoun`, `adverb`, `preposition`, `conjunction`, `indeclinable`, `other`, and adjectives that aren't declined by rule) are only used to work out sentence availability; give an optional `"forms": [...]` list for anything that inflects.
+- **Other words** (`pronoun`, `adverb`, `preposition`, `conjunction`, `indeclinable`, `other`, and adjectives that aren't declined by rule) are used to work out sentence availability and in the vocabulary game; give an optional `"forms": [...]` list for anything that inflects.
+- `english` (optional, on any entry): the gloss shown under the entry in the typed games and asked in the vocabulary game; how to write one is under "The vocabulary game" above. Leave the field out when the meaning isn't known yet instead of guessing: the word is then only left out of the vocabulary game.
 - Spelling: write consonantal i as **j** the way Henle does (*jubeō*, *cūjus*). The games show it as j or i according to the student's spelling setting, and grading accepts i/j and u/v either way. Macrons are ignored unless the student turns on "strict macrons", and every correct form is shown with macrons.
 
 ### Proofing the generator
@@ -256,7 +273,7 @@ node tools/test-forms.js
 node tools/validate-items.js
 ```
 
-With no arguments it checks every textbook folder: `curriculum.json` (shape and lesson numbers), `items.json` (missing fields, values outside the allowed lists, a use that doesn't go with the case, a `target_index` that doesn't point at the target word, lesson and `available` numbers outside the book, duplicate ids) and `vocab.json` (missing fields, unknown declension/conjugation codes and flags, adjectives whose `nom` doesn't fit their declension, entries the engine can't decline or conjugate, irregular verbs without a hand table). "OK" on every line means the data is good. To check one file, give its path: `node tools/validate-items.js site/practice/data/henle/vocab.json`.
+With no arguments it checks every textbook folder: `curriculum.json` (shape and lesson numbers), `items.json` (missing fields, values outside the allowed lists, a use that doesn't go with the case, a `target_index` that doesn't point at the target word, lesson and `available` numbers outside the book, duplicate ids) and `vocab.json` (missing fields, unknown declension/conjugation codes and flags, adjectives whose `nom` doesn't fit their declension, entries the engine can't decline or conjugate, irregular verbs without a hand table, an `english` that is empty; entries with no `english` are counted in a warning, which is not an error). "OK" on every line means the data is good. To check one file, give its path: `node tools/validate-items.js site/practice/data/henle/vocab.json`.
 
 ## Publishing a change
 
