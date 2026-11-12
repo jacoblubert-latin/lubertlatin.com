@@ -255,6 +255,22 @@
       form.querySelectorAll("input[name=declension]:checked").forEach(function (b) { picked.push(b.value); });
       ctx.settings.declensions = picked.length === L.DECLENSIONS.length ? [] : picked;
     },
+    // Links for assignments (js/practice-link.js):
+    //   mode=table | single | phrase   form=table | single (inside noun + adjective)
+    //   decl=1,2,3 (the declensions ticked)   voc=1 | 0 (Include vocative)
+    fromLink: function (p, K) {
+      var decl = K.list(p.decl, L.DECLENSIONS);
+      return {
+        mode: K.oneOf(p.mode, ["table", "single", "phrase"]),
+        phraseForm: K.oneOf(p.form, ["table", "single"]),
+        declensions: decl && (decl.length === L.DECLENSIONS.length ? [] : decl),
+        vocative: K.flag(p.voc)
+      };
+    },
+    toLink: function (s, K) {
+      var decl = L.DECLENSIONS.filter(function (d) { return (s.declensions || []).indexOf(d) >= 0; });
+      return [["mode", s.mode], ["form", s.phraseForm], ["decl", decl.join(",")], ["voc", K.onOff(s.vocative)]];
+    },
 
     pool: function () {
       var sel = ctx.settings.declensions;

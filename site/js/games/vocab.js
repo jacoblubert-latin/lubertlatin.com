@@ -241,6 +241,12 @@
         });
       }
     },
+    // Links for assignments (js/practice-link.js):
+    //   dir=la-en | en-la   pos=noun,verb,adjective,other (the parts of speech ticked)
+    fromLink: function (p, K) { return { dir: K.oneOf(p.dir, DIRECTIONS), pos: K.list(p.pos, GROUP_IDS) }; },
+    toLink: function (s) {
+      return [["dir", s.dir], ["pos", GROUP_IDS.filter(function (g) { return (s.pos || []).indexOf(g) >= 0; }).join(",")]];
+    },
 
     pool: function () { return filtered(isChoice() ? eligible() : openWords()).filter(asked); },
     poolNote: function (n) {

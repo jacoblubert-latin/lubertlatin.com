@@ -170,6 +170,17 @@
         ctx.settings[o[0]] = !!(s && s.checked);
       });
     },
+    // Links for assignments (js/practice-link.js):
+    //   mode=synopsis | single   subj=0 | 1   imp=0 | 1   nonfinite=0 | 1 (the Rows boxes)
+    fromLink: function (p, K) {
+      return {
+        mode: K.oneOf(p.mode, ["synopsis", "single"]),
+        subjunctive: K.flag(p.subj), imperative: K.flag(p.imp), nonfinite: K.flag(p.nonfinite)
+      };
+    },
+    toLink: function (s, K) {
+      return [["mode", s.mode], ["subj", K.onOff(s.subjunctive)], ["imp", K.onOff(s.imperative)], ["nonfinite", K.onOff(s.nonfinite)]];
+    },
 
     pool: function () {
       return verbsThrough().filter(function (v) { return columnsFor(v).length > 0; });

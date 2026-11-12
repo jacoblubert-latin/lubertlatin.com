@@ -216,6 +216,9 @@
       var checked = form.querySelector("input[name=types]:checked");
       ctx.settings.types = checked ? checked.value : "both";
     },
+    // Links for assignments (js/practice-link.js): type=noun | verb | both
+    fromLink: function (p, K) { return { types: K.oneOf(p.type, ["noun", "verb", "both"]) }; },
+    toLink: function (s) { return [["type", s.types]]; },
     pool: function () {
       return items.filter(function (it) {
         // through Lesson N, or Lesson N only: by the lesson the sentence is first usable
