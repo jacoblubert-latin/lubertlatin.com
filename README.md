@@ -24,6 +24,7 @@ site/                 ← everything Netlify publishes
     items.json                 ← parsing-drill sentences and answers
     vocab.json                 ← dictionary entries for the typed games
   practice/data/henle2/        ← Henle Second Year: the same three files
+  practice/data/henle3/        ← Henle Third Year: the same three files
   css/styles.css      ← colors, fonts, layout
   css/practice.css    ← styles for the practice games only
   css/fonts.css       ← self-hosted font files (don't edit)
@@ -153,7 +154,7 @@ Every game:
 
 | Parameter | Values | Setting |
 |---|---|---|
-| `book` | a textbook's folder name: `henle`, `henle2` | The textbook. Left out of a copied link when it is the page's own (`henle`), so links made before there was a choice still mean First Year: a link that carries settings and no `book` opens First Year, whatever the student last chose. A name that isn't a textbook is ignored. |
+| `book` | a textbook's folder name: `henle`, `henle2`, `henle3` | The textbook. Left out of a copied link when it is the page's own (`henle`), so links made before there was a choice still mean First Year: a link that carries settings and no `book` opens First Year, whatever the student last chose. A name that isn't a textbook is ignored. |
 | `lesson` | a whole number | The lesson slider. A number outside the game's range is brought to the nearest end (`lesson=999` is the last lesson). Default: the last lesson. |
 | `only` | `1`, `0` | "Lesson N only" (`1`) or "Through Lesson N" (`0`, the default). Only in games that show the choice (Vocabulary); ignored elsewhere. |
 | `macrons` | `strict`, `optional` | Strict macrons on or off (default `optional`). Typed games: Decline, Synopsis, Vocabulary. |
@@ -307,12 +308,13 @@ A game without `printItem` and `printAnswer` has no button. "Number of items" an
 
 ### Textbooks (curricula)
 
-Every data file lives in a folder named for the textbook, and every item and entry carries a matching `"curriculum"` field. There are two: `henle` (Henle *First Year Latin*) and `henle2` (Henle *Second Year Latin*). `site/practice/data/textbooks.json` lists them, in the order the start screen shows them:
+Every data file lives in a folder named for the textbook, and every item and entry carries a matching `"curriculum"` field. There are three: `henle` (Henle *First Year Latin*), `henle2` (Henle *Second Year Latin*) and `henle3` (Henle *Third Year Latin*). `site/practice/data/textbooks.json` lists them, in the order the start screen shows them:
 
 ```json
 [
   { "id": "henle", "label": "Henle First Year" },
-  { "id": "henle2", "label": "Henle Second Year" }
+  { "id": "henle2", "label": "Henle Second Year" },
+  { "id": "henle3", "label": "Henle Third Year" }
 ]
 ```
 
@@ -334,6 +336,22 @@ Its parsing sentences are First Year's, for every sentence whose words Second Ye
 
 ```bash
 node tools/build-henle2-items.js
+```
+
+**Henle Third Year (`henle3`).** Its 21 lessons are those of Part IV, "Exercises Based on Cicero" (pp. 209–344). They teach syntax (questions, wishes, conditions, the uses of the cases, the subordinate clauses) and assign the forms only as review, so the grammar schedule opens every declension, conjugation, tense, voice and mood at Lesson 1; a verb still waits for the lesson that lists it (*mālō* Lesson 9, *nōlō* Lesson 19). The gerund and gerundive (Lesson 11) are not in the typed games.
+
+Its words come from two lists. The book's Classified Word List, First and Second Years (pp. 377–410) is Second Year's list reprinted, so those 541 words are copied from `henle2/vocab.json` at Lesson 1 with `"review": true`. Its own 310 words are the VOCABULARY of each lesson, transcribed in `tools/henle3-lesson-vocab.txt` (the Review Word List for Third Year, pp. 359–376, is the same entries in the same order), and built from the printed entry:
+
+```bash
+node tools/build-henle3-vocab.js --write
+```
+
+The script's tables hold what the print leaves out: third-declension genders, the i-stems, the forms of *domus*, and the words that are not declined by rule (*īdem*, *quīdam*, *aliquis*, *complūrēs*, *cēterī*, *nōnnūllī*, the impersonals *placet*, *cōnstat*, *accidit*, the defectives *ōdī* and *meminī*, and the phrases). Two readings are set right in its `FIX` table (*parēns* for the printed *pārēns*, *ēmptus* for *emptus*). Four lesson words are already in the earlier list (*magis*, *male*, *nūper*, *prope*): they stay review words and get `"lessons": [1, N]`, so "Lesson N only" asks them with that lesson's words. *quam* "how" and *ut* "as" are entries of their own beside the earlier *quam* "than" and *ut* "that". Without `--write` the script only reports. So for this textbook correct a word in the list or in the script's tables (a review word: in Second Year's lists, then build both), not in `vocab.json`.
+
+Its parsing sentences are Second Year's 139 items (First Year's among them), all usable from Lesson 1, plus 76 new items in 29 sentences written with Third Year's words (the `NEW` table in the script), each at the lesson that brings the last of its words:
+
+```bash
+node tools/build-henle3-items.js
 ```
 
 `curriculum.json` holds the display name, the number of lessons, the word for a lesson ("Lesson" or "Chapter") and a **grammar schedule**: the lesson in which each declension, conjugation, tense, voice and mood is first taught. The typed games open a row or column once the lesson filter reaches that number (or, with "Lesson N only", when it is that number). The Henle numbers come from the book's table of contents. A tense is one lesson number, or a map by conjugation where the book teaches it one conjugation at a time (`"present": {"1": 9, "2": 10, "3": 12, "4": 13, "3io": 37}`); `conjugation` says when each conjugation starts, `deponent` when deponents start, and `irregular` when each hand-table verb starts (`null` = not taught in this book; compounds follow their base verb). Every cell opens at the later of the verb's start and the tense's lesson, so *capiō* shows nothing before Lesson 37 and *sequor* nothing before 41.
@@ -438,10 +456,10 @@ The typed games generate every form from these entries with the rules engine in 
 ```
 
 - **Nouns:** `lemma`, `gen` (genitive singular; genitive plural for a plural-only noun), `gender` (m, f, n), `declension` ("1"–"5"). The stem comes from the genitive, so *ager, agrī* and *fīlius, fīliī* work by themselves; 2nd-declension -ius nouns get the vocative in -ī, 3rd-declension neuters and i-stems (`"i-stem"` flag: gen. pl. -ium; neuters also abl. -ī and nom./acc. pl. -ia), and the 4th and 5th declensions are all handled. Flags: `i-stem`, `plural-only`, `singular-only`, `no-vocative`. For an odd word, `"forms": {"sg.voc": "deus", "pl.nom": ["dī", "deī"]}` overrides single cells (a list means every spelling is accepted).
-- **Verbs:** `parts` (principal parts; three for a deponent, ending in "… sum"), `conjugation` ("1", "2", "3", "3io", "4" or "irregular"). Flags: `deponent`, `no-passive` (intransitive verbs: only the active column is shown). The verbs **sum, possum, eō, ferō, volō, nōlō, mālō, fīō** are hand-entered tables, not rules; give them `"conjugation": "irregular"`.
+- **Verbs:** `parts` (principal parts; three for a deponent, ending in "… sum"), `conjugation` ("1", "2", "3", "3io", "4" or "irregular"). Flags: `deponent`, `semi-deponent` (*audeō, audēre, ausus sum*: three parts ending in "… sum"; one Active column, active in the present system, the perfect system from the participle), `no-passive` (intransitive verbs: only the active column is shown). Compounds of *sum*, *eō* and *ferō* use the base verb's table (*adsum*, *obeō*, *afferō*, *offerō*, *dēferō*). The verbs **sum, possum, eō, ferō, volō, nōlō, mālō, fīō** are hand-entered tables, not rules; give them `"conjugation": "irregular"`.
 - **Adjectives:** `nom` (the nominative singular forms as the dictionary gives them, written out in full: three for `"declension": "1-2"`, two for `"declension": "3"`). A third-declension adjective can also have three (`["ācer", "ācris", "ācre"]`) or one with its genitive beside it (`"nom": ["audāx"], "gen": "audācis"`). The stem comes from the feminine, so *miser, misera* keeps its e and *integer, integra* and *noster, nostra* drop it. `-us` adjectives get the vocative in *-e* (*mī* for *meus*); third-declension adjectives decline as i-stems (abl. sg. *-ī*, gen. pl. *-ium*, neuter pl. *-ia*). Flags: `gen-ius` (genitive singular *-īus* and dative singular *-ī* in all genders; the neuter is taken as written, so *alius* has *aliud*), `singular-only` (*ūnus*). For an odd word, `"forms": {"f.sg.gen": ["alterīus", "alterius", "alīus", "aliae"]}` overrides single cells, keyed gender.number.case; a list means every spelling is accepted and the first is the one shown (the genitive and dative singular of *alius* are entered this way). The possessives *meus, tuus, suus, noster, vester* are entered as adjectives. An adjective with no `nom` and `declension` (*quot*, *duo*, *mīlle*) is not declined and counts as one of the "other words" below.
 - **Other words** (`pronoun`, `adverb`, `preposition`, `conjunction`, `indeclinable`, `other`, and adjectives that aren't declined by rule) are used to work out sentence availability and in the vocabulary game; give an optional `"forms": [...]` list for anything that inflects.
-- `review` (optional, `true` only): a word known from an earlier book. It is asked through every lesson, but is not one of any lesson's own words, so "Lesson N only" leaves it out. Only `henle2` uses it.
+- `review` (optional, `true` only): a word known from an earlier book. It is asked through every lesson, but is not one of any lesson's own words, so "Lesson N only" leaves it out. `henle2` and `henle3` use it. A review word that a lesson of the book boxes again also has `"lessons": [1, N]` and is asked in "Lesson N only".
 - `english` (optional, on any entry): the gloss shown under the entry in the typed games and asked in the vocabulary game; how to write one is under "The vocabulary game" above. Leave the field out when the meaning isn't known yet instead of guessing: the word is then only left out of the vocabulary game.
 - Spelling: write consonantal i as **j** the way Henle does (*jubeō*, *cūjus*). The games show it as j or i according to the student's spelling setting, and grading accepts i/j and u/v either way. Macrons are ignored unless the student turns on "strict macrons", and every correct form is shown with macrons.
 

@@ -1,0 +1,77 @@
+{
+  "id": "henle3",
+  "name": "Henle Third Year Latin",
+  "short": "Henle III",
+  "lessons": 21,
+  "lessonWord": "Lesson",
+  "_note": "The lessons are the 21 of Part IV, 'Exercises Based on Cicero' (pp. 209-344). They teach syntax (questions, wishes, conditions, the uses of the cases and the subordinate clauses) and assign the forms only as review of the GRAMMAR, so every declension, conjugation, tense, voice and mood is taken as known from the first two years and is open from Lesson 1. A verb still waits for the lesson whose VOCABULARY has it (mālō Lesson 9, nōlō Lesson 19). The future infinitive passive and the gerundive are not in the games. The words: the VOCABULARY of each lesson (gathered again in the Review Word List for Third Year, pp. 359-376), and the Classified Word List, First and Second Years (pp. 377-410), whose words are entered at Lesson 1 with \"review\": true.",
+  "_source": {
+    "L1": "direct questions; quis, quid",
+    "L2": "indirect questions",
+    "L3": "wishes",
+    "L4": "tense usage",
+    "L5": "use of demonstrative, reflexive, and intensive pronouns",
+    "L6": "conditional sentences",
+    "L7": "the vocative; commands",
+    "L8": "time; numerals",
+    "L9": "accusative with the infinitive",
+    "L10": "place; ablative absolute",
+    "L11": "the gerund and the gerundive (not in the games)",
+    "L12": "review",
+    "L13": "the genitive as an adjective equivalent; the dative of possession",
+    "L14": "general grammar review",
+    "L15": "common expressions of purpose",
+    "L16": "deliberative questions; concessive subjunctive",
+    "L17": "review of the ablative",
+    "L18": "result clauses; noun clauses introduced by quōminus and quod",
+    "L19": "comparative clauses; ablative of comparison",
+    "L20": "adversative clauses; genitive of the charge",
+    "L21": "causal clauses; ablative of cause, price; genitive of indefinite value"
+  },
+  "grammar": {
+    "nouns": {
+      "declension": { "1": 1, "2": 1, "3": 1, "4": 1, "5": 1 },
+      "vocative": 1
+    },
+    "adjectives": {
+      "declension": { "1-2": 1, "3": 1 },
+      "er": 1,
+      "gen-ius": 1
+    },
+    "verbs": {
+      "conjugation": { "1": 1, "2": 1, "3": 1, "4": 1, "3io": 1 },
+      "deponent": 1,
+      "irregular": {
+        "sum": 1,
+        "possum": 1,
+        "eō": 1,
+        "ferō": 1,
+        "volō": 1,
+        "nōlō": 1,
+        "mālō": 1,
+        "fīō": 1,
+        "dō": { "start": 1, "like": "1" }
+      },
+      "indicative": {
+        "active":  { "present": 1, "imperfect": 1, "future": 1, "perfect": 1, "pluperfect": 1, "future perfect": 1 },
+        "passive": { "present": 1, "imperfect": 1, "future": 1, "perfect": 1, "pluperfect": 1, "future perfect": 1 }
+      },
+      "subjunctive": {
+        "active":  { "present": 1, "imperfect": 1, "perfect": 1, "pluperfect": 1 },
+        "passive": { "present": 1, "imperfect": 1, "perfect": 1, "pluperfect": 1 }
+      },
+      "imperative": {
+        "active":  { "present": 1 },
+        "passive": { "present": 1 }
+      },
+      "infinitive": {
+        "active":  { "present": 1, "perfect": 1, "future": 1 },
+        "passive": { "present": 1, "perfect": 1, "future": null }
+      },
+      "participle": {
+        "active":  { "present": 1, "future": 1 },
+        "passive": { "perfect": 1 }
+      }
+    }
+  }
+}

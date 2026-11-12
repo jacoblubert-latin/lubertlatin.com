@@ -5,7 +5,7 @@
 //
 // Entry format (vocab.json):
 //   noun: { lemma, gen, gender: m|f|n, declension: "1".."5", flags?: ["i-stem","plural-only"], forms?: {...} }
-//   verb: { lemma, parts: [..], conjugation: "1"|"2"|"3"|"3io"|"4"|"irregular", flags?: ["deponent","no-passive"] }
+//   verb: { lemma, parts: [..], conjugation: "1"|"2"|"3"|"3io"|"4"|"irregular", flags?: ["deponent","semi-deponent","no-passive"] }
 //   adjective: { lemma, nom: [m, f, n] | [m/f, n], declension: "1-2"|"3", flags?: ["gen-ius","singular-only"] }
 // Rules handle 3rd-declension i-stems and neuters, 4th/5th declensions,
 // 2nd-declension -ius/-ium/-er nouns, -us/-er and third-declension
@@ -30,7 +30,7 @@
   var DECLENSIONS = ["1", "2", "3", "4", "5"];
   var CONJUGATIONS = ["1", "2", "3", "3io", "4", "irregular"];
   var NOUN_FLAGS = ["i-stem", "plural-only", "singular-only", "no-vocative"];
-  var VERB_FLAGS = ["deponent", "no-passive"];
+  var VERB_FLAGS = ["deponent", "semi-deponent", "no-passive"];
   var GENDERS = ["m", "f", "n"];
   var ADJ_DECLENSIONS = ["1-2", "3"];
   var ADJ_FLAGS = ["gen-ius", "singular-only"];
@@ -326,7 +326,10 @@
     var infEnding = dep ? DEP_INF_ENDING[c] : INF_ENDING[c];
     var pres = cut(inf, infEnding);            // laud, mon, dūc, cap, aud
     var perf = null, ppl = null;
-    if (dep) {
+    // audeō, audēre, ausus sum: active in the present system, the perfect
+    // system from the participle, as a deponent's is
+    var semi = hasFlag(entry, "semi-deponent");
+    if (dep || semi) {
       // sequor, sequī, secūtus sum
       var p3 = (parts[2] || "").replace(/\s+sum$/, "");
       if (p3) ppl = cut(p3, "us");
@@ -341,7 +344,7 @@
       }
     }
     // moritūrus and oritūrus are not made from mortuus and ortus
-    var fut = { morior: "morit", orior: "orit" }[normalize(entry.lemma)] || futureStem(dep ? parts[2] : parts[3]);
+    var fut = { morior: "morit", orior: "orit" }[normalize(entry.lemma)] || futureStem(dep || semi ? parts[2] : parts[3]);
     return { conj: c, pres: pres, perf: perf, ppl: ppl, fut: fut,
              impfSubj: pres + INF_ENDING[c].slice(0, -1) /* laudār, dūcer */ };
   }
@@ -574,7 +577,7 @@
   // principal parts supply the perfect stem (absum → āfu-).
   // Only sum, eō and ferō take prefixes (dēdō and reddō are 3rd conjugation).
   var COMPOUND_BASES = ["sum", "eō", "ferō"];
-  var PREFIXES = ["ab", "ad", "ante", "circum", "con", "dē", "dif", "ex", "in", "inter", "intrō", "ob", "per", "prae", "prō", "prōd", "re", "red", "sub", "super", "trāns"];
+  var PREFIXES = ["ab", "ad", "af", "ante", "circum", "con", "dē", "dif", "ex", "in", "inter", "intrō", "ob", "of", "per", "prae", "prō", "prōd", "re", "red", "sub", "super", "trāns"];
   function irregularFor(entry) {
     var key = normalize(entry.lemma);
     var found = null;
@@ -633,7 +636,7 @@
   //   no-passive / sum-type irregulars / fīō: ["active"]
   function verbVoices(entry) {
     if (hasFlag(entry, "deponent")) return ["deponent"];
-    if (hasFlag(entry, "no-passive")) return ["active"];
+    if (hasFlag(entry, "no-passive") || hasFlag(entry, "semi-deponent")) return ["active"];
     if (String(entry.conjugation) === "irregular") {
       var t = irregularFor(entry);
       if (!t) throw new Error("no hand-entered table for irregular verb " + entry.lemma);
@@ -662,6 +665,11 @@
       return regularSet(entry, stems, mood, tense, "passive");
     }
     if (voice === "deponent") return null;
+    if (hasFlag(entry, "semi-deponent")) {
+      if (voice !== "active") return null;
+      if (tense === "perfect" || tense === "pluperfect" || tense === "future perfect") return perfectPassive(stems.ppl, mood, tense);
+      return regularSet(entry, stems, mood, tense, "active");
+    }
     if (voice === "passive" && hasFlag(entry, "no-passive")) return null;
     return regularSet(entry, stems, mood, tense, voice);
   }
@@ -691,7 +699,8 @@
   // three functions below.
   function nonFiniteParts(entry) {
     var parts = entry.parts || [];
-    var noPassive = hasFlag(entry, "no-passive");
+    var semi = hasFlag(entry, "semi-deponent");
+    var noPassive = hasFlag(entry, "no-passive") || semi;
     if (String(entry.conjugation) === "irregular") {
       var hit = irregularFor(entry);
       if (!hit) throw new Error("no hand-entered table for irregular verb " + entry.lemma);
@@ -718,7 +727,7 @@
     var impA = add(S, IMPV_ACTIVE[c]);
     // dīc, dūc, fac (and addūc, dēdūc, trādūc…): no final -e in the singular.
     if (c === "3" && (endsWith(S, "dīc") || endsWith(S, "dūc"))) impA[0] = S;
-    if (c === "3io" && normalize(entry.lemma) === "facio") impA[0] = "fac";
+    if (c === "3io" && endsWith(normalize(entry.lemma), "facio")) impA[0] = S;   // fac, patefac (but interfice)
     return {
       impA: dep ? null : impA,
       impP: noPassive ? null : [S + INF_ENDING[c], S + P.pres[c][4]],        // laudāre, laudāminī; sequere, sequiminī
@@ -726,8 +735,8 @@
       infP: noPassive ? null : S + DEP_INF_ENDING[c],
       perf: s.perf, perfInfAlso: [],
       // A neuter fourth part (pugnātum) is not a participle that can be asked for.
-      ppl: s.ppl && !noPassive && (dep || endsWith(parts[3] || "", "us")) ? s.ppl : null,
-      perfFromPpl: false,
+      ppl: s.ppl && (semi || (!noPassive && (dep || endsWith(parts[3] || "", "us")))) ? s.ppl : null,
+      perfFromPpl: semi,                                             // ausus esse, ausus
       fut: s.fut,
       presPart: S + PRES_PART[c]
     };
@@ -1012,6 +1021,8 @@
       var activeForm = (section === "participle" && tense !== "perfect") || (section === "infinitive" && tense === "future");
       sv = activeForm ? "active" : "passive";
     }
+    // a semi-deponent's perfect participle (ausus) is taught with the passive one
+    if (hasFlag(entry, "semi-deponent") && section === "participle" && tense === "perfect") sv = "passive";
     var table = info.g[section] && info.g[section][sv];
     if (!table) return null;
     var tv = table[tense];
