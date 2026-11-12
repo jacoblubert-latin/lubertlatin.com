@@ -243,6 +243,7 @@
       if (whoText) sub.appendChild(S.make("b", null, whoText));
       if (item.entry.english) bits.push(item.entry.english);
       if (L.hasFlag(item.entry, "deponent")) bits.push("deponent");
+      if (L.hasFlag(item.entry, "semi-deponent")) bits.push("semi-deponent");
       if (bits.length) sub.appendChild(document.createTextNode((whoText ? " · " : "") + bits.join(" · ")));
       area.appendChild(sub);
 
@@ -410,6 +411,7 @@
     var bits = [];
     if (item.entry.english) bits.push(item.entry.english);
     if (L.hasFlag(item.entry, "deponent")) bits.push("deponent");
+    if (L.hasFlag(item.entry, "semi-deponent")) bits.push("semi-deponent");
     if (bits.length) sub.appendChild(S.make("span", "ws-gloss", " " + bits.join(" · ")));
     box.appendChild(sub);
     var cols = columnsFor(item.entry);

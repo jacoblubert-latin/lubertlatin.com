@@ -1,0 +1,319 @@
+# Henle, Third Year Latin, Part IV: every entry under a VOCABULARY heading, Lessons 1-21, as printed.
+# Tab-separated: lesson, dictionary entry, meaning, book page.
+# Entries the book braces together with one meaning are one row each, with that meaning repeated.
+# After correcting a line, run: node tools/build-henle3-vocab.js --write
+1	audācia, ae	boldness; daring; recklessness	209
+1	Catilīna, ae, m.	Catiline	209
+1	scientia, ae	knowledge	209
+1	vigilia, ae	night watch; guard	209
+1	oculus, ī	eye	209
+1	incendium, ī	fire; conflagration	209
+1	conjūrātiō, conjūrātiōnis	conspiracy; plot	209
+1	Cicerō, Cicerōnis	Cicero	209
+1	fīnis, fīnis, m.	end; (pl.) territory	209
+1	furor, furōris	rage; frenzy; madness	209
+1	mōs, mōris, m.	manner; custom; (pl.) character	209
+1	pestis, pestis	plague; ruin	209
+1	pūblicus, a, um	public	209
+1	nocturnus, a, um	nocturnal; nightly	209
+1	quam, adv.	how	209
+1	ignōrō, 1, tr.; acc. w. infin.	not know; am unaware; overlook	209
+1	convocō, 1, tr.	call together; summon together	210
+1	pateō, patēre, patuī, 2, intr.	lie open; am open; extend	210
+1	vītō, 1, tr.	avoid; shun	210
+1	jam, adv.	already; now	210
+1	vērō, adv. and conj.; postp.	in truth; but; of course	210
+1	jam prīdem	long (since); long (ago)	210
+1	jam diū	long (since); long (ago)	210
+1	jam dūdum	long (since); long (ago)	210
+2	poena, ae	punishment; penalty	216
+2	supplicium, ī	punishment; penalty	216
+2	cōnsultum, ī	decree; resolution (of the Senate)	216
+2	cīvis, cīvis, m.	citizen; fellow citizen	216
+2	orbis (orbis) terrārum (sometimes terrae)	world	216
+2	praetor, praetōris	praetor	216
+2	manus, ūs, f.	hand; band	216
+2	rēs (reī) pūblica (ae)	state	216
+2	rēs (rērum) novae (novārum)	revolution (lit., new things)	216
+2	antīquus, a, um	ancient; former	216
+2	clārus, a, um	famous; loud; clear	216
+2	perniciōsus, a, um	dangerous; destructive	216
+2	prīvātus, a, um	private; personal (personally)	216
+2	cōnsulāris, e	of consular rank; ex-consul (as a noun)	216
+2	apertē, adv.	openly; plainly	216
+2	omnīnō, adv.	altogether	216
+2	dēcernō, dēcernere, dēcrēvī, dēcrētus, 3, tr.; w. infin. if subject is the same; ut (nē) if subject is different	determine; decide; decree	216
+2	permittō, permittere, permīsī, permissus, 3, tr.; w. dat. of person; acc. of thing; ut (nē)	give over; entrust	217
+2	at, conj.	but	217
+2	quōmodo, adv.	how	217
+3	nēquitia, ae	criminal negligence; wickedness	222
+3	moenia, moenium	walls; fortifications	222
+3	jūs, jūris, n.	right; justice	222
+3	voluntās, voluntātis	will	222
+3	perniciēs, perniciēī	disaster; destruction	222
+3	improbus, a, um	wicked; depraved	222
+3	perditus, a, um	desperate; abandoned	222
+3	crūdēlis, e	cruel	222
+3	modus, ī	manner; kind	222
+3	ējus modī	of this kind; of this sort	222
+3	hūjus modī	of this kind; of this sort	222
+3	nōndum, adv.	not yet	222
+3	potius, adv.	rather	222
+3	comprehendō, comprehendere, comprehendī, comprehēnsus, 3, tr.	grasp (in a physical or intellectual sense); arrest	222
+3	crēscō, crēscere, crēvī, crētum, 3, intr.	grow; increase (in size, power, age, etc.)	222
+3	dēpōnō, dēpōnere, dēposuī, dēpositus, 3, tr.	lay down; give up	222
+3	mōlior, mōlīrī, mōlītus sum, 4, tr.	undertake	222
+3	inveniō, invenīre, invēnī, inventus, 4, tr.; acc. w. infin.	come upon; find (out); discover	223
+4	dīligentia, ae	care; carefulness	228
+4	mēns, mentis	mind	228
+4	coetus, ūs	meeting; gathering	228
+4	domus, ūs, f. (Gr. 67-68; 915-917)	home; house	228
+4	nefārius, a, um	wicked; impious	228
+4	atrōx (gen. atrōcis)	savage; fierce	228
+4	incrēdibilis, e	unbelievable; extraordinary	228
+4	admīror, 1, tr.	wonder at; am surprised at	228
+4	mūtō, 1, tr.	change	228
+4	audeō, audēre, ausus sum, 2, intr.; w. infin. (Gr. 345)	dare	228
+4	ērumpō, ērumpere, ērūpī, ēruptum, 3, intr.; ex (ē) w. abl.	burst forth; rush forth	228
+4	profugiō, profugere, profūgī, profugitum, 3, intr.	flee from; run away	228
+4	custōdiō, 4, tr.	guard	228
+4	oblīvīscor, oblīvīscī, oblītus sum, 3, tr.; w. gen. of persons, gen. or acc. of things, acc. of neuter prons. or adjs.; acc. w. infin.	forget	228
+4	meminī, meminisse, tr.; w. gen. of persons, gen. or acc. of things, acc. of neuter prons. or adjs.; acc. w. infin. (Gr. 436-442)	remember; bear in mind	228
+4	magis, comparative adv.	more	229
+4	multō, abl. of degree of difference (Gr. 771)	much; by much	229
+4	nōn modo . . . sed (etiam)	not only . . . but (also)	229
+4	nōn modo . . . vērum (etiam)	not only . . . but (also)	229
+5	exitium, ī	ruin; destruction	235
+5	scelus, sceleris, n.	crime	235
+5	complūrēs, complūra	several; many	235
+5	immortālis, e	immortal; deathless	235
+5	hīc, adv.	here	235
+5	plānē, adv.	clearly; plainly	235
+5	cotīdiē, adv.	daily	235
+5	īdem, eadem, idem (Gr. 137; 813-814)	same	235
+5	cōgitō, 1, tr. and intr.; acc. w. infin.	ponder; think; contemplate	235
+5	vulnerō, 1, tr.	wound	235
+5	taceō, 2, tr. and intr.	pass over in silence; am silent	235
+5	cōnfīdō, cōnfīdere, cōnfīsus sum, 3, intr.; w. dat. of person; abl. of thing; acc. w. infin.	trust; rely on	235
+6	līberō, 1, tr.	free; liberate	240
+6	placet, placēre, placuit, placitum, 2, intr.; w. dat.; w. infin.; acc. w. infin.; ut (nē)	it pleases; it seems good	240
+6	dēsīderō, 1, tr.	miss; long for	240
+6	comperiō, comperīre, comperī, compertus, 4, tr.; acc. w. infin.	find out; discover (as certain)	240
+6	ēdūcō, ēdūcere, ēdūxī, ēductus, 3, tr.	lead out	240
+6	praedīcō, praedīcere, praedīxī, praedictus, 3, tr.; acc. w. infin.	say; foretell	240
+6	statuō, statuere, statuī, statūtus, 3, tr.; w. infin.	set up; place; determine	240
+6	dēligō, dēligere, dēlēgī, dēlēctus, 3, tr.	choose; pick out	240
+6	quodsī, conj.	but if	240
+6	aliquandō, adv.	at some time; at length	240
+6	paulō, abl. of degree of difference (modifying ante, post, or a comparative)	(by) a little	240
+6	paulum, adv. or noun w. gen.	a little	240
+7	comitia, comitiōrum	assembly; elections	246
+7	exilium, ī	exile	246
+7	tēctum, ī	roof; house	246
+7	templum, ī	temple; shrine	246
+7	sevēritās, sevēritātis	strictness; sternness	246
+7	calamitās, calamitātis	disaster; misfortune	246
+7	tumultus, ūs	uproar; disorder	246
+7	īnfestus, a, um	hostile; threatening	246
+7	extrā, prep. w. acc.	outside (of); beyond	246
+7	quamquam, conj. (Gr. 595)	although; and yet	246
+7	quārē, adv. (quā + rē)	wherefore	246
+7	dubitō, 1, tr. and intr.; w. infin.; dē w. abl.	doubt; hesitate	246
+7	effugiō, effugere, effūgī, 3, tr. and intr.	flee from; escape	246
+7	metuō, metuere, metuī, 3, tr.; nē (nē nōn, ut); w. infin.	fear	246
+7	īnsidior, 1, intr.; w. dat.	waylay; plot	246
+7	ōdī, ōdisse, tr. (Gr. 443-448, 451)	hate	246
+7	meā (tuā, suā) sponte	of my (your, his, their) own accord	247
+7	quīdam, quiddam, defin. pronoun (Gr. 820)	a certain one; a certain thing	247
+7	quīdam, quaedam, quoddam (Gr. 820)	certain	247
+8	fāma, ae	reputation; fame; rumor	253
+8	difficultās, difficultātis	trouble; difficulty	253
+8	turpitūdō, turpitūdinis	shame; disgrace	253
+8	facinus, facinoris, n.	deed; misdeed; outrage	253
+8	domesticus, a, um	of the home; domestic	253
+8	nūper, adv.	recently	253
+8	umquam, adv.	ever; at any time	253
+8	vindicō, 1, tr.	punish; deliver; set free	253
+8	stō, stāre, stetī, statum, 1, intr.	stand	253
+8	sileō, silēre, siluī, 2, intr.	am silent; keep silent	253
+8	impendeō, impendēre, 2, intr.; w. dat.	overhang; threaten	253
+8	nesciō, 4, tr.; acc. w. infin.	not know; am ignorant	253
+9	frequentia, ae	crowd; throng	263
+9	jūdicium, ī	judgment; trial	263
+9	odium, ī	hatred	263
+9	aspectus, ūs	sight; look; appearance	263
+9	pārēns, pārentis, c.	parent	263
+9	jūstus, a, um	just; lawful	263
+9	obscūrus, a, um	obscure; dark	263
+9	quidem, adv.	indeed; at least	263
+9	ut, conj.	as; just as	263
+9	sīc . . . ut, conj.	as; just as	263
+9	careō, carēre, caruī, caritūrus, 2, intr.; w. abl.	am without; want; lack	263
+9	concēdō, concēdere, concessī, concessus, 3, tr. and intr.	withdraw; yield	263
+9	opprimō, opprimere, oppressī, oppressus, 3, tr.	overwhelm; surprise	263
+9	ēlābor, ēlābī, ēlāpsus sum, 3, intr.	slip away; escape	263
+9	cōnspicor, 1, tr.; acc. w. infin.	observe; perceive	263
+9	suspicor, 1, tr.; acc. w. infin.	suspect	263
+9	mālō, mālle, māluī, tr.; acc. w. infin.	prefer	263
+10	custōdia, ae	guard; custody	269
+10	patria, ae	fatherland; native land; country	269
+10	vinculum, ī	bond; (pl.) chains; (pl.) prison	269
+10	carcer, carceris	prison	269
+10	quaestiō, quaestiōnis	inquiry; investigation; law court	269
+10	impūnītus, a, um	unpunished	269
+10	dignus, a, um; w. abl. (Gr. 775)	worthy (of)	269
+10	falsus, a, um	false	269
+10	tacitus, a, um	silent; silently; quiet; quietly	269
+10	habitō, 1, tr.	live; dwell	269
+10	impetrō, 1, tr.; ab (ā) w. abl. of person; acc. of thing; ut (nē)	obtain (by asking)	269
+10	jūdicō, 1, tr.; acc. w. infin.	judge	269
+10	adhibeō, 2, tr.; ad w. acc.	employ; use	269
+10	valeō, valēre, valuī, 2, intr.; w. infin.	am strong; am influential; am well	269
+10	discēdō, discēdere, discessī, discessum, 3, intr.; ab (ā), ex (ē), or dē w. abl.	depart; withdraw	270
+11	invidia, ae	envy; hatred; unpopularity	274
+11	studium, ī	zeal; eagerness; devotion	274
+11	adulēscēns, adulēscentis	young man	274
+11	tempestās, tempestātis	storm; weather	274
+11	cārus, a, um	dear	274
+11	cēterī, ae, a (Gr. 829)	the rest (of); the remainder	274
+11	honestus, a, um	upright; honorable	274
+11	vix, adv.	hardly; scarcely; barely; with difficulty	274
+11	dummodo, conj. (Gr. 594)	if only; provided only; as long as	274
+11	clāmō, 1, tr.; acc. w. infin.	cry aloud; shout	274
+11	frangō, frangere, frēgī, frāctus, 3, tr.	break; destroy	274
+11	postulō, 1, tr.; ab (ā) w. abl. of person; acc. of thing; ut (nē); acc w. infin.	demand	274
+11	revocō, 1, tr.	call back; recall	274
+11	percipiō, percipere, percēpī, perceptus, 3, tr.; acc. w. infin.	learn of; perceive	275
+11	exaudiō, 4, tr.; acc. w. infin.	catch sound of; hear	275
+11	serviō, 4, intr.; w. dat.	serve	275
+12	laetitia, ae	joy; gladness	280
+12	inimīcus, ī	enemy (personal)	280
+12	gaudium, ī	delight; pleasure	280
+12	latrōcinium, ī	robbery; brigandage	280
+12	laus, laudis	praise	280
+12	voluptās, voluptātis	pleasure	280
+12	dexter, dextra, dextrum	on the right; right	280
+12	dexter, dextera, dexterum	on the right; right	280
+12	impius, a, um	impious; undutiful	280
+12	numquam, adv.	never	280
+12	armō, 1, tr.	arm; equip	280
+12	concitō, 1, tr.	stir up; instigate	280
+12	invītō, 1, tr.	invite	280
+12	exerceō, 2, tr.	train; carry on	280
+12	soleō, solēre, solitus sum, 2, intr.; w. infin.	am accustomed	280
+12	ējiciō, ējicere, ējēcī, ējectus, 3, tr.	throw out	280
+12	pariō, parere, peperī, partus, 3, tr.	bring forth; bear	280
+12	praemittō, praemittere, praemīsī, praemissus, 3, tr.	send ahead	280
+12	rapiō, rapere, rapuī, raptus, 3, tr.	snatch; seize	280
+12	afferō, afferre, attulī, allātus, irreg., tr.	bring to; report	281
+12	prōficiō, prōficere, prōfēcī, prōfectus, 3, tr.; ut (nē)	effect; accomplish	281
+12	trānsferō, trānsferre, trānstulī, trānslātus, irreg., tr.	carry over; transfer	281
+12	veneror, 1, tr.	reverence	281
+12	perfruor, perfruī, perfrūctus sum, 3, intr.; w. abl.	enjoy	281
+13	animus, ī	soul; mind; spirit	286
+13	auctor, auctōris	originator; author; instigator	286
+13	fortitūdō, fortitūdinis	courage; bravery	286
+13	amor, amōris	love	286
+13	sanguis, sanguinis, m.	blood	286
+13	vērus, a, um	true; real	286
+13	maximē, adv.	especially; mostly; mainly	286
+13	prope, adv.	almost; nearly	286
+13	cōnflagrō, 1, intr.	burn; am on fire	286
+13	ārdeō, ārdēre, ārsī, ārsum, 2, intr.; w. infin.	am aflame; blaze	286
+13	ēmittō, ēmittere, ēmīsī, ēmissus, 3, tr.	send forth; send out	286
+13	immittō, immittere, immīsī, immissus, 3, tr.	send into; send against	286
+14	īnsidiae, īnsidiārum	ambush; plot; snare	292
+14	imperītus, a, um; w. gen.	unskilled (in); inexperienced (in)	292
+14	nōnnūllī, ae, a	some	292
+14	paulisper, adv.	for a short time	292
+14	vērē, adv.	indeed; truly	292
+14	īnflammō, 1, tr.	set on fire	292
+14	congregō, 1, tr.	gather into a flock; gather together	292
+14	colligō, colligere, collēgī, collēctus, 3, tr.	bring together	292
+14	īnscrībō, īnscrībere, īnscrīpsī, īnscrīptus, 3, tr.	write on; inscribe	292
+14	intendō, intendere, intendī, intentus, 3, tr.; w. dat.; ad or in w. acc.	stretch to; am bound for	292
+14	comprimō, comprimere, compressī, compressus, 3, tr.	check	292
+14	patefaciō, patefacere, patefēcī, patefactus, 3, tr. (passive, patefīō)	open; disclose	292
+15	fātum, ī	prophetic utterance; fate; doom	296
+15	domicilium, ī	abode; domicile	296
+15	verbum, ī	word	296
+15	ignis, ignis, m.	fire	296
+15	magnitūdō, magnitūdinis	size; greatness	296
+15	condiciō, condiciōnis	condition; state; (pl.) terms	296
+15	pulcher, pulchra, pulchrum	beautiful	296
+15	manifestus, a, um	clear; evident	296
+15	salvus, a, um	safe	296
+15	breviter, adv.	briefly	296
+15	restō, restāre, restitī, 1, intr.	remain	296
+15	prōvideō, prōvidēre, prōvīdī, prōvīsus, 2, tr.; ut (nē)	see ahead; provide; take care	296
+15	expōnō, expōnere, exposuī, expositus, 3, tr.; acc. w. infin.	explain; disembark; line up	296
+15	condō, condere, condidī, conditus, 3, tr.	found; build	296
+16	opera, ae	services; pains; efforts	301
+16	mandātum, ī	instruction; order	301
+16	frequēns (gen. frequentis)	in large numbers; crowded	301
+16	nōtus, a, um	known; well-known	301
+16	deinde, adv.	next; thereupon	301
+16	optō, 1, tr.; w. infin.; ut (nē)	desire; hope for; pray for	301
+16	sollicitō, 1, tr.	stir up; tempt	301
+16	dēprehendō, dēprehendere, dēprehendī, dēprehēnsus, 3, tr.	catch; catch in the act; surprise	301
+16	offerō, offerre, obtulī, oblātus, irreg., tr.	present; offer	301
+16	dēferō, dēferre, dētulī, dēlātus, irreg., tr.; ad w. acc.	carry away; report (to)	301
+17	indicium, ī	information; proof	306
+17	potestās, potestātis	power	306
+17	īnfīnītus, a, um	endless; extensive	306
+17	studiōsus, a, um; w. gen.	fond of; eager for	306
+17	aliquis, aliquid (Gr. 815)	someone; something	306
+17	aliquis, aliqua, aliquod (Gr. 815)	some	306
+17	amō, 1, tr.	love	306
+17	indicō, 1, tr.; acc. w. infin.	point out; accuse	306
+17	recitō, 1, tr.	read aloud	306
+17	cūrō, 1, tr.; ut (nē)	care for; take care	306
+17	cēnseō, cēnsēre, cēnsuī, cēnsus, 2, tr.; ut (nē); acc. w. infin.	am of the opinion; think	306
+17	cōnfiteor, cōnfitērī, cōnfessus sum, 2, tr.; acc. w. infin.	admit; confess	306
+17	intrōdūcō, intrōdūcere, intrōdūxī, intrōductus, 3, tr.	bring in	306
+17	legō, legere, lēgī, lēctus, 3, tr.	read	306
+18	testis, testis, m.	witness	313
+18	aptus, a, um; w. dat.; ad w. acc.	fitted for; fitted to	313
+18	prīmum, adv.	first	313
+18	meritō, adv.	rightly; justly	313
+18	jūre, adv.	rightly; justly	313
+18	modo, adv.	only; just now	313
+18	palam, adv.	openly	313
+18	quōminus, conj. (Gr. 646)	from; that . . . not	313
+18	dēpellō, dēpellere, dēpulī, dēpulsus, 3, tr.	drive away; expel	313
+18	occurrō, occurrere, occurrī, occursum, 3, intr.; w. dat.	go to meet	313
+18	obeō, obīre, obiī, obitus, irreg., tr.	undergo	313
+18	pūniō, 4, tr.	punish	313
+18	cōnstat, cōnstāre, cōnstitit, 1, intr.; acc. w. infin.	it is certain	313
+18	accidit, accidere, accidit, 3, intr.; w. dat. of person; ut (ut nōn)	it happens	313
+19	vērum, ī	truth; reality	319
+19	monumentum, ī	monument; memorial	319
+19	externus, a, um	foreign	319
+19	male, adv.	badly; poorly	319
+19	ultrō, adv.	unasked; unprovoked	319
+19	convertō, convertere, convertī, conversus, 3, tr.	turn about	319
+19	nōlō, nōlle, nōluī, tr.; w. infin.; acc. w. infin.; ut (nē) (Gr. 405-407, 419-424)	am unwilling; do not wish	319
+20	īnfāmia, ae	dishonor; disgrace	325
+20	ēloquentia, ae	eloquence	325
+20	reus, ī	defendant; the accused (person)	325
+20	jūdex, jūdicis	judge; juror; (voc. pl.) gentlemen of the jury	325
+20	nātiō, nātiōnis	tribe; nation	325
+20	caput, capitis	head	325
+20	crīmen, crīminis	accusation; crime	325
+20	accūsō, 1, tr.; w. gen. of the charge	accuse	325
+20	condemnō, 1, tr.; w. gen. of the charge	condemn	325
+20	damnō, 1, tr.; w. acc. of person; gen. or abl. of thing	harm; condemn; sentence	325
+20	capite damnāre	to sentence to death	325
+20	adsum, adesse, adfuī, adfutūrus, irreg., intr.; w. dat.	am present; support	325
+21	industria, ae	exertion; hard work; energy	332
+21	pecūnia, ae	money	332
+21	nihilum, ī	nothing	332
+21	mercātor, mercātōris	merchant	332
+21	genus, generis, n.	race; kind	332
+21	anteā, adv.	before	332
+21	quasi, adv. and conj. (Gr. 611)	as if; just as; nearly	332
+21	emō, emere, ēmī, emptus, 3, tr.	buy	332
+21	vēndō, vēndere, vēndidī, vēnditus, 3, tr.	sell	332
+21	cōnstō, cōnstāre, cōnstitī, cōnstātum, 1, intr.; w. abl. or gen.	cost	332
+21	gaudeō, gaudēre, gāvīsus sum, 2, intr.	rejoice; am glad	332
+21	necesse est, esse, fuit, intr.; w. infin. (Gr. 641, 892)	it is necessary	332

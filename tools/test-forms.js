@@ -590,6 +590,33 @@ eq("verb cell: never taught", [openL(1, laudo, "imperative", "present", "passive
   const morior = { pos: "verb", lemma: "morior", parts: ["morior", "morī", "mortuus sum"], conjugation: "3io", flags: ["deponent"] };
   eq("morior: moritūrus", [L.participle(morior, "future", "deponent").form, L.infinitive(morior, "future", "deponent").form], ["moritūrus", "moritūrus esse"]);
 }
+// ---------- Third Year: semi-deponents, afferō and offerō, patefaciō ----------
+{
+  const audeo = { pos: "verb", lemma: "audeō", parts: ["audeō", "audēre", "ausus sum"], conjugation: "2", flags: ["semi-deponent"] };
+  eq("audeō: one column, active", L.verbVoices(audeo), ["active"]);
+  eq("audeō: present and imperfect are active", [forms(L.conjugateSet(audeo, "indicative", "present", "active"))[2], forms(L.conjugateSet(audeo, "subjunctive", "imperfect", "active"))[5]], ["audet", "audērent"]);
+  eq("audeō: the perfect system is from the participle", [
+    forms(L.conjugateSet(audeo, "indicative", "perfect", "active")),
+    forms(L.conjugateSet(audeo, "subjunctive", "pluperfect", "active"))[0]],
+    [["ausus sum", "ausus es", "ausus est", "ausī sumus", "ausī estis", "ausī sunt"], "ausus essem"]);
+  eq("audeō: no passive", L.conjugateSet(audeo, "indicative", "present", "passive"), null);
+  eq("audeō: imperative, infinitives, participles", [
+    L.imperativeSet(audeo, "active").map((x) => x.form), L.infinitive(audeo, "present", "active").form, L.infinitive(audeo, "perfect", "active").form,
+    L.infinitive(audeo, "future", "active").form, L.participle(audeo, "present", "active").form, L.participle(audeo, "perfect", "active").form, L.participle(audeo, "future", "active").form],
+    [["audē", "audēte"], "audēre", "ausus esse", "ausūrus esse", "audēns", "ausus", "ausūrus"]);
+  const confido = { pos: "verb", lemma: "cōnfīdō", parts: ["cōnfīdō", "cōnfīdere", "cōnfīsus sum"], conjugation: "3", flags: ["semi-deponent"] };
+  eq("cōnfīdō: cōnfīdet, cōnfīsus erat", [forms(L.conjugateSet(confido, "indicative", "future", "active"))[2], forms(L.conjugateSet(confido, "indicative", "pluperfect", "active"))[2]], ["cōnfīdet", "cōnfīsus erat"]);
+  const affero = { pos: "verb", lemma: "afferō", parts: ["afferō", "afferre", "attulī", "allātus"], conjugation: "irregular" };
+  const offero = { pos: "verb", lemma: "offerō", parts: ["offerō", "offerre", "obtulī", "oblātus"], conjugation: "irregular" };
+  eq("afferō, offerō have ferō's table", [L.hasIrregularTable(affero), L.hasIrregularTable(offero)], [true, true]);
+  eq("afferō: affers, attulit, allātus est; offerō: offertur, obtulisse", [
+    forms(L.conjugateSet(affero, "indicative", "present", "active"))[1], forms(L.conjugateSet(affero, "indicative", "perfect", "active"))[2],
+    forms(L.conjugateSet(affero, "indicative", "perfect", "passive"))[2], forms(L.conjugateSet(offero, "indicative", "present", "passive"))[2],
+    L.infinitive(offero, "perfect", "active").form], ["affers", "attulit", "allātus est", "offertur", "obtulisse"]);
+  const patefacio = { pos: "verb", lemma: "patefaciō", parts: ["patefaciō", "patefacere", "patefēcī", "patefactus"], conjugation: "3io" };
+  const interficio = { pos: "verb", lemma: "interficiō", parts: ["interficiō", "interficere", "interfēcī", "interfectus"], conjugation: "3io" };
+  eq("patefac, but interfice", [L.imperativeSet(patefacio, "active")[0].form, L.imperativeSet(interficio, "active")[0].form], ["patefac", "interfice"]);
+}
 
 if (failures) { console.error("\n" + failures + " of " + checks + " checks failed."); process.exit(1); }
 console.log("OK: " + checks + " checks passed.");

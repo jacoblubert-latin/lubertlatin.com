@@ -84,10 +84,11 @@
   // "review": true is known from an earlier book: it is in play through
   // every lesson, but no lesson's own words include it. A word boxed again
   // in later lessons ("lessons": [9, 17, 25]) is among each of those
-  // lessons' own words.
+  // lessons' own words; a review word boxed again ("review": true,
+  // "lessons": [1, 13]) is among the words of the lessons after the first.
   function asked(w) {
+    if (ctx.settings.lessonOnly && Array.isArray(w.lessons) && w.lessons.indexOf(lesson()) >= (w.review === true ? 1 : 0)) return true;
     if (ctx.settings.lessonOnly && w.review === true) return false;
-    if (ctx.settings.lessonOnly && Array.isArray(w.lessons) && w.lessons.indexOf(lesson()) >= 0) return true;
     return S.inLesson(S.lessonOf(w));
   }
   function filtered(list) {
