@@ -300,7 +300,7 @@ Optional: `printSheet()`, which returns any of
 | `columns`, `keyColumns` | 1 or 2: items side by side on the worksheet, and in the key | 1; the key follows the worksheet |
 | `macrons` | whether the student writes Latin, so the macron line is shown | true for a typed game |
 
-A game without `printItem` and `printAnswer` has no button. "Number of items" and "Include answer key" are not settings of the game: they are not saved and are not part of a link.
+A game without `printItem` and `printAnswer` has no button. Neither does a phone or tablet: printing from the page doesn't work there yet, so `canPrintSheets()` in `practice.js` leaves the button and its two controls off on those devices (it goes by the device, not the window's width; take the check out to turn them back on). "Number of items" and "Include answer key" are not settings of the game: they are not saved and are not part of a link.
 
 ### Textbooks (curricula)
 

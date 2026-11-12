@@ -644,8 +644,20 @@
     var n = sheetChoice != null && sheetChoiceFor === info.items ? sheetChoice : info.items;
     return Math.min(info.max, Math.max(1, n));
   }
+  // Printing a worksheet doesn't work on phones and tablets yet, so the
+  // button and its two controls are left off there. This goes by the device,
+  // not the width of the window: a narrow window on a computer still prints.
+  function canPrintSheets() {
+    if (typeof window.print !== "function") return false;
+    var ua = navigator.userAgent || "";
+    if (navigator.userAgentData && navigator.userAgentData.mobile) return false;
+    if (/Android|iPhone|iPad|iPod|Mobile/i.test(ua)) return false;
+    // (an iPad says it is a Mac; a Mac with a touch screen is an iPad)
+    if (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) return false;
+    return true;
+  }
   function buildSheetControls() {
-    if (sheetUi || !game.printItem || !game.printAnswer || !el.startButton) return;
+    if (sheetUi || !game.printItem || !game.printAnswer || !el.startButton || !canPrintSheets()) return;
     var actions = el.startButton.parentNode;
     var button = make("button", "btn btn-outline", "Print a worksheet");
     button.type = "button"; button.id = "print-button";
