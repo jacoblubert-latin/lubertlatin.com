@@ -9,6 +9,10 @@
 // under "Links for assignments".
 //
 // The shell's own parameters, in the order a link carries them:
+//   book=henle2         the textbook (a folder under /practice/data/), when it
+//                       isn't the page's own. A link with settings and no
+//                       book means the page's own textbook, as it did when
+//                       there was only one.
 //   lesson=5            the lesson slider (clamped to the game's range)
 //   only=1              "Lesson N only" (games that offer the choice)
 //   ...the game's own parameters, in the game's order...
@@ -72,6 +76,8 @@
     return Math.min(max, Math.max(min, parseInt(value, 10)));
   }
   function onOff(on) { return on ? "1" : "0"; }
+  // A textbook id (a data folder's name: "henle2"), else undefined.
+  function bookId(value) { return typeof value === "string" && /^[a-z0-9][a-z0-9-]{0,39}$/.test(value) ? value : undefined; }
 
   // ---------- reading a link ----------
   // game: the registered game object. opts: { min, max } the lesson range.
@@ -80,11 +86,12 @@
   //             plus lesson and lessonOnly (the shell's)
   //   typed     { strict?, spelling? } for a typed game
   //   start     true for start=1
+//   book      the textbook the link names (not counted as a setting)
   //   count     how many settings the link set (0: an ordinary visit)
   // Unknown parameters and bad values are left out, never an error.
   function read(query, game, opts) {
     var p = parseQuery(query);
-    var res = { settings: {}, typed: {}, start: p.start === "1", count: 0 };
+    var res = { settings: {}, typed: {}, start: p.start === "1", count: 0, book: bookId(p.book) };
     if (!game) return res;
     var lesson = lessonNumber(p.lesson, opts.min, opts.max);
     if (lesson !== undefined) { res.settings.lesson = lesson; res.count++; }
@@ -111,9 +118,11 @@
 
   // ---------- making a link ----------
   // Every setting as [name, value], in the link's fixed order.
-  // state: { settings, typed } (typed: { strict, spelling }, typed games only).
+  // state: { settings, typed, book } (typed: { strict, spelling }, typed games
+// only; book: the textbook's id).
   function pairs(game, state) {
     var s = state.settings || {}, out = [];
+    if (state.book) out.push(["book", String(state.book)]);
     if (s.lesson != null) out.push(["lesson", String(s.lesson)]);
     if (game.lessonOnlyChoice) out.push(["only", onOff(s.lessonOnly)]);
     if (game.toLink) {
@@ -140,7 +149,7 @@
   }
 
   var api = {
-    parseQuery: parseQuery, oneOf: oneOf, flag: flag, list: list, lessonNumber: lessonNumber, onOff: onOff,
+    parseQuery: parseQuery, oneOf: oneOf, flag: flag, list: list, lessonNumber: lessonNumber, onOff: onOff, bookId: bookId,
     read: read, pairs: pairs, build: build
   };
   return api;

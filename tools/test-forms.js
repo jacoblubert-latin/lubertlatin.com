@@ -267,7 +267,7 @@ eq("patior imperative", imp(patior, "deponent"), ["patere", "patiminī"]);
 eq("patior infinitives", infs(patior, "deponent"), ["patī", "passus esse", "passūrus esse"]);
 eq("patior participles", parts3(patior, "deponent"), ["patiēns", "passus", "passūrus"]);
 eq("hortor, vereor, orior infinitives", [hortor, vereor, V(["orior", "orīrī", "ortus sum"], "4", ["deponent"])].map((e) => infs(e, "deponent")),
-  [["hortārī", "hortātus esse", "hortātūrus esse"], ["verērī", "veritus esse", "veritūrus esse"], ["orīrī", "ortus esse", "ortūrus esse"]]);
+  [["hortārī", "hortātus esse", "hortātūrus esse"], ["verērī", "veritus esse", "veritūrus esse"], ["orīrī", "ortus esse", "oritūrus esse"]]);
 eq("deponent has no active column", [imp(sequor), infs(sequor), parts3(sequor)], [null, [null, null, null], [null, null, null]]);
 
 // Hand tables.
@@ -554,6 +554,42 @@ eq("verb cell: word later than the grammar", [openL(24, laudo, "indicative", "pr
 eq("verb cell: -iō verbs and deponents", [openL(14, capio, "indicative", "present", "active"), openL(14, capio, "indicative", "perfect", "active"),
   openL(41, sequor, "indicative", "present", "deponent")], [37, 37, 41]);
 eq("verb cell: never taught", [openL(1, laudo, "imperative", "present", "passive"), openL(1, fero, "indicative", "present", "active")], [null, null]);
+
+// ---------- Second Year: adjectives of three endings and of one ----------
+{
+  const acer = { pos: "adjective", lemma: "ācer", nom: ["ācer", "ācris", "ācre"], declension: "3" };
+  const audax = { pos: "adjective", lemma: "audāx", nom: ["audāx"], gen: "audācis", declension: "3" };
+  const diligens = { pos: "adjective", lemma: "dīligēns", nom: ["dīligēns"], gen: "dīligentis", declension: "3" };
+  const a = L.declineAdjective(acer), x = L.declineAdjective(audax), g = L.declineAdjective(diligens);
+  eq("ācer nominatives", [a.m.sg.nom, a.f.sg.nom, a.n.sg.nom], ["ācer", "ācris", "ācre"]);
+  eq("ācer m sg", a.m.sg, { nom: "ācer", gen: "ācris", dat: "ācrī", acc: "ācrem", abl: "ācrī", voc: "ācer" });
+  eq("ācer n pl", a.n.pl, { nom: "ācria", gen: "ācrium", dat: "ācribus", acc: "ācria", abl: "ācribus", voc: "ācria" });
+  eq("audāx sg: one nominative, neuter accusative like it", [x.m.sg.nom, x.f.sg.nom, x.n.sg.nom, x.m.sg.acc, x.n.sg.acc, x.f.sg.abl], ["audāx", "audāx", "audāx", "audācem", "audāx", "audācī"]);
+  eq("audāx pl", [x.m.pl.nom, x.n.pl.nom, x.f.pl.gen], ["audācēs", "audācia", "audācium"]);
+  eq("dīligēns", [g.m.sg.gen, g.n.sg.acc, g.n.pl.acc, g.m.pl.gen], ["dīligentis", "dīligēns", "dīligentia", "dīligentium"]);
+  eq("entry text, one ending", [L.adjectiveEntryText(audax), L.adjectiveEntryText(acer)], ["audāx (gen. audācis)", "ācer, ācris, ācre"]);
+  let threw = false;
+  try { L.declineAdjective({ pos: "adjective", lemma: "audāx", nom: ["audāx"], declension: "3" }); } catch (e) { threw = true; }
+  eq("one ending without gen is an error", threw, true);
+  eq("agreement: mīles audāx, flūmen ācre", [
+    L.agreeAdjective(audax, { gender: "m" }, "acc", "sg"), L.agreeAdjective(acer, { gender: "n" }, "nom", "sg")], ["audācem", "ācre"]);
+}
+// ---------- Second Year: dēsum, the compounds of ferō, morior ----------
+{
+  const desum = { pos: "verb", lemma: "dēsum", parts: ["dēsum", "deesse", "dēfuī", "dēfutūrus"], conjugation: "irregular", flags: ["no-passive"] };
+  eq("dēsum: dē- is short before a vowel", forms(L.conjugateSet(desum, "indicative", "present", "active")), ["dēsum", "dees", "deest", "dēsumus", "deestis", "dēsunt"]);
+  eq("dēsum imperfect, perfect", [forms(L.conjugateSet(desum, "indicative", "imperfect", "active"))[2], forms(L.conjugateSet(desum, "indicative", "perfect", "active"))[2]], ["deerat", "dēfuit"]);
+  const differo = { pos: "verb", lemma: "differō", parts: ["differō", "differre", "distulī", "dīlātus"], conjugation: "irregular" };
+  const refero = { pos: "verb", lemma: "referō", parts: ["referō", "referre", "rettulī", "relātus"], conjugation: "irregular" };
+  eq("differō, referō have ferō's table", [L.hasIrregularTable(differo), L.hasIrregularTable(refero)], [true, true]);
+  eq("differō: present, perfect, perfect passive", [
+    forms(L.conjugateSet(differo, "indicative", "present", "active"))[1],
+    forms(L.conjugateSet(differo, "indicative", "perfect", "active"))[5],
+    forms(L.conjugateSet(differo, "indicative", "perfect", "passive"))[2]], ["differs", "distulērunt", "dīlātus est"]);
+  eq("referō: rettulit, refer", [forms(L.conjugateSet(refero, "indicative", "perfect", "active"))[2], L.imperativeSet(refero, "active")[0].form], ["rettulit", "refer"]);
+  const morior = { pos: "verb", lemma: "morior", parts: ["morior", "morī", "mortuus sum"], conjugation: "3io", flags: ["deponent"] };
+  eq("morior: moritūrus", [L.participle(morior, "future", "deponent").form, L.infinitive(morior, "future", "deponent").form], ["moritūrus", "moritūrus esse"]);
+}
 
 if (failures) { console.error("\n" + failures + " of " + checks + " checks failed."); process.exit(1); }
 console.log("OK: " + checks + " checks passed.");

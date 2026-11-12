@@ -52,7 +52,7 @@ const ITEM_OPTIONAL = ["available"];
 // ---------- vocab entries ----------
 const POS = ["noun", "verb", "adjective", "pronoun", "adverb", "preposition", "conjunction", "indeclinable", "other"];
 const VOCAB_FIELDS = ["id", "curriculum", "lesson", "pos", "lemma"];
-const VOCAB_OPTIONAL = ["english", "flags", "available", "forms", "stem", "gen", "gender", "declension", "parts", "conjugation", "nom"];
+const VOCAB_OPTIONAL = ["english", "review", "flags", "available", "forms", "stem", "gen", "gender", "declension", "parts", "conjugation", "nom"];
 
 const trim = (w) => w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
 const isStr = (v) => typeof v === "string" && v.trim().length > 0;
@@ -167,6 +167,7 @@ function validateVocab(vocab, ctx) {
     if (!isStr(e.lemma)) err("lemma must be a non-empty string");
     checkLessons(e, err, ctx.curriculumId, ctx.lessonMax, ctx.lessonMaxFor);
     if (!POS.includes(e.pos)) { err("pos must be one of: " + POS.join(", ")); return; }
+    if ("review" in e && e.review !== true) err("review must be true (a word known from an earlier book), or left out");
     if ("english" in e && (typeof e.english !== "string" || !e.english.trim())) err("english must be a non-empty string (leave the field out if the gloss is not known yet)");
     if ("flags" in e) {
       const allowed = e.pos === "noun" ? L.NOUN_FLAGS : e.pos === "verb" ? L.VERB_FLAGS : e.pos === "adjective" ? L.ADJ_FLAGS : [];
@@ -198,9 +199,12 @@ function validateVocab(vocab, ctx) {
     } else if (e.pos === "adjective" && ("declension" in e || "nom" in e)) {
       // A declined adjective: "nom" + "declension". (quot, duo, mīlle… have neither and fall through below.)
       if (!L.ADJ_DECLENSIONS.includes(String(e.declension))) { err("adjective declension " + JSON.stringify(e.declension) + " is not one of: " + L.ADJ_DECLENSIONS.join(", ")); return; }
-      const want = String(e.declension) === "3" ? 2 : 3;
-      if (!Array.isArray(e.nom) || e.nom.length !== want || !e.nom.every(isStr)) err("a declension " + e.declension + " adjective needs \"nom\" with " + want + " forms (" + (want === 2 ? "gravis, grave" : "magnus, magna, magnum") + ")");
+      const third = String(e.declension) === "3";
+      const lengthOk = Array.isArray(e.nom) && e.nom.every(isStr) && (third ? e.nom.length >= 1 && e.nom.length <= 3 : e.nom.length === 3);
+      if (!lengthOk) err(third ? "a declension 3 adjective needs \"nom\": gravis, grave; or ācer, ācris, ācre; or audāx alone with \"gen\": \"audācis\"" : "a declension 1-2 adjective needs \"nom\" with 3 forms (magnus, magna, magnum)");
       else {
+        if (third && e.nom.length === 1 && !isStr(e.gen)) err("an adjective of one ending needs \"gen\" (audāx: \"gen\": \"audācis\")");
+        if ("gen" in e && !(third && e.nom.length === 1)) err("\"gen\" only belongs on a third-declension adjective of one ending (audāx)");
         if (isStr(e.lemma) && e.nom[0] !== e.lemma) err("nom[0] is " + JSON.stringify(e.nom[0]) + " but the lemma is " + JSON.stringify(e.lemma));
         try { L.declineAdjective(e); } catch (x) { err("cannot decline: " + x.message); }
       }
@@ -210,7 +214,7 @@ function validateVocab(vocab, ctx) {
         if (!(isStr(v) || (Array.isArray(v) && v.length && v.every(isStr)))) err("forms." + k + " must be a form or a list of accepted forms");
       });
       if (Array.isArray(e.flags) && e.flags.includes("gen-ius") && String(e.declension) !== "1-2") err("flag \"gen-ius\" only goes with declension \"1-2\"");
-      for (const k of ["gen", "gender", "parts", "conjugation", "stem"]) if (k in e) err("\"" + k + "\" does not belong on an adjective");
+      for (const k of ["gender", "parts", "conjugation", "stem"]) if (k in e) err("\"" + k + "\" does not belong on an adjective");
     } else {
       if ("flags" in e && e.pos === "adjective" && Array.isArray(e.flags) && e.flags.length) err("flags on an adjective need \"nom\" and \"declension\"");
       if ("forms" in e && (!Array.isArray(e.forms) || !e.forms.every(isStr))) err("forms must be an array of strings for a " + e.pos);
