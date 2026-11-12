@@ -20,7 +20,7 @@ global.window = { LatinForms: L, LatinPractice: { register: (g) => { games[g.id]
 ["parse", "decline", "synopsis", "vocab"].forEach((id) => require(path.join("..", "site", "js", "games", id + ".js")));
 
 const MIN = 1, MAX = 42;
-const TYPED_DEFAULTS = { strict: false, spelling: "henle" };
+const TYPED_DEFAULTS = { strict: false, spelling: "classical" };
 // A game set up the way the shell's boot() does it, without a page.
 function open(id) {
   const game = games[id];
@@ -81,9 +81,9 @@ eq("lessonNumber: not a whole number", [K.lessonNumber("abc", 1, 42), K.lessonNu
   [undefined, undefined, undefined, undefined, undefined]);
 
 // ---------- reading: each game's parameters ----------
-let v = visit("decline", "?lesson=5&mode=single&decl=1,2&voc=1&macrons=strict&spelling=classical");
+let v = visit("decline", "?lesson=5&mode=single&decl=1,2&voc=1&macrons=strict&spelling=henle");
 eq("decline: reads all", v.settings, { lesson: 5, lessonOnly: false, mode: "single", phraseForm: "table", vocative: true, declensions: ["1", "2"] });
-eq("decline: typed", v.typed, { strict: true, spelling: "classical" });
+eq("decline: typed", v.typed, { strict: true, spelling: "henle" });
 eq("decline: count", [v.res.count, v.res.start], [6, false]);
 v = visit("decline", "?mode=phrase&form=single&start=1");
 eq("decline: noun + adjective, single form", [v.settings.mode, v.settings.phraseForm, v.res.start], ["phrase", "single", true]);
@@ -99,7 +99,7 @@ eq("synopsis: a link can set a default back", [v.settings.mode, v.settings.subju
 
 v = visit("vocab", "?lesson=3&only=1&dir=en-la&pos=verb,noun&macrons=strict");
 eq("vocab: reads all", v.settings, { lesson: 3, lessonOnly: true, dir: "en-la", pos: ["noun", "verb"] });
-eq("vocab: typed", v.typed, { strict: true, spelling: "henle" });
+eq("vocab: typed", v.typed, { strict: true, spelling: "classical" });
 v = visit("vocab", "?only=0", { lesson: 9, lessonOnly: true });
 eq("vocab: only=0 over a saved only", [v.settings.lesson, v.settings.lessonOnly], [9, false]);
 
@@ -131,18 +131,18 @@ eq("negative lesson", visit("vocab", "?lesson=-4").settings.lesson, MIN);
 eq("clamped to the game's own range", K.read("?lesson=1", games.synopsis, { min: 4, max: 42 }).settings.lesson, 4);
 
 // ---------- the link goes over the saved settings; the rest are kept ----------
-v = visit("decline", "?lesson=5&mode=single", { lesson: 20, mode: "phrase", phraseForm: "single", vocative: true, declensions: ["3"] }, { strict: true, spelling: "classical" });
+v = visit("decline", "?lesson=5&mode=single", { lesson: 20, mode: "phrase", phraseForm: "single", vocative: true, declensions: ["3"] }, { strict: true, spelling: "henle" });
 eq("decline: link over saved", v.settings, { lesson: 5, lessonOnly: false, mode: "single", phraseForm: "single", vocative: true, declensions: ["3"] });
-eq("decline: saved typed settings kept", v.typed, { strict: true, spelling: "classical" });
-v = visit("decline", "?macrons=optional", null, { strict: true, spelling: "classical" });
-eq("decline: macrons=optional over saved strict", v.typed, { strict: false, spelling: "classical" });
+eq("decline: saved typed settings kept", v.typed, { strict: true, spelling: "henle" });
+v = visit("decline", "?macrons=optional", null, { strict: true, spelling: "henle" });
+eq("decline: macrons=optional over saved strict", v.typed, { strict: false, spelling: "henle" });
 v = visit("vocab", "", { lesson: 8, lessonOnly: true, dir: "en-la", pos: ["verb"] });
 eq("vocab: no query string, saved settings as they were", [v.settings, v.res.count], [{ lesson: 8, lessonOnly: true, dir: "en-la", pos: ["verb"] }, 0]);
 
 // ---------- making a link ----------
 ["parse", "decline", "synopsis", "vocab"].forEach((id) => eq(id + ": the defaults make no query string", linkFor(id, {}), ""));
-eq("decline link", linkFor("decline", { lesson: 5, mode: "single", vocative: true, declensions: ["1", "2"] }, { strict: true, spelling: "classical" }),
-  "lesson=5&mode=single&decl=1,2&voc=1&macrons=strict&spelling=classical");
+eq("decline link", linkFor("decline", { lesson: 5, mode: "single", vocative: true, declensions: ["1", "2"] }, { strict: true, spelling: "henle" }),
+  "lesson=5&mode=single&decl=1,2&voc=1&macrons=strict&spelling=henle");
 eq("decline link: noun + adjective", linkFor("decline", { mode: "phrase", phraseForm: "single" }), "mode=phrase&form=single");
 eq("synopsis link", linkFor("synopsis", { lesson: 17, mode: "single", subjunctive: false, imperative: false, nonfinite: false }), "lesson=17&mode=single&subj=0&imp=0&nonfinite=0");
 eq("vocab link", linkFor("vocab", { lesson: 3, lessonOnly: true, dir: "en-la", pos: ["noun", "verb"] }), "lesson=3&only=1&dir=en-la&pos=noun,verb");
@@ -159,12 +159,12 @@ eq("stable order: vocab", linkFor("vocab", { pos: ["other", "noun"], dir: "en-la
 const cases = [
   ["parse", { lesson: 12, types: "verb" }, null],
   ["parse", { types: "noun" }, null],
-  ["decline", { lesson: 5, mode: "single", vocative: true, declensions: ["1", "2", "3"] }, { strict: true, spelling: "classical" }],
-  ["decline", { lesson: 30, mode: "phrase", phraseForm: "single", declensions: ["3"] }, { strict: false, spelling: "classical" }],
-  ["decline", { vocative: true }, { strict: true, spelling: "henle" }],
-  ["synopsis", { lesson: 17, mode: "single", subjunctive: false, imperative: false, nonfinite: false }, { strict: true, spelling: "henle" }],
+  ["decline", { lesson: 5, mode: "single", vocative: true, declensions: ["1", "2", "3"] }, { strict: true, spelling: "henle" }],
+  ["decline", { lesson: 30, mode: "phrase", phraseForm: "single", declensions: ["3"] }, { strict: false, spelling: "henle" }],
+  ["decline", { vocative: true }, { strict: true, spelling: "classical" }],
+  ["synopsis", { lesson: 17, mode: "single", subjunctive: false, imperative: false, nonfinite: false }, { strict: true, spelling: "classical" }],
   ["synopsis", { nonfinite: false }, null],
-  ["vocab", { lesson: 3, lessonOnly: true, dir: "en-la", pos: ["noun", "verb"] }, { strict: true, spelling: "classical" }],
+  ["vocab", { lesson: 3, lessonOnly: true, dir: "en-la", pos: ["noun", "verb"] }, { strict: true, spelling: "henle" }],
   ["vocab", { pos: ["other"] }, null]
 ];
 cases.forEach(([id, settings, typed], i) => {

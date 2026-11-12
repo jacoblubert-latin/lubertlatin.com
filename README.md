@@ -158,7 +158,7 @@ Every game:
 | `lesson` | a whole number | The lesson slider. A number outside the game's range is brought to the nearest end (`lesson=999` is the last lesson). Default: the last lesson. |
 | `only` | `1`, `0` | "Lesson N only" (`1`) or "Through Lesson N" (`0`, the default). Only in games that show the choice (Vocabulary); ignored elsewhere. |
 | `macrons` | `strict`, `optional` | Strict macrons on or off (default `optional`). Typed games: Decline, Synopsis, Vocabulary. |
-| `spelling` | `henle`, `classical` | Spelling on screen: j (default `henle`) or i. Typed games. |
+| `spelling` | `classical`, `henle` | Spelling on screen: i (default `classical`) or j. Typed games. The start screen has no control for it, so a link is the only way to get j. |
 | `start` | `1` | Skip the start screen and begin the round. If the settings leave nothing to ask, the start screen is shown with its note instead. Never part of a copied link; add `&start=1` by hand. |
 
 Parsing drill (`/practice/`):
@@ -416,7 +416,7 @@ Adjectives have their own lines in the schedule:
 - **Mode.** *Latin → English* shows the dictionary entry (*mīles, mīlitis, m.*; *laudō, laudāre, laudāvī, laudātus*; the nominatives of an adjective; the lemma of anything else) and four glosses to pick from. *English → Latin* shows the gloss and the part of speech, and the student types the first dictionary form (*mīles*, *laudō*). A full dictionary entry typed in the box is graded on its first word.
 - **Parts of speech.** Nouns, Verbs, Adjectives, Other (pronouns, adverbs, prepositions, conjunctions, phrases); all on to begin with. A box is struck through until the chosen lesson has a word of that kind.
 - **Lesson.** The words through the chosen lesson, by each word's `lesson`, ten to a round; or with "Lesson N only" the words of that lesson alone, every one of them in the round. The note under the slider says how many are in play.
-- **Typing and Spelling** are the shared settings of the typed games: macrons optional unless strict macrons is on, i/j and u/v accepted either way, Henle (j) or classical (i) spelling on screen.
+- **Typing and Spelling** are the shared settings of the typed games: macrons optional unless strict macrons is on, i/j and u/v accepted either way. Spelling on screen is classical (i); the Henle (j) / Classical (i) choice is hidden. To bring it back, set `SPELLING_CHOICE` to `true` in `site/js/practice.js`; `SPELLING_DEFAULT` beside it sets what students start with.
 - **Wrong options** in multiple choice are the glosses of three other words open at the chosen lesson: the same part of speech where there are enough, never a gloss that is the same as the right one or shares a meaning with it (a word glossed "fear, dread" would never be offered beside *timor*, "fear"), and no two alike. A word with fewer than three such options is left out of multiple choice, and if that leaves nothing the start screen says there are too few words; with the Henle data every word has them from Lesson 1.
 - **Two words, one gloss.** Where two open words of the same part of speech are asked by the same gloss (*exīstimō* and *putō*, "think"; *et* and *atque*, "and"), English → Latin accepts either, shows both in the feedback and asks that gloss only once in a round.
 - After each answer the feedback shows the full entry with macrons and the whole gloss, and the end-of-round review lists each missed word the same way.
@@ -461,7 +461,7 @@ The typed games generate every form from these entries with the rules engine in 
 - **Other words** (`pronoun`, `adverb`, `preposition`, `conjunction`, `indeclinable`, `other`, and adjectives that aren't declined by rule) are used to work out sentence availability and in the vocabulary game; give an optional `"forms": [...]` list for anything that inflects.
 - `review` (optional, `true` only): a word known from an earlier book. It is asked through every lesson, but is not one of any lesson's own words, so "Lesson N only" leaves it out. `henle2` and `henle3` use it. A review word that a lesson of the book boxes again also has `"lessons": [1, N]` and is asked in "Lesson N only".
 - `english` (optional, on any entry): the gloss shown under the entry in the typed games and asked in the vocabulary game; how to write one is under "The vocabulary game" above. Leave the field out when the meaning isn't known yet instead of guessing: the word is then only left out of the vocabulary game.
-- Spelling: write consonantal i as **j** the way Henle does (*jubeō*, *cūjus*). The games show it as j or i according to the student's spelling setting, and grading accepts i/j and u/v either way. Macrons are ignored unless the student turns on "strict macrons", and every correct form is shown with macrons.
+- Spelling: write consonantal i as **j** the way Henle does (*jubeō*, *cūjus*). The games show it as i (or as j, if the spelling setting is switched back on or a link asks for it), and grading accepts i/j and u/v either way. Macrons are ignored unless the student turns on "strict macrons", and every correct form is shown with macrons.
 
 ### Proofing the generator
 

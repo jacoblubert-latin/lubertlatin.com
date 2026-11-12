@@ -128,17 +128,23 @@
   function lessonName(n) { return curriculum.lessonWord + " " + (n == null ? ctx.settings.lesson : n); }
 
   // ---------- typed-answer kit (used by the decline and synopsis games) ----------
+  // Spelling on screen: "classical" writes consonantal i as i, "henle" as j.
+  // SPELLING_CHOICE puts the Henle (j) / Classical (i) choice back on the
+  // start screen of the typed games; while it is off every student gets
+  // SPELLING_DEFAULT (a saved choice is ignored; a link's spelling= still works).
+  var SPELLING_CHOICE = false;
+  var SPELLING_DEFAULT = "classical";
   var typed = {
-    settings: { strict: false, spelling: "henle" },
+    settings: { strict: false, spelling: SPELLING_DEFAULT },
     load: function () {
       var s = readJSON(TYPED_KEY);
       if (s) {
         if (typeof s.strict === "boolean") typed.settings.strict = s.strict;
-        if (s.spelling === "henle" || s.spelling === "classical") typed.settings.spelling = s.spelling;
+        if (SPELLING_CHOICE && (s.spelling === "henle" || s.spelling === "classical")) typed.settings.spelling = s.spelling;
       }
     },
     save: function () { writeJSON(TYPED_KEY, typed.settings); },
-    // Start-screen controls: strict macrons + spelling convention.
+    // Start-screen controls: strict macrons (+ spelling convention, if on).
     renderSettings: function (container) {
       var fs = make("fieldset", "drill-fieldset");
       fs.appendChild(make("legend", null, "Typing"));
@@ -146,13 +152,15 @@
       row.appendChild(choice("checkbox", "strict", "1", "Strict macrons", typed.settings.strict));
       fs.appendChild(row);
       container.appendChild(fs);
-      var fs2 = make("fieldset", "drill-fieldset");
-      fs2.appendChild(make("legend", null, "Spelling"));
-      var row2 = make("div", "choice-row");
-      row2.appendChild(choice("radio", "spelling", "henle", "Henle (j)", typed.settings.spelling === "henle"));
-      row2.appendChild(choice("radio", "spelling", "classical", "Classical (i)", typed.settings.spelling === "classical"));
-      fs2.appendChild(row2);
-      container.appendChild(fs2);
+      if (SPELLING_CHOICE) {
+        var fs2 = make("fieldset", "drill-fieldset");
+        fs2.appendChild(make("legend", null, "Spelling"));
+        var row2 = make("div", "choice-row");
+        row2.appendChild(choice("radio", "spelling", "henle", "Henle (j)", typed.settings.spelling === "henle"));
+        row2.appendChild(choice("radio", "spelling", "classical", "Classical (i)", typed.settings.spelling === "classical"));
+        fs2.appendChild(row2);
+        container.appendChild(fs2);
+      }
       var note = make("p", "fine", "Macrons are ignored unless strict macrons is on. i/j and u/v are always accepted either way.");
       container.appendChild(note);
     },
@@ -160,7 +168,7 @@
       var s = form.querySelector("input[name=strict]");
       typed.settings.strict = !!(s && s.checked);
       var sp = form.querySelector("input[name=spelling]:checked");
-      typed.settings.spelling = sp ? sp.value : "henle";
+      if (sp) typed.settings.spelling = sp.value;
       // (on a visit from a shared link they are saved with the rest, at Start)
       if (!link.active) typed.save();
     },
@@ -946,7 +954,7 @@
         bounds = g.lessonBounds();
         if (!isFinite(bounds.min) || !isFinite(bounds.max)) throw new Error("No items");
         ctx.settings.lesson = bounds.max; // default: everything unlocked
-        link.defaults = { settings: JSON.parse(JSON.stringify(ctx.settings)), typed: g.typed ? { strict: false, spelling: "henle" } : null, book: defaultCurriculum };
+        link.defaults = { settings: JSON.parse(JSON.stringify(ctx.settings)), typed: g.typed ? { strict: false, spelling: SPELLING_DEFAULT } : null, book: defaultCurriculum };
         loadSettings();
         ctx.settings.lesson = clampLesson(ctx.settings.lesson);
         applyLink();
