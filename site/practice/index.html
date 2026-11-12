@@ -78,6 +78,10 @@
 
           <!-- ===== Start screen ===== -->
           <form id="screen-start" class="drill-card drill-start" hidden>
+            <!-- Shown by js/practice.js when the page was opened from a link that carries settings. -->
+            <p class="fine link-note" id="link-note" hidden>Settings from a shared link.
+              <button type="button" class="link-button" id="link-reset">Use my saved settings</button>
+            </p>
             <div id="start-options"></div>
             <div class="drill-fieldset">
               <label for="lesson-number" class="lesson-label"><span id="lesson-label-text">Lesson </span><output id="lesson-output" for="lesson-range lesson-number"></output></label>
@@ -91,6 +95,12 @@
             <div class="drill-actions">
               <button class="btn" type="submit" id="start-button">Start</button>
             </div>
+            <!-- For teachers: a link that opens this page with these settings (js/practice-link.js). -->
+            <p class="fine share-link">
+              <button type="button" class="link-button" id="copy-link" hidden>Copy link to these settings</button>
+              <span id="copy-status" role="status" aria-live="polite"></span>
+              <input type="text" id="copy-url" class="share-url" readonly hidden aria-label="Link to these settings">
+            </p>
             <!-- Shown by js/practice.js when this browser has a missed list for the game. -->
             <div id="missed-start" class="missed-start" hidden>
               <p class="missed-count" id="missed-count" aria-live="polite"></p>
@@ -127,6 +137,14 @@
             <p class="eyebrow">Round complete</p>
             <p class="results-score" id="results-score"></p>
             <p class="results-line" id="results-line"></p>
+            <!-- One line saying what the round was and the score, for a student to send to a teacher (js/practice.js). -->
+            <div class="result-share" id="result-share" hidden>
+              <p class="result-summary" id="result-summary"></p>
+              <p class="fine">
+                <button type="button" class="link-button" id="result-copy">Copy my result</button>
+                <span id="result-status" role="status" aria-live="polite"></span>
+              </p>
+            </div>
             <div id="missed-block">
               <h2 class="results-heading">Missed items</h2>
               <ul class="missed-list" id="missed-list"></ul>
@@ -160,6 +178,7 @@
 
   <script src="/js/main.js" defer></script>
   <script src="/js/missed-list.js" defer></script>
+  <script src="/js/practice-link.js" defer></script>
   <script src="/js/practice.js" defer></script>
   <script src="/js/games/parse.js" defer></script>
 </body>

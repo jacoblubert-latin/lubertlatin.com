@@ -241,6 +241,19 @@
         });
       }
     },
+    // Links for assignments (js/practice-link.js):
+    //   dir=la-en | en-la   pos=noun,verb,adjective,other (the parts of speech ticked)
+    fromLink: function (p, K) { return { dir: K.oneOf(p.dir, DIRECTIONS), pos: K.list(p.pos, GROUP_IDS) }; },
+    toLink: function (s) {
+      return [["dir", s.dir], ["pos", GROUP_IDS.filter(function (g) { return (s.pos || []).indexOf(g) >= 0; }).join(",")]];
+    },
+    // Result summary (the line a student can send a teacher): the settings in words.
+    summary: function () {
+      var out = [isChoice() ? "Latin → English" : "English → Latin"];
+      var on = GROUPS.filter(function (g) { return ctx.settings.pos.indexOf(g[0]) >= 0; });
+      if (on.length < GROUPS.length) out.push(on.map(function (g) { return g[1]; }).join(", "));
+      return out;
+    },
 
     pool: function () { return filtered(isChoice() ? eligible() : openWords()).filter(asked); },
     poolNote: function (n) {
