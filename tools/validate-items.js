@@ -52,7 +52,7 @@ const ITEM_OPTIONAL = ["available"];
 // ---------- vocab entries ----------
 const POS = ["noun", "verb", "adjective", "pronoun", "adverb", "preposition", "conjunction", "indeclinable", "other"];
 const VOCAB_FIELDS = ["id", "curriculum", "lesson", "pos", "lemma"];
-const VOCAB_OPTIONAL = ["english", "review", "flags", "available", "forms", "stem", "gen", "gender", "declension", "parts", "conjugation", "nom"];
+const VOCAB_OPTIONAL = ["english", "lessons", "review", "flags", "available", "forms", "stem", "gen", "gender", "declension", "parts", "conjugation", "nom"];
 
 const trim = (w) => w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
 const isStr = (v) => typeof v === "string" && v.trim().length > 0;
@@ -167,6 +167,15 @@ function validateVocab(vocab, ctx) {
     if (!isStr(e.lemma)) err("lemma must be a non-empty string");
     checkLessons(e, err, ctx.curriculumId, ctx.lessonMax, ctx.lessonMaxFor);
     if (!POS.includes(e.pos)) { err("pos must be one of: " + POS.join(", ")); return; }
+    if ("lessons" in e) {
+      const ls = e.lessons;
+      if (!Array.isArray(ls) || ls.length < 2 || !ls.every(isInt)) err("lessons must list two or more whole numbers (every lesson that boxes the word), or be left out");
+      else {
+        if (ls[0] !== e.lesson) err("lessons must start with the word's own lesson (" + e.lesson + ")");
+        if (ls.some((l, j) => j > 0 && l <= ls[j - 1])) err("lessons must be in rising order, each lesson once");
+        if (ls.some((l) => l < LESSON_MIN || l > ctx.lessonMax)) err("lessons has a number outside " + LESSON_MIN + "–" + ctx.lessonMax);
+      }
+    }
     if ("review" in e && e.review !== true) err("review must be true (a word known from an earlier book), or left out");
     if ("english" in e && (typeof e.english !== "string" || !e.english.trim())) err("english must be a non-empty string (leave the field out if the gloss is not known yet)");
     if ("flags" in e) {

@@ -6,10 +6,13 @@
 //   node tools/apply-lesson-vocab.js            report only (no changes made)
 //   node tools/apply-lesson-vocab.js --write    write the lessons into vocab.json
 //
-// A word's lesson is the first lesson whose list has it. Words are matched
-// on the lemma, macrons ignored and i/j, u/v alike (L.normalize). A bare
-// verb form in an early list (ōrat, vīcērunt) counts for its verb. The
-// report lists: book entries with no vocab.json entry, vocab.json entries
+// A word's lesson is the first lesson whose list has its dictionary entry.
+// Words are matched on the lemma, macrons ignored and i/j, u/v alike
+// (L.normalize). A bare verb form in an early list (ōrat, vīcērunt) is an
+// entry of its own (frm-orat); it does not date its verb, which waits for
+// the lesson that boxes laudō, dō, videō... A word boxed in more than one
+// lesson (a later VOCABULARY list, or a REVIEW VOCABULARY list, below)
+// also gets "lessons": every lesson that boxes it. The report lists: book entries with no vocab.json entry, vocab.json entries
 // in no list (left unchanged), and entries whose spelling, genitive or
 // principal parts differ from the book.
 "use strict";
@@ -33,13 +36,29 @@ const rows = fs.readFileSync(listPath, "utf8").replace(/^﻿/, "").split(/\r?\n/
   .map((l) => { const f = l.split("\t"); return { lesson: +f[0], entry: (f[1] || "").trim(), english: f[2] || "", page: f[3] || "" }; });
 
 // Entries the lists cannot place, with the reason.
-const KEEP = {
-  sum: "est and sunt are used from the first lessons (table on p. 28); the lists have only erat/erant (L3) and sum (L14)",
+const KEEP = {};
+// REVIEW VOCABULARY lists (not in the .txt file): lesson -> ids boxed again.
+const REVIEW = {
+  11: ["imperator"],
+  17: ["do", "adiuuo", "colloco", "oppugno", "uoco", "occupo"],
+  18: ["terreo", "teneo", "uideo"],
+  19: ["defendo", "duco", "pello", "uinco", "ago"],
+  20: ["audio", "munio", "uenio", "conuenio"],
+  25: ["adv-ubi", "adv-cur", "pro-quis", "uoco", "appello", "nomen"],
+  32: ["pre-a", "pre-de"],
+  33: ["pro-is"],
+  34: ["adj-liber", "adj-tutus", "defendo", "adj-plenus", "pre-cum", "pre-pro", "pre-a", "pre-de", "pre-sine", "absum"],
+  35: ["paro", "timeo", "adj-paratus", "contendo"],
+  37: ["adj-primus", "adj-alter"],
+  39: ["scio", "audio", "cerno", "cognosco", "confirmo", "conspicio", "ostendo", "probo", "moneo", "uideo"],
+  40: ["adv-quam"],
 };
 // Words the book teaches outside a VOCABULARY list (a rule box, the
 // lesson's own text, or a footnote gloss): id -> [lesson, where].
 // Used only when the word is in no list.
 const OUTSIDE = {
+  "littera": [1, "the lesson's text"],
+  "frm-est": [1, "est and sunt are used from the first lessons (table on p. 28); sum itself is boxed in Lesson 14"],
   "con-ut": [22, "rule box, p. 227"],
   "con-ne": [22, "rule box, p. 230"],
   "con-quo": [24, "section 4, p. 263"],
@@ -59,20 +78,20 @@ const OUTSIDE = {
   "adv-tandem": [16, "footnote gloss, p. 167 (earliest found)"],
   "pre-praeter": [37, "footnote gloss, p. 403 (earliest found)"],
 };
-// Homographs the printed entry does not tell apart: "lesson|lemma" -> id.
+// Homographs and phrases the lemma alone does not settle: the printed
+// entry, "lesson|printed entry" or "lesson|lemma" -> id.
 // (The book lists cōnsuēscō only in the perfect: cōnsuēvī, cōnsuētus.)
-const PICK = { "25|quō": "adv-quo", "2|dedit": "do", "35|cōnsuēvī": "consuesco" };
+const PICK = {
+  "25|quō": "adv-quo", "quid, pronoun": "pro-quis", "35|cōnsuēvī": "consuesco",
+  "in, prep. w. abl.": "pre-in", "in, prep. w. acc.": "pre-in-acc",
+  "24|quī, quae, quod": "pro-qui", "25|quī, quae, quod": "adj-qui",
+  "satis, adv.": "adv-satis", "satis, indecl. noun w. gen.": "oth-satis",
+  "et . . . et": "oth-et-et", "aut . . . aut, conjs.": "oth-aut-aut", "neque . . . neque, conjs.": "oth-neque-neque",
+};
 
 const nfc = (s) => String(s || "").normalize("NFC");
 const byLemma = {};
 vocab.forEach((v) => { const k = L.normalize(v.lemma); (byLemma[k] = byLemma[k] || []).push(v); });
-// finite verb form -> verbs that have it
-const byVerbForm = {};
-vocab.filter((v) => v.pos === "verb").forEach((v) => {
-  let fl = [];
-  try { fl = L.formLessons(v, curriculum, {}); } catch (e) { /* the validator reports these */ }
-  fl.forEach((x) => { const a = (byVerbForm[x.form] = byVerbForm[x.form] || []); if (a.indexOf(v) < 0) a.push(v); });
-});
 
 function posHint(entry) {
   if (/\bprep\b|preceded by gen/.test(entry)) return "preposition";
@@ -104,7 +123,7 @@ function match(r) {
   if (r.entry[0] === "(") return { skip: "sub-line of the entry above" };
   const heads = headwords(r.entry);
   const hint = posHint(r.entry);
-  const picked = PICK[r.lesson + "|" + heads[0]];
+  const picked = PICK[r.entry] || PICK[r.lesson + "|" + r.entry] || PICK[r.lesson + "|" + heads[0]];
   if (picked) return { hits: vocab.filter((v) => v.id === picked), how: "lemma" };
   for (const h of heads) {
     let c = byLemma[L.normalize(h)] || [];
@@ -112,12 +131,6 @@ function match(r) {
     if (c.length > 1 && !hint) { const rest = c.filter((v) => SMALL.indexOf(v.pos) < 0); if (rest.length) c = rest; }
     if (c.length > 1) { const exact = c.filter((v) => nfc(v.lemma).toLowerCase() === nfc(h).toLowerCase()); if (exact.length) c = exact; }
     if (c.length) return { hits: c, how: "lemma", head: h };
-  }
-  if (heads.length === 1 && !/\s/.test(heads[0]) && r.entry.indexOf(",") < 0) {
-    const c = byVerbForm[L.normalize(heads[0])] || [];
-    // "erat" is also the second word of every pluperfect passive: it is sum's
-    const sum = c.filter((v) => L.normalize(v.lemma) === "sum");
-    if (c.length) return { hits: sum.length ? sum : c, how: "form" };
   }
   if (knownWords(heads[0])) return { skip: "phrase" };
   return { hits: [] };
@@ -171,26 +184,45 @@ function differences(r, v) {
 }
 
 const first = {};      // id -> {lesson, row}
-const unmatched = [], formOnly = [], diffs = [], skipped = [];
+const boxed = {};      // id -> every lesson that boxes it
+const box = (id, lesson) => { const a = (boxed[id] = boxed[id] || []); if (a.indexOf(lesson) < 0) a.push(lesson); };
+const unmatched = [], diffs = [], skipped = [];
 rows.forEach((r) => {
   const m = match(r);
   if (m.skip) { if (m.skip === "phrase") skipped.push(r); return; }
   if (!m.hits.length) { unmatched.push(r); return; }
   m.hits.forEach((v) => {
     if (!first[v.id] || r.lesson < first[v.id].lesson) first[v.id] = { lesson: r.lesson, row: r };
-    if (m.how === "form") formOnly.push({ r: r, v: v });
-    else differences(r, v).forEach((d) => diffs.push({ r: r, v: v, d: d }));
+    box(v.id, r.lesson);
+    differences(r, v).forEach((d) => diffs.push({ r: r, v: v, d: d }));
   });
 });
+Object.keys(REVIEW).forEach((l) => REVIEW[l].forEach((id) => {
+  if (!vocab.some((v) => v.id === id)) throw new Error("REVIEW names " + id + ", which is not in vocab.json");
+  box(id, +l);
+}));
 
 let moved = 0;
-const moves = [], kept = [], outside = [];
+const moves = [], kept = [], outside = [], again = [];
 vocab.forEach((v) => {
   let f = first[v.id];
   if (!f && OUTSIDE[v.id]) { f = first[v.id] = { lesson: OUTSIDE[v.id][0] }; outside.push(v); }
   if (!f) return;
   if (KEEP[v.id]) { kept.push(v); return; }
   if (v.lesson !== f.lesson) { moves.push(v.id + ": " + v.lesson + " -> " + f.lesson); v.lesson = f.lesson; moved++; }
+});
+// "lessons": every lesson that boxes the word, when there is more than one.
+let relisted = 0;
+vocab.forEach((v, i) => {
+  const all = (boxed[v.id] || []).filter((l) => l >= v.lesson).concat(v.lesson)
+    .filter((l, j, a) => a.indexOf(l) === j).sort((a, b) => a - b);
+  const want = all.length > 1 ? all : null;
+  if (JSON.stringify(v.lessons || null) !== JSON.stringify(want)) relisted++;
+  if (want) again.push(v);
+  // keep "lessons" right after "lesson"
+  const out = {};
+  Object.keys(v).forEach((k) => { if (k !== "lessons") out[k] = v[k]; if (k === "lesson" && want) out.lessons = want; });
+  vocab[i] = out;
 });
 const unseen = vocab.filter((v) => !first[v.id]);
 
@@ -201,8 +233,8 @@ console.log("\nKept as they are (" + kept.length + "):");
 kept.forEach((v) => console.log("  " + v.id + " stays at " + v.lesson + ": " + KEEP[v.id]));
 console.log("\nTaught outside a VOCABULARY list, lesson set by hand (" + outside.length + "):");
 outside.forEach((v) => console.log("  " + v.id + "  " + v.lemma + ": lesson " + OUTSIDE[v.id][0] + ", " + OUTSIDE[v.id][1]));
-console.log("\nBare verb forms counted for their verb (" + formOnly.length + "):");
-formOnly.forEach((x) => console.log("  " + line(x.r) + "  => " + x.v.lemma));
+console.log("\nBoxed in more than one lesson (" + again.length + "), " + relisted + " changed:");
+again.forEach((v) => console.log("  " + v.id + "  " + v.lemma + ": " + boxed[v.id].slice().sort((a, b) => a - b).join(", ")));
 console.log("\nBook entries with no vocab.json entry (" + unmatched.length + "):");
 unmatched.forEach((r) => console.log("  " + line(r)));
 console.log("\nPhrases made of words vocab.json already has, no entry needed (" + skipped.length + "):");
@@ -215,5 +247,5 @@ diffs.forEach((x) => console.log("  " + x.v.id + "  " + x.d + "   [" + line(x.r)
 if (write) {
   // Keep the one-entry-per-line layout.
   fs.writeFileSync(vocabPath, ("[\n" + vocab.map((v) => JSON.stringify(v)).join(",\n") + "\n]\n").replace(/\n/g, EOL));
-  console.log("\nWrote " + moved + " lesson" + (moved === 1 ? "" : "s") + " to " + path.relative(process.cwd(), vocabPath) + ".");
+  console.log("\nWrote " + moved + " lesson" + (moved === 1 ? "" : "s") + " and " + relisted + " lessons list" + (relisted === 1 ? "" : "s") + " to " + path.relative(process.cwd(), vocabPath) + ".");
 }
