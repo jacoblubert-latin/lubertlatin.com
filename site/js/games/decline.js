@@ -271,6 +271,15 @@
       var decl = L.DECLENSIONS.filter(function (d) { return (s.declensions || []).indexOf(d) >= 0; });
       return [["mode", s.mode], ["form", s.phraseForm], ["decl", decl.join(",")], ["voc", K.onOff(s.vocative)]];
     },
+    // Result summary (the line a student can send a teacher): the settings in words.
+    summary: function () {
+      var form = asking() === "table" ? "Full table" : "Single form";
+      var out = [isPhrase() ? "Noun + adjective, " + form.toLowerCase() : form];
+      var decl = L.DECLENSIONS.filter(function (d) { return ctx.settings.declensions.indexOf(d) >= 0; });
+      if (decl.length) out.push(S.plural(decl.length, "Declension") + " " + decl.map(ordinal).join(", "));
+      if (ctx.settings.vocative) out.push("With vocative");
+      return out;
+    },
 
     pool: function () {
       var sel = ctx.settings.declensions;

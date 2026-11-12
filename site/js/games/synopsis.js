@@ -181,6 +181,16 @@
     toLink: function (s, K) {
       return [["mode", s.mode], ["subj", K.onOff(s.subjunctive)], ["imp", K.onOff(s.imperative)], ["nonfinite", K.onOff(s.nonfinite)]];
     },
+    // Result summary (the line a student can send a teacher): the settings in words.
+    summary: function () {
+      var out = [ctx.settings.mode === "synopsis" ? "Full synopsis" : "Single form"];
+      var off = [];
+      if (!ctx.settings.subjunctive) off.push("subjunctive");
+      if (!ctx.settings.imperative) off.push("imperative");
+      if (!ctx.settings.nonfinite) off.push("infinitives and participles");
+      if (off.length) out.push("Without " + off.join(", "));
+      return out;
+    },
 
     pool: function () {
       return verbsThrough().filter(function (v) { return columnsFor(v).length > 0; });

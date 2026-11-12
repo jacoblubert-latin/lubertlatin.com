@@ -137,6 +137,14 @@
             <p class="eyebrow">Round complete</p>
             <p class="results-score" id="results-score"></p>
             <p class="results-line" id="results-line"></p>
+            <!-- One line saying what the round was and the score, for a student to send to a teacher (js/practice.js). -->
+            <div class="result-share" id="result-share" hidden>
+              <p class="result-summary" id="result-summary"></p>
+              <p class="fine">
+                <button type="button" class="link-button" id="result-copy">Copy my result</button>
+                <span id="result-status" role="status" aria-live="polite"></span>
+              </p>
+            </div>
             <div id="missed-block">
               <h2 class="results-heading">Missed items</h2>
               <ul class="missed-list" id="missed-list"></ul>

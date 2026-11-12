@@ -71,6 +71,11 @@
     resultsLine: document.getElementById("results-line"),
     missedBlock: document.getElementById("missed-block"),
     missedList: document.getElementById("missed-list"),
+    resultShare: document.getElementById("result-share"),
+    resultSummary: document.getElementById("result-summary"),
+    resultCopy: document.getElementById("result-copy"),
+    resultStatus: document.getElementById("result-status"),
+    title: document.getElementById("practice-title"),
     retry: document.getElementById("retry-button"),
     again: document.getElementById("again-button"),
     settings: document.getElementById("settings-button")
@@ -293,10 +298,14 @@
       el.copyUrl.scrollLeft = 0;   // show the start of the address, not its tail
       el.copyStatus.textContent = "Copy the link from the box.";
     }
+    copyText(url, copied, byHand);
+  }
+  // Put text on the clipboard; `failed` runs where that can't be done.
+  function copyText(text, done, failed) {
     try {
-      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(copied, byHand);
-      else byHand();
-    } catch (e) { byHand(); }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, failed);
+      else failed();
+    } catch (e) { failed(); }
   }
 
   function readStartForm() {
@@ -465,10 +474,18 @@
 
   function startRound() {
     var size = game.roundSize ? game.roundSize() : 10;
-    beginRound((game.buildRound || defaultBuildRound)(game.pool(), size));
+    beginRound((game.buildRound || defaultBuildRound)(game.pool(), size), roundLabel());
   }
-  function beginRound(items) {
-    round = { items: items, index: 0, correct: 0, streak: 0, missed: [], wrongKeys: [], phase: "play" };
+  // What a round was, in words, for the result summary: the lesson filter
+  // and the game's settings as they stood when it began.
+  function roundLabel() {
+    var parts = [curriculum.short + " " + (ctx.settings.lessonOnly ? lessonName() + " only" : "through " + lessonName())];
+    try { if (game.summary) parts = parts.concat(game.summary() || []); } catch (e) { /* the lesson alone */ }
+    return parts;
+  }
+  function typedLabel() { return game.typed && typed.settings.strict ? ["Strict macrons"] : []; }
+  function beginRound(items, label) {
+    round = { items: items, index: 0, correct: 0, streak: 0, missed: [], wrongKeys: [], phase: "play", label: label.concat(typedLabel()) };
     show(el.play);
     showItem();
   }
@@ -477,7 +494,7 @@
   // don't apply; a key that no longer has an item is left out.
   function startMissedRound(keys) {
     var items = keys.map(itemFor).filter(Boolean);
-    if (items.length) beginRound(items);
+    if (items.length) beginRound(items, ["Missed-list round"]);
     return items.length > 0;
   }
   // Results screen: only what was missed in the round just played, shuffled.
@@ -560,8 +577,34 @@
       el.missedList.appendChild(li);
     });
     if (el.retry) el.retry.hidden = round.wrongKeys.length === 0;
+    showSummary(n, pct);
     show(el.results);
     el.results.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+
+  // The result summary: one line saying what the round was and how it went,
+  // for a student to copy and send to a teacher. It is made here and goes
+  // nowhere by itself; the site keeps no record of it.
+  //   Decline a noun · Henle through Lesson 5 · Single form · 9/10 (90%) · 11 Nov 2026, 4:12 PM
+  function dateText(d) {
+    try {
+      return d.toLocaleString(undefined, { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" });
+    } catch (e) { return d.toString(); }
+  }
+  function showSummary(n, pct) {
+    if (!el.resultShare) return;
+    var parts = [el.title ? el.title.textContent.trim() : gameId].concat(round.label || []);
+    parts.push(round.correct + "/" + n + " (" + pct + "%)", dateText(new Date()));
+    el.resultSummary.textContent = parts.join(" · ");
+    el.resultStatus.textContent = "";
+    el.resultShare.hidden = false;
+  }
+  function copySummary() {
+    copyText(el.resultSummary.textContent, function () { el.resultStatus.textContent = "Result copied"; }, function () {
+      // No clipboard: select the line, to be copied by hand.
+      try { window.getSelection().selectAllChildren(el.resultSummary); } catch (e) { /* the line is still there to select */ }
+      el.resultStatus.textContent = "Copy the selected line.";
+    });
   }
 
   // ---------- wiring ----------
@@ -581,6 +624,7 @@
   el.again.addEventListener("click", startRound);
   el.settings.addEventListener("click", function () { askClear(false); syncStartForm(); show(el.start); });
   if (el.retry) el.retry.addEventListener("click", retryMissed);
+  if (el.resultCopy) el.resultCopy.addEventListener("click", copySummary);
   if (el.missedStart) {
     el.missedDrill.addEventListener("click", drillMissedList);
     el.missedClear.addEventListener("click", function () { askClear(true); el.missedClearNo.focus(); });

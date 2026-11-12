@@ -205,6 +205,20 @@ node tools/test-links.js
 
 Each practice page's `<link rel="canonical">` is its bare address, so links with settings are not indexed as separate pages. `netlify.toml` needs no rule for them: Netlify passes a query string through its redirects.
 
+### The result summary ("Copy my result")
+
+The results screen shows one line saying what the round was and how it went, with a **Copy my result** button, so a student can paste it into an email or the class platform:
+
+```
+Decline a noun · Henle through Lesson 5 · Single form · Declensions 1st, 2nd · Strict macrons · 9/10 (90%) · Nov 11, 2026, 4:12 PM
+```
+
+It has the game, the lesson filter ("through Lesson 5" or "Lesson 5 only"), the game's settings in words, "Strict macrons" when that was on, the score, and the date and time on the student's device in the student's own date format. A round from the missed list says "Missed-list round" in place of the lesson and settings, which don't apply to it. Where the browser won't copy, the line is selected to copy by hand.
+
+The line is made in the student's browser and goes nowhere by itself: the site keeps no record and sends nothing to anyone. It is plain text that a student could edit, so treat it as a report of work done, not a secure grade. It has no name on it; the student's message says who it is from.
+
+The shell (`practice.js`) builds the line. A game adds its settings with one optional function on the object it registers: `summary()` returns a list of short phrases for the settings as they stand (`["Single form", "Declensions 1st, 2nd", "With vocative"]`), leaving out what is at its default where that reads better. A game without it gets the lesson and the score only.
+
 ### The missed list ("drill only what I missed")
 
 Every form a student answers wrong goes on a missed list, one list per game and textbook, kept in their browser. Two buttons use it:
