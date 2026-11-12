@@ -328,6 +328,27 @@
       return cell ? { entry: e, person: person, number: number, mood: key.mood, tense: key.tense, voice: key.voice, expected: cell } : null;
     },
     missedRoundSize: function () { return 10; }, // single forms, whatever the mode
+
+    // Worksheets (the shell's "Print a worksheet"): a page is two full
+    // synopses side by side, or twenty single forms.
+    printSheet: function () {
+      var full = ctx.settings.mode === "synopsis", open = moods();
+      var notes = [];
+      if (full && open.indexOf("imperative") >= 0) notes.push("the imperative in the number given");
+      if (open.indexOf("participle") >= 0) notes.push("participles in the nominative singular masculine");
+      return {
+        mode: full ? "Full synopsis" : "Single form",
+        instructions: (full ? "Write every form of each verb in the person and number given." : "Write the form asked for.") +
+          (notes.length ? " Give " + notes.join(" and ") + "." : ""),
+        items: full ? 2 : 20,
+        max: full ? game.pool().length : openForms(60),
+        columns: full ? 2 : 1,
+        keyColumns: full ? 1 : 2   // a filled grid needs the width: "laudātus es or laudāta es; laudātum es"
+      };
+    },
+    printItem: function (item, box) { printVerb(item, box, false); },
+    printAnswer: function (item, box) { printVerb(item, box, true); },
+
     review: function (item, result, li) {
       var p = S.make("p", "missed-sentence"); p.setAttribute("lang", "la");
       p.textContent = entryText(item.entry);
@@ -346,6 +367,80 @@
       li.appendChild(ul);
     }
   };
+
+  // ---------- worksheets ----------
+  // How many different single forms the pool holds, counted up to `limit`
+  // (a form that doesn't vary by person or number counts once).
+  function openForms(limit) {
+    var count = 0, open = moods();
+    game.pool().some(function (e) {
+      columnsFor(e).forEach(function (v) { open.forEach(function (m) { tensesFor(m).forEach(function (t) {
+        if (!rowOpen(e, m, v, t)) return;
+        count += FINITE[m] ? 6 : m === "imperative" ? 2 : 1;
+      }); }); });
+      return count >= limit;
+    });
+    return Math.min(count, limit);
+  }
+  // "3rd pl.", "pl.", or nothing: what whoSingle() says, as short as a worksheet line needs.
+  function whoShort(item) {
+    var num = item.number === "sg" ? "sg." : "pl.";
+    if (!item.mood || FINITE[item.mood]) return L.PERSON_NAMES[item.person] + " " + num;
+    return item.mood === "imperative" ? num : "";
+  }
+  // One item on paper: the principal parts, then the grid the screen shows
+  // with empty cells for the person and number given, or what is asked and a
+  // blank. `filled` is the answer key.
+  function printVerb(item, box, filled) {
+    var head = S.make("p", "ws-entry");
+    var la = S.make("span", null, entryText(item.entry)); la.setAttribute("lang", "la");
+    head.appendChild(la);
+    if (item.mood) {
+      var row = S.make("div", "ws-single");
+      row.appendChild(head);
+      var short = whoShort(item);
+      row.appendChild(S.make("span", "ws-ask", cellText(item.mood, item.tense, item.voice) + (short ? ", " + short : "")));
+      row.appendChild(filled ? S.answerNode(expectedList(item.expected)) : S.make("span", "ws-blank"));
+      box.appendChild(row);
+      return;
+    }
+    box.appendChild(head);
+    var sub = S.make("p", "ws-person");
+    sub.appendChild(S.make("b", null, who(item)));
+    var bits = [];
+    if (item.entry.english) bits.push(item.entry.english);
+    if (L.hasFlag(item.entry, "deponent")) bits.push("deponent");
+    if (bits.length) sub.appendChild(S.make("span", "ws-gloss", " " + bits.join(" · ")));
+    box.appendChild(sub);
+    var cols = columnsFor(item.entry);
+    var table = S.make("table", "ws-grid ws-synopsis-grid");
+    var thead = S.make("thead"), hr = S.make("tr");
+    hr.appendChild(S.make("th", null, ""));
+    cols.forEach(function (v) { hr.appendChild(S.make("th", null, VOICE_HEAD[v])); });
+    thead.appendChild(hr); table.appendChild(thead);
+    var tbody = S.make("tbody");
+    moods().forEach(function (mood) {
+      var tenses = tensesFor(mood).filter(function (t) { return cols.some(function (v) { return rowOpen(item.entry, mood, v, t); }); });
+      if (!tenses.length) return;
+      var sec = S.make("tr", "ws-section");
+      var sth = S.make("th", null, SECTION_HEAD[mood]); sth.colSpan = cols.length + 1; sth.setAttribute("scope", "colgroup");
+      sec.appendChild(sth); tbody.appendChild(sec);
+      tenses.forEach(function (t) {
+        var tr = S.make("tr");
+        var th = S.make("th", null, rowLabel(mood, t, item)); th.setAttribute("scope", "row");
+        tr.appendChild(th);
+        cols.forEach(function (v) {
+          var td = S.make("td"), cell = cellFor(item.entry, mood, t, v, item.person, item.number);
+          if (!cell) { td.className = "ws-none"; td.textContent = "—"; }
+          else if (filled) td.appendChild(S.answerNode(expectedList(cell)));
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    });
+    table.appendChild(tbody);
+    box.appendChild(table);
+  }
 
   // A cell from the engine is {form, accept}; grading takes a list.
   function expectedList(cell) { return [cell.form].concat(cell.accept || []); }

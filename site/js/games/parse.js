@@ -306,6 +306,43 @@
       for (var i = 0; i < items.length; i++) if (items[i].id === key.id) return items[i];
       return null;
     },
+    // Worksheets (the shell's "Print a worksheet"): ten sentences to a page.
+    // On paper the chips become labeled blanks, one for each thing the drill
+    // asks about the word. The blanks themselves say noun or verb, so that
+    // first question isn't asked; the key gives it.
+    printSheet: function () {
+      return {
+        mode: { noun: "Nouns", verb: "Verbs", both: "Nouns and verbs" }[ctx.settings.types],
+        instructions: "Parse the underlined word in each sentence. Abbreviations are fine (abl., sg., 3rd).",
+        items: ROUND_SIZE
+      };
+    },
+    printItem: function (item, box) {
+      var s = S.make("p", "ws-sentence"); s.setAttribute("lang", "la");
+      renderSentence(s, item);
+      box.appendChild(s);
+      // The Clause blank is on every verb once the lesson has a subjunctive
+      // to parse, so that it doesn't give the mood away.
+      var clauses = game.pool().some(function (it) { return it.parse.clause != null; });
+      var row = S.make("div", "ws-fields");
+      fieldsFor(item).forEach(function (f) {
+        if (f.key === "clause" && !clauses) return;
+        var wide = f.key === "use" || f.key === "clause" || f.key === "tense" || f.key === "mood";
+        var field = S.make("span", wide ? "ws-field ws-field-wide" : "ws-field");
+        field.appendChild(S.make("span", "ws-label", f.key === "clause" ? "Clause (if subjunctive)" : f.label));
+        field.appendChild(S.make("span", "ws-blank"));
+        row.appendChild(field);
+      });
+      box.appendChild(row);
+    },
+    printAnswer: function (item, box) {
+      var p = S.make("p", "ws-parse");
+      var b = S.make("b", null, item.target); b.setAttribute("lang", "la");
+      p.appendChild(b);
+      p.appendChild(document.createTextNode(": " + parseText(item)));
+      box.appendChild(p);
+    },
+
     review: function (item, result, li) {
       var s = S.make("p", "missed-sentence"); s.setAttribute("lang", "la");
       renderSentence(s, item);

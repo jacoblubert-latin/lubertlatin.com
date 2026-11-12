@@ -12,6 +12,10 @@
 // missed list (js/missed-list.js) and runs the two rounds made from it:
 // "Drill what I missed" after a round and "Drill my missed list" on the
 // start screen. A game takes part by supplying formKeys() and fromMissed().
+// "Print a worksheet" on the start screen is the shell's too: it builds a
+// round with the game's own buildRound, lays it out as a paper worksheet
+// with an answer key and calls window.print(). A game takes part by
+// supplying printItem() and printAnswer() (and, optionally, printSheet()).
 // Settings can also arrive in the page's address (?lesson=5&mode=single) and
 // be copied from the start screen as a link: js/practice-link.js, and
 // "links for assignments" below. A game takes part by supplying fromLink()
@@ -214,6 +218,27 @@
       });
     }
   };
+  // An answer as the key prints it: the form shown as correct, with macrons
+  // and in the chosen spelling, then any other form the grading accepts
+  // ("dī or deī"). `expected` is a string or a list, the main form first.
+  // Forms that differ only in punctuation or in i/j, u/v are given once.
+  function answerNode(expected) {
+    var forms = (Array.isArray(expected) ? expected : [expected]).map(typed.spell);
+    var seen = {}, shown = [];
+    forms.forEach(function (f) {
+      var k = window.LatinForms ? window.LatinForms.normalize(f, true).replace(/[\s,;.]+/g, " ").trim() : f;
+      if (!seen[k]) { seen[k] = true; shown.push(f); }
+    });
+    var box = make("span", "ws-answer");
+    var main = make("b", null, shown[0]); main.setAttribute("lang", "la");
+    box.appendChild(main);
+    if (shown.length > 1) {
+      box.appendChild(document.createTextNode(" "));
+      var alt = make("span", "ws-alt", "or " + shown.slice(1).join("; ")); alt.setAttribute("lang", "la");
+      box.appendChild(alt);
+    }
+    return box;
+  }
   // A pill-styled radio/checkbox like the start screen's existing choices.
   function choice(type, name, value, text, checked) {
     var label = make("label", "choice");
@@ -331,6 +356,7 @@
     // have material. With none anywhere the game's own note explains why.
     el.poolNote.textContent = (n === 0 && ctx.settings.lessonOnly && nothingNewNote()) || game.poolNote(n);
     el.startButton.disabled = n === 0;
+    syncSheetControls();
     if (el.linkNote) el.linkNote.hidden = !link.active;
     showMissedLine();
   }
@@ -392,6 +418,7 @@
     }
     game.renderStart(el.startOptions, el.startExtra);
     if (game.typed) typed.renderSettings(el.startExtra);
+    buildSheetControls();
   }
 
   // ---------- missed list ----------
@@ -582,6 +609,183 @@
     el.results.scrollIntoView({ block: "start", behavior: "smooth" });
   }
 
+  // ---------- worksheets ----------
+  // "Print a worksheet" beside Start: a round built from the settings on the
+  // start screen, laid out for paper in a container that only shows in print
+  // (the @media print rules in practice.css), then window.print(). The
+  // browser's dialog does the rest, paper or "Save as PDF". The container is
+  // taken away again when the dialog closes.
+  //
+  // What a game supplies:
+  //   printItem(item, box)    the item as the student gets it, blanks to fill
+  //   printAnswer(item, box)  the same item's answer, for the key
+  //   printSheet()            optional: { mode, instructions, keyNote, items,
+  //                           max, columns, keyColumns, macrons }
+  // printItem is always called before printAnswer for the same item, so it
+  // may leave on the item what the answer needs (the order of the options).
+  var SHEET_MAX = 100;                           // the most items one worksheet takes
+  var sheetUi = null;                            // { button, count, key }
+  var sheetChoice = null, sheetChoiceFor = null; // a number the teacher typed, and the default it replaced
+
+  function sheetInfo() {
+    var s = (game.printSheet && game.printSheet()) || {};
+    var pool = game.pool().length;
+    var max = !game.printItem || !pool ? 0 : Math.max(1, Math.min(SHEET_MAX, s.max != null ? s.max : pool));
+    var items = Math.min(max, Math.max(1, s.items || (game.roundSize ? game.roundSize() : 10)));
+    var columns = s.columns === 2 ? 2 : 1;
+    return {
+      mode: s.mode || "", instructions: s.instructions || "", keyNote: s.keyNote || "",
+      columns: columns, keyColumns: s.keyColumns === 2 || s.keyColumns === 1 ? s.keyColumns : columns,
+      macrons: s.macrons != null ? !!s.macrons : !!game.typed,
+      items: items, max: max
+    };
+  }
+  function sheetSize(info) {
+    var n = sheetChoice != null && sheetChoiceFor === info.items ? sheetChoice : info.items;
+    return Math.min(info.max, Math.max(1, n));
+  }
+  function buildSheetControls() {
+    if (sheetUi || !game.printItem || !game.printAnswer || !el.startButton) return;
+    var actions = el.startButton.parentNode;
+    var button = make("button", "btn btn-outline", "Print a worksheet");
+    button.type = "button"; button.id = "print-button";
+    actions.appendChild(button);
+    var row = make("div", "print-options");
+    row.setAttribute("role", "group"); row.setAttribute("aria-label", "Worksheet");
+    var countLabel = make("label", null, "Number of items ");
+    var count = make("input"); count.type = "number"; count.name = "sheetCount"; count.id = "sheet-count";
+    count.min = 1; count.setAttribute("inputmode", "numeric");
+    countLabel.appendChild(count);
+    var keyLabel = make("label");
+    var key = make("input"); key.type = "checkbox"; key.name = "sheetKey"; key.id = "sheet-key"; key.checked = true;
+    keyLabel.appendChild(key);
+    keyLabel.appendChild(make("span", null, "Include answer key"));
+    row.appendChild(countLabel); row.appendChild(keyLabel);
+    actions.parentNode.insertBefore(row, actions.nextSibling);
+    sheetUi = { button: button, count: count, key: key };
+    count.addEventListener("change", function () {
+      var n = Math.round(Number(count.value));
+      if (count.value === "" || !isFinite(n)) sheetChoice = null;
+      else { sheetChoice = Math.max(1, n); sheetChoiceFor = sheetInfo().items; }
+      syncSheetControls();   // shows the number in range
+    });
+    // These two are about the worksheet, not the game: they don't count as a
+    // change of settings (a shared link's settings stay unsaved).
+    row.addEventListener("change", function (e) { e.stopPropagation(); });
+    // Enter in the number field is not Start.
+    count.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      count.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    button.addEventListener("click", printWorksheet);
+  }
+  function syncSheetControls() {
+    if (!sheetUi) return;
+    var info = sheetInfo();
+    // A typed number holds while the default stays what it was; a change of
+    // mode (4 tables, 20 single forms) starts from the new default.
+    if (sheetChoice != null && sheetChoiceFor !== info.items) sheetChoice = null;
+    sheetUi.button.disabled = sheetUi.count.disabled = info.max === 0;
+    sheetUi.count.max = Math.max(1, info.max);
+    sheetUi.count.value = info.max ? sheetSize(info) : "";
+  }
+
+  function siteName() {
+    var m = document.querySelector('meta[property="og:site_name"]');
+    return (m && m.getAttribute("content")) || location.hostname;
+  }
+  // The address for the foot of the worksheet: this game with the settings
+  // the worksheet was made from, the same link "Copy link to these settings"
+  // gives (js/practice-link.js), on the site's own address.
+  function sheetUrl() {
+    var c = document.querySelector('link[rel="canonical"]');
+    var base = (c && c.href) || location.origin + location.pathname;
+    var query = "";
+    try { if (K) query = K.build(game, { settings: ctx.settings, typed: typedState() }, link.defaults); } catch (e) { query = ""; }
+    return base + (query ? "?" + query : "");
+  }
+  function gameTitle() {
+    var h = document.getElementById("practice-title");
+    return h ? h.textContent.trim() : document.title;
+  }
+  function writeLine(label, cls) {
+    var span = make("span", "ws-write " + cls);
+    span.appendChild(make("span", null, label));
+    span.appendChild(make("span", "ws-rule"));
+    return span;
+  }
+  function sheetHead(info, isKey) {
+    var head = make("div", "ws-head");
+    var top = make("div", "ws-top");
+    top.appendChild(make("span", "ws-site", siteName()));
+    if (isKey) top.appendChild(make("span", "ws-keymark", "Answer key"));
+    else {
+      var who = make("span", "ws-who");
+      who.appendChild(writeLine("Name", "ws-name")); who.appendChild(writeLine("Date", "ws-date"));
+      top.appendChild(who);
+    }
+    head.appendChild(top);
+    head.appendChild(make("h1", "ws-title", gameTitle() + (info.mode ? ": " + info.mode : "")));
+    head.appendChild(make("p", "ws-sub", curriculum.name + ", " +
+      (ctx.settings.lessonOnly ? lessonName() + " only" : "through " + lessonName())));
+    var notes = [];
+    if (isKey) {
+      if (info.macrons) notes.push((typed.settings.strict ? "Macrons count." : "Macrons are optional.") + " i/j and u/v are accepted either way.");
+      if (info.keyNote) notes.push(info.keyNote);
+    } else {
+      if (info.instructions) notes.push(info.instructions);
+      if (info.macrons) notes.push(typed.settings.strict ? "Mark the long vowels: macrons count." : "Macrons are optional.");
+    }
+    head.appendChild(make("p", "ws-instructions", notes.join(" ")));
+    return head;
+  }
+  function sheetPage(info, items, isKey) {
+    var page = make("section", isKey ? "ws-page ws-key" : "ws-page");
+    var head = sheetHead(info, isKey);
+    page.appendChild(head);
+    var list = make("ol", "ws-items" + ((isKey ? info.keyColumns : info.columns) === 2 ? " ws-cols-2" : ""));
+    items.forEach(function (item, i) {
+      var li = make("li", "ws-item");
+      li.appendChild(make("span", "ws-num", (i + 1) + "."));
+      var body = make("div", "ws-body");
+      (isKey ? game.printAnswer : game.printItem)(item, body);
+      li.appendChild(body);
+      list.appendChild(li);
+    });
+    page.appendChild(list);
+    if (isKey && list.querySelector(".ws-alt")) {
+      head.querySelector(".ws-instructions").appendChild(document.createTextNode(" A form after “or” is accepted too."));
+    }
+    if (!isKey) {
+      var foot = make("p", "ws-foot", "Practice this online: ");
+      foot.appendChild(make("span", "ws-url", sheetUrl()));
+      page.appendChild(foot);
+    }
+    return page;
+  }
+  function removeWorksheet() {
+    var old = document.getElementById("worksheet");
+    if (old) old.parentNode.removeChild(old);
+    document.documentElement.classList.remove("print-worksheet");
+  }
+  function printWorksheet() {
+    readStartForm(); syncStartForm(); saveSettings();
+    var info = sheetInfo();
+    if (!info.max) return;
+    var items = (game.buildRound || defaultBuildRound)(game.pool(), sheetSize(info));
+    if (!items.length) return;
+    removeWorksheet();
+    var sheet = make("div", "worksheet"); sheet.id = "worksheet";
+    sheet.appendChild(sheetPage(info, items, false));
+    if (sheetUi.key.checked) sheet.appendChild(sheetPage(info, items, true));
+    document.body.appendChild(sheet);
+    document.documentElement.classList.add("print-worksheet");
+    window.print();
+  }
+  // Printed or cancelled: the page is as it was.
+  window.addEventListener("afterprint", removeWorksheet);
+
   // The result summary: one line saying what the round was and how it went,
   // for a student to copy and send to a teacher. It is made here and goes
   // nowhere by itself; the site keeps no record of it.
@@ -658,7 +862,7 @@
           area: el.area,
           shell: {
             make: make, clear: clear, shuffle: shuffle, pick: pick, plural: plural, lessonOf: lessonOf, typed: typed,
-            inLesson: inLesson, lessonName: lessonName,
+            inLesson: inLesson, lessonName: lessonName, answerNode: answerNode,
             setCheckEnabled: function (on) { el.check.hidden = false; el.check.disabled = !on; },
             finish: function (right, item, result) { el.check.hidden = true; finish(right, item, result); },
             check: onCheck

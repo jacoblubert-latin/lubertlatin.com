@@ -80,6 +80,15 @@
 .result-share #result-status { margin-left: .6em; }
 .link-button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 
+/* "Print a worksheet": the number of items and the answer-key box, under the buttons */
+.drill-actions #print-button { flex-basis: 190px; }
+.print-options { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 22px; margin-top: 14px; font-size: .95rem; }
+.print-options label { display: inline-flex; align-items: center; gap: .55em; font-weight: 600; min-height: 44px; cursor: pointer; }
+.print-options input[type="number"] { width: 4.6em; min-height: 40px; padding: .25em .4em; text-align: center; font-size: 1rem; }
+.print-options input[type="checkbox"] { width: 1.2em; height: 1.2em; margin: 0; padding: 0; accent-color: var(--accent); }
+/* The worksheet itself only exists while the print dialog is open, and only shows on paper. */
+.worksheet { display: none; }
+
 /* ---------- Play screen ---------- */
 .drill-status {
   display: flex; justify-content: space-between; gap: 12px;
@@ -217,3 +226,93 @@
 .missed-cells li { margin: 2px 0; }
 .missed-cells b { color: var(--ok); font-family: var(--serif); font-size: 1.05em; }
 .missed-list .missed-cells li { background: none; border: 0; padding: 0; border-radius: 0; }
+
+/* =========================================================
+   Worksheets on paper. "Print a worksheet" (js/practice.js)
+   puts a .worksheet at the end of <body> and sets
+   .print-worksheet on <html> while the print dialog is open;
+   everything else on the page is left off the paper.
+   Black on white, lines instead of fills, nothing that needs
+   color. Sizes are in inches and points: US Letter or A4,
+   portrait. An item (.ws-item) is never split across pages,
+   and the answer key (.ws-key) starts a page of its own.
+   ========================================================= */
+@media print {
+  @page { margin: .6in; }
+
+  html.print-worksheet, html.print-worksheet body { background: #fff !important; margin: 0; padding: 0; }
+  html.print-worksheet body > *:not(.worksheet) { display: none !important; }
+
+  .worksheet { display: block; color: #000; background: #fff; font: 500 12pt/1.3 var(--serif); font-feature-settings: "locl" 0; }
+  .worksheet * { color: #000; background: none; box-shadow: none; text-shadow: none; }
+  .worksheet p, .worksheet ol, .worksheet h1 { margin: 0; padding: 0; }
+  .worksheet b, .worksheet th { font-weight: 600; }
+  .ws-key { break-before: page; page-break-before: always; }
+
+  /* Header: site name, Name and Date, the game and mode, the lesson, what to do */
+  .ws-top { display: flex; justify-content: space-between; align-items: baseline; gap: .3in; font-size: 10.5pt; }
+  .ws-who { display: flex; gap: .2in; }
+  .ws-write { display: inline-flex; align-items: baseline; gap: .08in; }
+  .ws-rule { display: inline-block; border-bottom: .75pt solid #000; }
+  .ws-name .ws-rule { width: 2.3in; }
+  .ws-date .ws-rule { width: 1.1in; }
+  .ws-keymark { font-weight: 600; letter-spacing: .08em; text-transform: uppercase; border: 1pt solid #000; padding: 1pt 7pt; }
+  .worksheet .ws-title { font: 600 17pt/1.2 var(--serif); margin-top: .1in; }
+  .ws-sub { font-size: 11pt; }
+  .worksheet .ws-instructions { font-size: 11pt; font-style: italic; margin: .04in 0 .14in; padding-bottom: .07in; border-bottom: .75pt solid #000; }
+
+  /* Numbered items, one or two columns to the page */
+  .ws-items { list-style: none; }
+  .ws-item { display: flex; align-items: baseline; gap: .09in; margin-bottom: .07in; break-inside: avoid; page-break-inside: avoid; }
+  .ws-num { flex: 0 0 auto; min-width: .22in; font-weight: 600; font-variant-numeric: lining-nums; }
+  .ws-body { flex: 1 1 auto; min-width: 0; }
+  .ws-cols-2 > .ws-item { display: inline-flex; vertical-align: top; width: calc(50% - .16in); margin-right: .3in; margin-bottom: .16in; }
+  .ws-cols-2 > .ws-item:nth-child(even) { margin-right: 0; }
+
+  .ws-entry { font-size: 12.5pt; }
+  .ws-gloss { font-size: 10.5pt; font-style: italic; }
+  .ws-person { font-size: 11pt; }
+  .ws-alt { font-size: 9.5pt; font-style: italic; }
+
+  /* A table to fill in: ruled cells tall enough to write in */
+  .ws-grid { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: .05in; break-inside: avoid; page-break-inside: avoid; }
+  .ws-grid th, .ws-grid td { border: .75pt solid #000; padding: 1pt 5pt; text-align: left; vertical-align: middle; overflow-wrap: anywhere; }
+  .ws-grid thead th { font-size: 9pt; letter-spacing: .08em; text-transform: uppercase; }
+  .ws-grid thead th:first-child { width: .5in; border-top-color: transparent; border-left-color: transparent; }
+  .ws-grid tbody th { font-size: 10.5pt; white-space: nowrap; }
+  .ws-grid td { height: .4in; }
+  .ws-grid .ws-none { text-align: center; }
+  .ws-phrase-grid td { height: .36in; }
+  .ws-synopsis-grid thead th:first-child { width: .72in; }
+  .ws-synopsis-grid td { height: .3in; }
+  .ws-grid .ws-section th { white-space: normal; font-size: 10.5pt; font-style: italic; padding-top: 3pt; }
+  .ws-key .ws-grid td { height: .25in; font-size: 11.5pt; }
+
+  /* One line: what is asked, then a rule to write on */
+  .ws-single { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: .14in; padding-top: .07in; }
+  .ws-ask { font-size: 11pt; }
+  .ws-ask::before { content: "— "; }
+  .ws-blank { flex: 1 1 1.3in; min-width: 1.3in; height: 1em; border-bottom: .75pt solid #000; }
+  .ws-single .ws-blank { max-width: 3.4in; }
+  .ws-key .ws-single { padding-top: 0; }
+  .ws-key .ws-item { margin-bottom: .05in; }
+  .ws-key .ws-cols-2 > .ws-item { margin-bottom: .12in; }
+
+  /* Parsing: the sentence, the word marked, and a labeled blank for each part */
+  .ws-sentence { font-size: 13pt; }
+  .worksheet .drill-target { font-weight: 600; text-decoration: underline; text-decoration-color: #000; text-decoration-thickness: 1.25pt; text-underline-offset: .14em; }
+  .ws-fields { display: flex; align-items: baseline; gap: .16in; padding: .1in 0 .03in; }
+  .ws-field { display: flex; flex: 1 1 auto; align-items: baseline; gap: .06in; }
+  .ws-field-wide { flex-grow: 3; }
+  .ws-label { font-size: 10pt; white-space: nowrap; }
+  .ws-field .ws-blank { min-width: .3in; flex-basis: .3in; }
+
+  /* Vocabulary, multiple choice: the entry, and four meanings to circle one of */
+  .ws-choice { display: flex; align-items: baseline; gap: .15in; }
+  .ws-choice .ws-entry { flex: 0 0 2.3in; }
+  .ws-options { flex: 1 1 auto; list-style: none; font-size: 11pt; }
+  .ws-options li { display: inline-flex; align-items: baseline; gap: .06in; width: 50%; vertical-align: top; padding: 0 .1in .03in 0; box-sizing: border-box; }
+  .ws-letter { flex: 0 0 auto; font-weight: 600; }
+
+  .worksheet .ws-foot { margin-top: .16in; font-size: 9pt; overflow-wrap: anywhere; }
+}
