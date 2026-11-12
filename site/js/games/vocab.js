@@ -82,8 +82,14 @@
   // Is the word one the lesson filter asks? Through Lesson N: all of the
   // above. Lesson N only: the words whose own lesson is N. A word marked
   // "review": true is known from an earlier book: it is in play through
-  // every lesson, but no lesson's own words include it.
-  function asked(w) { return !(ctx.settings.lessonOnly && w.review === true) && S.inLesson(S.lessonOf(w)); }
+  // every lesson, but no lesson's own words include it. A word boxed again
+  // in later lessons ("lessons": [9, 17, 25]) is among each of those
+  // lessons' own words.
+  function asked(w) {
+    if (ctx.settings.lessonOnly && w.review === true) return false;
+    if (ctx.settings.lessonOnly && Array.isArray(w.lessons) && w.lessons.indexOf(lesson()) >= 0) return true;
+    return S.inLesson(S.lessonOf(w));
+  }
   function filtered(list) {
     return list.filter(function (w) { return ctx.settings.pos.indexOf(group(w)) >= 0; });
   }
@@ -137,6 +143,9 @@
     list.forEach(function (w) {
       out.push(w.lemma);
       if (/^-/.test(w.lemma)) out.push(w.lemma.slice(1));   // -ne, -que
+      if (w.lemma.indexOf("…") >= 0) {                        // et … et: typed with three dots, or with none
+        out.push(w.lemma.replace(/…/g, "..."), w.lemma.replace(/s*…s*/g, " "));
+      }
     });
     return out;
   }

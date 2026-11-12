@@ -1,5 +1,6 @@
 # Henle, First Year Latin: every entry under a VOCABULARY heading, Lessons 1-42, as printed.
-# Tab-separated: lesson, dictionary entry, meaning, book page. REVIEW VOCABULARY lists are left out.
+# Tab-separated: lesson, dictionary entry, meaning, book page. REVIEW VOCABULARY lists are left out
+# (the words they box again are in REVIEW in tools/apply-lesson-vocab.js).
 # Lesson 6 has no VOCABULARY heading; its entries are the unheaded word lists on p. 64.
 # A ? after a word would mark a doubtful reading (there are none).
 # After correcting a line, run: node tools/apply-lesson-vocab.js --write
