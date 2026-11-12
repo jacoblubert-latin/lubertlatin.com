@@ -1,0 +1,266 @@
+# Henle, Second Year Latin, Part IV: every entry under a VOCABULARY heading, Lessons 1-32, as printed.
+# Tab-separated: lesson, dictionary entry, meaning, book page, heading when it is not VOCABULARY.
+# Lessons 21, 28, 30 and 32 have no list. A row whose entry begins "with" is a second meaning of the row above.
+# After correcting a line, run: node tools/build-henle2-vocab.js --write
+1	crux, crucis	cross	305
+1	classis, classis	fleet	305
+1	cohors, cohortis	cohort (a division of a legion containing 600 men)	305
+1	cōnsul, cōnsulis, m.	consul	305
+1	auctōritās, auctōritātis	authority; influence	305
+1	lībertās, lībertātis	liberty	305
+1	timor, timōris	fear	305
+2	barbarus, a, um	barbarian; foreign	309
+2	firmus, a, um	strong; vigorous	309
+2	plūrimus, a, um	very many; the greatest number; (pl.) the most	309
+2	idōneus, a, um; w. dat. or ad w. acc.	suitable; proper; convenient	309
+2	proximus, a, um; w. dat.	nearest; next	309
+3	pācō, 1, tr.	pacify	313
+3	incolō, incolere, incoluī, 3, tr.	inhabit; dwell in	313
+3	capiō, capere, cēpī, captus, 3, tr.	take; capture	313
+3	cōnsilium capere	to make a plan	313
+3	faciō, facere, fēcī, factus, 3, tr.	do; make	313
+3	iter facere	to march; to make a journey	313
+3	fugiō, fugere, fūgī, fugitūrus, 3, intr.	flee	313
+3	cupiō, cupere, cupīvī, cupītus, 3, tr.	desire	313
+3	jaciō, jacere, jēcī, jactus, 3, tr.	throw; hurl	313
+3	-ne	particle used in asking questions	313
+3	num	word used in asking questions when the answer 'no' is expected	313
+3	nōnne	word used in asking questions when the answer 'yes' is expected	313
+3	quis, quid	who; what	313
+3	ubi, adv.	where	314
+3	cūr, adv.	why	314
+4	redūcō, redūcere, redūxī, reductus, 3, tr.	lead back; draw back	320
+4	rejiciō, rejicere, rejēcī, rejectus, 3, tr.	hurl back; drive back; repel	320
+4	remittō, remittere, remīsī, remissus, 3, tr.	send back; return; release	320
+4	repellō, repellere, reppulī, repulsus, 3, tr.	beat back; drive back	320
+4	reprimō, reprimere, repressī, repressus, 3, tr.	press back; check; restrain	320
+4	vīvō, vīvere, vīxī, vīctūrus, 3, intr.	live	320
+4	praesidium, ī	garrison; protection	320
+4	pīlum, ī	javelin	320
+5	rogō, 1, tr.	ask; request	327
+5	quot, indecl. adj.	how many	327
+5	quantus, a, um	how large; how great	327
+5	quō, adv.	whither; where (of motion)	327
+5	sciō, 4, tr.	know	327
+5	quaerō, quaerere, quaesīvī, quaesītus, 3, tr.	seek; ask	327
+5	dolor, dolōris	pain; sorrow	327
+5	aperiō, aperīre, aperuī, apertus, 4, tr.	open; uncover; expose	327
+6	ego, meī	I (pl., we)	333
+6	tū, tuī	you	333
+6	meus, a, um	my; mine	333
+6	noster, nostra, nostrum	our; ours; our own	333
+6	tuus, a, um	your (of one person); yours; your own	333
+6	vester, vestra, vestrum	your (of more than one person); yours; your own	333
+6	is, ea, id	he (pl., they); she; it	333
+6	ējus	his; her; hers; its; of him, etc.	333
+6	eōrum, eārum	their; of them, etc.	333
+6	suī	himself (him); herself (her); itself (it); themselves (them)	334
+6	suus, a, um	his (own); her (own); its (own); their (own)	334
+6	recipiō, recipere, recēpī, receptus, 3, tr.	take back	334
+6	with a reflexive pronoun	withdraw; recover	334
+6	dēdō, dēdere, dēdidī, dēditus, 3, tr.	give up; devote; surrender	334
+6	abdō, abdere, abdidī, abditus, 3, tr.	hide; conceal	334
+7	dējiciō, dējicere, dējēcī, dējectus, 3, tr.	hurl down; cast down	343
+7	cōgō, cōgere, coēgī, coāctus, 3, tr.	bring together; collect; force	343
+7	relinquō, relinquere, relīquī, relictus, 3, tr.	leave; leave behind	343
+7	dīvidō, dīvidere, dīvīsī, dīvīsus, 3, tr.	divide; separate	343
+7	fuga, ae	flight	343
+7	in fugam dō, dare, dedī, datus, 1, tr.	put to flight	343
+7	ex (ē), prep. w. abl.	out of; from	343
+7	dē, prep. w. abl.	down from; out of; from; concerning (about)	343
+7	ab (ā), prep. w. abl.	by (agent); away from; from	343
+8	hic, haec, hoc	this (pl., these)	348
+8	is, ea, id	that (pl., those); he, she, it, they, etc.	348
+8	ille, illa, illud	that (pl., those); he, she, it, they, etc.	348
+8	causa, ae	cause; reason	348
+8	causā, preceded by gen.	for the sake of	348
+8	ratiō, ratiōnis	method; reason; plan; way	348
+8	dīligō, dīligere, dīlēxī, dīlēctus, 3, tr.	love	348
+8	contrā, prep. w. acc.	against; opposite	348
+8	dē, prep. w. abl.	down from; out of; from; concerning (about); for (w. causā)	349	NOTE
+9	interficiō, interficere, interfēcī, interfectus, 3, tr.	kill	352
+9	addūcō, addūcere, addūxī, adductus, 3, tr.	lead to; induce; influence	352
+9	cōnspiciō, cōnspicere, cōnspexī, cōnspectus, 3, tr.	observe; perceive	352
+9	cōnficiō, cōnficere, cōnfēcī, cōnfectus, 3, tr.	accomplish; finish; exhaust	352
+9	accipiō, accipere, accēpī, acceptus, 3, tr.	receive; take	352
+9	facilius, comp. adv.	more easily	352
+9	ut, conj.	that; in order that (in purpose clauses)	352
+9	nē, conj.	that . . . not; in order that not (in negative purpose clauses)	352
+9	quō, conj.	that; in order that (in purpose clauses containing a comparative adverb or adjective)	352
+10	dīligēns (gen. dīligentis)	careful; exact	356
+10	audāx (gen. audācis)	daring; bold; courageous	356
+10	ācer, ācris, ācre	sharp; fierce; eager	356
+10	celer, celeris, celere	swift	356
+10	studeō, studēre, studuī, 2, intr.; w. dat.	am eager (for); strive (after); am devoted (to)	356
+10	resistō, resistere, restitī, 3, intr.; w. dat.	remain behind; resist; withstand	356
+10	praesum, praeesse, praefuī, praefutūrus, irreg., intr.; w. dat.	am over; am in command of	356
+10	noceō, nocēre, nocuī, nocitūrus, 2, intr.; w. dat.	harm; injure	356
+10	praeficiō, praeficere, praefēcī, praefectus, 3, tr.; w. dat. of thing of which	put in command of	356
+11	hortor, 1, tr.	urge; encourage	362
+11	vereor, 2, tr.	fear	362
+11	sequor, sequī, secūtus sum, 3, tr.	follow; pursue	362
+11	patior, patī, passus sum, 3, tr.	suffer; allow	362
+11	orior, orīrī, ortus sum, 4, intr.	rise; arise	362
+11	loquor, loquī, locūtus sum, 3, tr. and intr.	talk; speak	362
+11	proficīscor, proficīscī, profectus sum, 3, intr.	set out; depart	362
+11	aggredior, aggredī, aggressus sum, 3, tr.	advance to; attack	362
+11	cum, conj.	when	362
+12	cohortor, 1, tr.	encourage	368
+12	prōgredior, prōgredī, prōgressus sum, 3, intr.	go forward; advance; proceed	368
+12	dubius, a, um	doubtful; uncertain	368
+12	certus, a, um	certain; fixed	368
+12	certiōrem (-ēs) faciō, facere, fēcī, factus, 3, tr.; acc. w. infin.; dē w. abl.	inform (lit., make (someone) more certain)	368
+12	quam, adv.	than	368
+12	apud, prep. w. acc.	among; in the presence of	368
+12	nihil (short form: nīl), n., indecl. noun	nothing	368
+12	nihil, adv.	not; not at all	368
+12	sub, prep. w. abl.	under; at the foot of	368
+12	sub, prep. w. acc.	under; beneath; up to; about (of time); toward (of time)	368
+13	quī, quae, quod	who; what; which; that	375
+13	committō, committere, commīsī, commissus, 3, tr.	commit; allow	375
+13	proelium committere	to join battle; to begin battle	375
+13	angustiae, angustiārum	defile; narrow place; difficulties	375
+13	inquit	he says; he said	375
+13	peccātum, ī	mistake; sin (in Christian Latin)	375
+13	ante, prep. w. acc.	before (of time or place); in front of	375
+14	extrēmus, a, um	outermost; farthest; last	380
+14	superior, superius	higher; former	380
+14	summus, a, um	highest	380
+14	ulterior, ulterius	farther	380
+14	ultimus, a, um	farthest; last	380
+14	medius, a, um	middle	380
+15	eō, īre, īvī (iī), itum, irreg., intr.	go	386
+15	exeō, exīre, exiī(-īvī), exitum, irreg., intr.	go out	386
+15	trānseō, trānsīre, trānsiī(-īvī), trānsitus, irreg., tr.	go across; cross; pass	386
+15	ineō, inīre, iniī(-īvī), initus, irreg., tr.	go into; enter upon	386
+15	adeō, adīre, adiī(-īvī), aditus, irreg., tr.	go to; approach; visit	386
+15	hōra, ae	hour	386
+15	diēs, diēī, m. (f.)	day	386
+15	mīlle, indecl. adj.	thousand	386
+15	mīlia, mīlium, noun (Gr. 117)	thousands	386
+15	decem, indecl. numeral	ten	386
+15	quattuor, indecl. numeral	four	386
+15	pēs, pedis, m.	foot (of an animal, mountain, etc.; or a unit of measure)	386
+15	passus, ūs	a pace	386
+15	mīlle passūs	a mile	386
+16	diū, adv.	a long time; long (of time)	390
+16	parum, adv.	little; too little	390
+16	parum, indecl. noun; w. gen.	too little; not enough	390
+16	satis, adv.	sufficiently	390
+16	satis, indecl. noun; w. gen.	enough	390
+16	tūtō, adv.	safely	390
+16	multum, adv.	much; greatly	390
+16	facile, adv.	easily	390
+17	ūllus, a, um	any	395
+17	nūllus, a, um	no; none	395
+17	sōlus, a, um	alone; only (as an adjective)	395
+17	tōtus, a, um	whole; all of; the whole of	395
+17	ūnus, a, um	one	395
+17	alius, alia, aliud (Gr. 85-86)	other; another	395
+17	alter, altera, alterum (Gr. 87)	the other (of two); the one (of two)	395
+17	uterque, utraque, utrumque (gen. utrīusque; dat. utrīque)	each (of two); both (of two)	395
+17	duo, duae, duo (Gr. 115)	two	395
+17	trēs, tria (declined like the plural of gravis)	three	395
+17	centum, indecl. numeral	one hundred	395
+17	prīmus, a, um	first	395
+17	secundus, a, um	second	395
+17	alter, altera, alterum	second	395
+17	tertius, a, um	third	396
+17	prohibeō, 2, tr.; w. abl. of separation	ward off (from); prevent	396
+18	ferō, ferre, tulī, lātus, irreg., tr.	bear; bring; carry	404
+18	īnferō, īnferre, īntulī, illātus, irreg., tr.; w. dat. of person	bring (upon); inflict (upon); inspire (in)	404
+18	differō, differre, distulī, dīlātus, irreg., tr.	scatter; put off; differ	404
+18	cōnferō, cōnferre, contulī, collātus, irreg., tr.	bring together; compare	404
+18	with a reflexive pronoun	betake oneself	404
+18	referō, referre, rettulī, relātus, irreg., tr.	bring back; report; refer	404
+18	pedem referre	to fall back; to retreat	404
+18	ipse, ipsa, ipsum	self	404
+18	praeter, prep. w. acc.	except; past; contrary to	404
+18	socius, ī	companion; ally	404
+18	suscipiō, suscipere, suscēpī, susceptus, 3, tr.	undertake; take (upon oneself)	405
+18	vīs (gen. vis [rare]; acc. vim; abl. vī)	force; power; violence	405
+18	vī (abl. of vīs)	violently; by force	405
+18	indūcō, indūcere, indūxī, inductus, 3, tr.	lead in; lead on; influence	405
+19	possum, posse, potuī, irreg., intr.; w. pres. infin.	am able; can	419
+19	cōnstituō, cōnstituere, cōnstituī, cōnstitūtus, 3, tr.; w. pres. infin.	place; set up; decide; determine	419
+19	cōnor, 1, tr.; w. pres. infin.	try; attempt	419
+19	coepī, coepisse, coeptus sum, tr.; w. pres. infin.	began; have begun	419
+19	dēbeō, 2, tr.; w. pres. infin.	ought; owe	419
+19	jubeō, jubēre, jussī, jussus, 2, tr.; acc. w. pres. infin.	order; command	419
+19	mandō, 1, tr.; w. dat. of person	commit; entrust	419
+19	parō, 1, tr.; w. pres. infin.	prepare; get ready	419
+19	cōnsequor, cōnsequī, cōnsecūtus sum, 3, tr.	follow up; overtake; gain	419
+19	jungō, jungere, jūnxī, jūnctus, 3, tr.	join; unite	419
+19	conjungō, conjungere, conjūnxī, conjūnctus, 3, tr.	join together; unite	419
+19	permoveō, permovēre, permōvī, permōtus, 2, tr.	arouse; influence	419
+19	imperō, 1, tr.; w. dat. of person	levy	420
+19	oportet, oportēre, oportuit, 2, intr.; acc. w. pres. infin.	it behooves; it is necessary	420
+19	parātus, a, um; w. pres. infin. or ad w. acc.	prepared (for); ready	420
+20	putō, 1, tr.; acc. w. infin.	think	432
+20	negō, 1, tr.; acc. w. infin.	deny; say . . . not	432
+20	exīstimō, 1, tr.; acc. w. infin.	think	432
+20	dēmōnstrō, 1, tr.; acc. w. infin.	show; point out	432
+20	cōnfirmō, 1, tr.	encourage; strengthen	432
+20	with acc. w. infin.	affirm	432
+20	respondeō, respondēre, respondī, respōnsus, 2, tr.; acc. w. infin.	answer	432
+20	intellegō, intellegere, intellēxī, intellēctus, 3, tr.; acc. w. infin.	understand; perceive	432
+20	dīcō, dīcere, dīxī, dictus, 3, tr.; acc. w. infin.	say; tell	432
+20	animadvertō, animadvertere, animadvertī, animadversus, 3, tr.; acc. w. infin.	attend to; notice	432
+20	sentiō, sentīre, sēnsī, sēnsus, 4, tr.; acc. w. infin.	feel; perceive; think	432
+20	reperiō, reperīre, repperī, repertus, 4, tr.; acc. w. infin.	find (out)	432
+20	sciō, 4, tr.; acc. w. infin.	know	432
+20	arbitror, 1, tr.; acc. w. infin.	consider; think	432
+20	nuntiō, 1, tr.; acc. w. infin.	announce; report	432
+20	polliceor, 2, tr.; acc. w. infin. (usually future)	promise	433
+20	crēdō, crēdere, crēdidī, crēditus, 3, tr. and intr.; w. dat. of person to whom or in whom; acc. w. infin.	believe; trust; entrust	433
+20	dispōnō, dispōnere, disposuī, dispositus, 3, tr.	distribute; station	433
+20	cōnscrībō, cōnscrībere, cōnscrīpsī, cōnscrīptus, 3, tr.; acc. w. infin.	enroll; write	433
+20	revertor, revertī, {revertī, / reversus sum,} 3, intr.	return	433
+20	trādūcō, trādūcere, trādūxī, trāductus, 3, tr.; two accs. or acc. and trāns w. acc.	lead across; lead over	433
+20	impediō, 4, tr.	hinder; impede	433
+22	ēgredior, ēgredī, ēgressus sum, 3, intr.	go out	454
+22	potior, 4, intr.; w. abl. or gen.	get possession of; become master of	454
+22	vetō, vetāre, vetuī, vetitus, 1, tr.; acc. w. pres. infin.	forbid	454
+22	conjūrō, 1, intr.	conspire; form a conspiracy	454
+22	commoveō, commovēre, commōvī, commōtus, 2, tr.	alarm; arouse	454
+23	ut prīmum, conj.	as soon as	462
+23	cum prīmum, conj.	as soon as	462
+23	postquam, conj.	after	462
+23	ubi, conj.	when	462
+23	volō, velle, voluī, tr.; w. pres. infin.; acc. w. infin.; ut (nē)	am willing; wish	462
+23	ēripiō, ēripere, ēripuī, ēreptus, 3, tr.; w. dat. of person or thing from which; ab (ā) or ex (ē) w. abl.	take away; save from	462
+23	vīrēs, vīrium, f.	strength; force	462
+23	mājōrēs, mājōrum, m.	ancestors; forefathers	462
+23	tempus, temporis, n.	time	462
+23	sūmō, sūmere, sūmpsī, sūmptus, 3, tr.	take; assume	462
+23	tot, indecl. adj.	so many	462
+23	ventus, ī	wind	462
+24	fīō, fierī, factus sum, irreg., intr.; ut (ut nōn)	am made; am done; become; happen	470
+24	imperō, 1, tr.; w. dat. of person; with ut (nē)	levy; (with ut (nē)) order; command	470
+24	mandō, 1, tr.; w. dat. of person; with ut (nē)	commit; entrust; (with ut (nē)) command	470
+24	efficiō, efficere, effēcī, effectus, 3, tr.; ut (ut nōn or nē)	bring about; cause	470
+24	persuādeō, persuādēre, persuāsī, persuāsum, 2, intr.; w. dat.; ut (nē)	persuade	470
+24	ostendō, ostendere, ostendī, ostentus, 3, tr.; acc. w. infin.	show; tell	470
+25	ūtor, ūtī, ūsus sum, 3, intr.; w. abl.	use; employ; exercise	476
+25	nēmō, nēminis	no one	476
+25	cāritās, cāritātis	charity; love	476
+25	tālis, e	such; of such a kind	476
+25	tantus, a, um	so great	476
+25	sīc, adv.	so; in such a manner	476
+25	ita, adv.	so; in such a manner	476
+25	tam, adv.	so; to such a degree	476
+25	adeō, adv.	so; to such a degree	476
+25	annus, ī	year	476
+26	tollō, tollere, sustulī, sublātus, 3, tr.	lift up (passive, am elated); take away	484
+26	paucī, ae, a	few	484
+26	dēsum, deesse, dēfuī, dēfutūrus, irreg., intr.; w. dat.	am lacking; am absent; fail	484
+27	perspiciō, perspicere, perspexī, perspectus, 3, tr.; acc. w. infin.	view; inspect; perceive	491
+27	morior, morī, mortuus sum, 3, intr.	die	491
+29	avē, interjection	hail!	505
+29	miserēre; w. dat. or gen.	have mercy (on)	505
+29	nōlī; w. pres. infin.	be unwilling	505
+29	nōlīte; w. pres. infin.	be unwilling	505
+31	quia, conj.	because	517
+31	quod, conj.	because	517
+31	quoniam, conj.	because	517
+31	cum, conj.	since	517

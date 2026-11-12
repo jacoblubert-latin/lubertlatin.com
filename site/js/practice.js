@@ -22,8 +22,12 @@
 // and toLink().
 //
 // Page markup: <div id="drill" data-game="parse" data-curriculum="henle" data-root="/practice/data/">
-// Data files live at <root><curriculum>/<file>.json. Adding a textbook means
-// adding a folder there (plus, later, a picker that sets data-curriculum).
+// Data files live at <root><curriculum>/<file>.json. data-curriculum is the
+// page's own textbook, the one a visit starts with. <root>textbooks.json
+// lists the textbooks there are; with more than one the start screen has a
+// Textbook choice, kept in the student's browser for all four games, and a
+// link can name one (?book=henle2). Adding a textbook means adding a folder
+// and a line in textbooks.json.
 (function () {
   "use strict";
 
@@ -31,10 +35,12 @@
   if (!root) return;
 
   var gameId = root.getAttribute("data-game");
-  var curriculumId = root.getAttribute("data-curriculum") || "henle";
+  var defaultCurriculum = root.getAttribute("data-curriculum") || "henle";
+  var curriculumId = defaultCurriculum;   // the textbook in use: chooseBook(), before the data loads
   var dataRoot = root.getAttribute("data-root") || "/practice/data/";
   var TYPED_KEY = "lubertlatin.practice.typed";
   var MISSED_KEY = "lubertlatin.practice.missed";
+  var BOOK_KEY = "lubertlatin.practice.book";
   var M = window.LatinMissed;
   var K = window.LatinLink;
 
@@ -264,8 +270,11 @@
   }
 
   // ---------- start screen ----------
+  // Each textbook keeps its own settings (its lessons are its own); the
+  // page's own textbook keeps the key it always had.
+  function settingsKey() { return game.storageKey + (curriculumId === defaultCurriculum ? "" : "." + curriculumId); }
   function loadSettings() {
-    var saved = readJSON(game.storageKey);
+    var saved = readJSON(settingsKey());
     if (saved && typeof saved.lesson === "number" && isFinite(saved.lesson)) ctx.settings.lesson = saved.lesson;
     // Settings stored before the choice existed have no lessonOnly: "through".
     // So does every game that doesn't offer the choice, whatever is stored.
@@ -276,7 +285,7 @@
   // student changes a setting on the start screen.
   function saveSettings() {
     if (link.active && !link.touched) return;
-    writeJSON(game.storageKey, ctx.settings); typed.save();
+    writeJSON(settingsKey(), ctx.settings); typed.save();
   }
 
   // ---------- links for assignments ----------
@@ -306,7 +315,7 @@
   // the ones still at their defaults.
   function linkUrl() {
     readStartForm();
-    var query = K.build(game, { settings: ctx.settings, typed: typedState() }, link.defaults);
+    var query = K.build(game, { settings: ctx.settings, typed: typedState(), book: curriculumId }, link.defaults);
     return window.location.origin + window.location.pathname + (query ? "?" + query : "");
   }
   function copyLink() {
@@ -394,8 +403,46 @@
     return (nothingNewCache[key] = note);
   }
 
+  // ---------- textbooks ----------
+  // books: [{ id, label }] from <root>textbooks.json (empty when it can't be
+  // read: the page's own textbook alone, and no choice on the start screen).
+  var books = [];
+  function storedBook() {
+    try { return K && K.bookId(localStorage.getItem(BOOK_KEY)); } catch (e) { return undefined; }
+  }
+  // Which textbook this visit uses: the one a link names; else, for a link
+  // that carries settings, the page's own (links made before there was a
+  // choice); else the one the student last chose; else the page's own.
+  function chooseBook() {
+    var known = books.map(function (b) { return b.id; });
+    var res = K && window.location.search ? K.read(window.location.search, game, { min: 1, max: 1 }) : null;
+    var want = res && res.book ? res.book : (res && (res.count || res.start) ? defaultCurriculum : storedBook());
+    return want && known.indexOf(want) >= 0 ? want : defaultCurriculum;
+  }
+  // The start screen's choice. Picking one loads the page again with that
+  // textbook: its data, its lessons, its saved settings and missed list.
+  function buildBookChoice() {
+    if (books.length < 2 || el.start.querySelector(".book-choice")) return;
+    var fs = make("fieldset", "drill-fieldset book-choice");
+    fs.appendChild(make("legend", null, "Textbook"));
+    var row = make("div", "choice-row");
+    books.forEach(function (b) { row.appendChild(choice("radio", "book", b.id, b.label, b.id === curriculumId)); });
+    fs.appendChild(row);
+    el.startOptions.parentNode.insertBefore(fs, el.startOptions);
+    fs.addEventListener("change", function (e) {
+      e.stopPropagation();   // not a setting of the round
+      var id = e.target && e.target.value;
+      if (!id || id === curriculumId) return;
+      var kept = false;
+      try { localStorage.setItem(BOOK_KEY, id); kept = localStorage.getItem(BOOK_KEY) === id; } catch (err) { kept = false; }
+      // where the browser keeps nothing, the address carries the choice
+      window.location.assign(window.location.pathname + (kept ? "" : "?book=" + encodeURIComponent(id)));
+    });
+  }
+
   function buildStartScreen() {
     clear(el.startOptions); clear(el.startExtra);
+    buildBookChoice();
     // Without the choice the slider means "through". With it, the label
     // names the lesson and the choice under the slider says whether that is
     // everything through the lesson or the lesson alone.
@@ -714,7 +761,7 @@
     var c = document.querySelector('link[rel="canonical"]');
     var base = (c && c.href) || location.origin + location.pathname;
     var query = "";
-    try { if (K) query = K.build(game, { settings: ctx.settings, typed: typedState() }, link.defaults); } catch (e) { query = ""; }
+    try { if (K) query = K.build(game, { settings: ctx.settings, typed: typedState(), book: curriculumId }, link.defaults); } catch (e) { query = ""; }
     return base + (query ? "?" + query : "");
   }
   function gameTitle() {
@@ -860,10 +907,24 @@
       .then(function (r) { if (!r.ok) throw new Error(file + ": HTTP " + r.status); return r.json(); });
   }
 
+  function fetchBooks() {
+    return fetch(dataRoot + "textbooks.json", { cache: "no-cache" })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (list) {
+        return (Array.isArray(list) ? list : []).filter(function (b) { return b && K && K.bookId(b.id) && typeof b.label === "string"; });
+      })
+      .catch(function () { return []; });
+  }
+
   function boot(g) {
     game = g;
     var files = ["curriculum"].concat(g.data || []);
-    Promise.all(files.map(fetchJSON))
+    fetchBooks()
+      .then(function (list) {
+        books = list;
+        curriculumId = chooseBook();
+        return Promise.all(files.map(fetchJSON));
+      })
       .then(function (loaded) {
         files.forEach(function (f, i) { data[f] = loaded[i]; });
         curriculum = data.curriculum;
@@ -885,7 +946,7 @@
         bounds = g.lessonBounds();
         if (!isFinite(bounds.min) || !isFinite(bounds.max)) throw new Error("No items");
         ctx.settings.lesson = bounds.max; // default: everything unlocked
-        link.defaults = { settings: JSON.parse(JSON.stringify(ctx.settings)), typed: g.typed ? { strict: false, spelling: "henle" } : null };
+        link.defaults = { settings: JSON.parse(JSON.stringify(ctx.settings)), typed: g.typed ? { strict: false, spelling: "henle" } : null, book: defaultCurriculum };
         loadSettings();
         ctx.settings.lesson = clampLesson(ctx.settings.lesson);
         applyLink();

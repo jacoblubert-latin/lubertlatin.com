@@ -445,7 +445,7 @@
 {"id":"adj-miser","curriculum":"henle","lesson":16,"pos":"adjective","lemma":"miser","nom":["miser","misera","miserum"],"declension":"1-2","english":"wretched"},
 {"id":"adj-liber","curriculum":"henle","lesson":16,"pos":"adjective","lemma":"līber","nom":["līber","lībera","līberum"],"declension":"1-2","english":"free; free (from)"},
 {"id":"adj-integer","curriculum":"henle","lesson":16,"pos":"adjective","lemma":"integer","nom":["integer","integra","integrum"],"declension":"1-2","english":"fresh, uninjured, whole"},
-{"id":"iesus","curriculum":"henle","lesson":8,"pos":"noun","lemma":"Jēsūs","gen":"Jēsū","gender":"m","declension":"4","stem":"Jēs","flags":["singular-only"],"forms":{"sg.nom":"Jēsūs","sg.gen":"Jēsū","sg.dat":"Jēsū","sg.acc":"Jēsūm","sg.abl":"Jēsū","sg.voc":"Jēsū"},"english":"Jesus"},
+{"id":"iesus","curriculum":"henle","lesson":8,"pos":"noun","lemma":"Jēsūs","gen":"Jēsū","gender":"m","declension":"4","stem":"Jēs","flags":["singular-only"],"forms":{"sg.nom":"Jēsūs","sg.gen":"Jēsū","sg.dat":"Jēsū","sg.acc":"Jēsum","sg.abl":"Jēsū","sg.voc":"Jēsū"},"english":"Jesus"},
 {"id":"pro-quid","curriculum":"henle","lesson":8,"pos":"pronoun","lemma":"quid","english":"what?"},
 {"id":"oth-in-principio","curriculum":"henle","lesson":9,"pos":"other","lemma":"in prīncipiō","english":"in the beginning"},
 {"id":"oth-in-saecula-saeculorum","curriculum":"henle","lesson":9,"pos":"other","lemma":"in saecula saeculōrum","english":"world without end, forever"},

@@ -80,8 +80,10 @@
   // word" answers come from these, whichever way the lesson filter is set.
   function openWords() { return words.filter(function (w) { return S.lessonOf(w) <= lesson(); }); }
   // Is the word one the lesson filter asks? Through Lesson N: all of the
-  // above. Lesson N only: the words whose own lesson is N.
-  function asked(w) { return S.inLesson(S.lessonOf(w)); }
+  // above. Lesson N only: the words whose own lesson is N. A word marked
+  // "review": true is known from an earlier book: it is in play through
+  // every lesson, but no lesson's own words include it.
+  function asked(w) { return !(ctx.settings.lessonOnly && w.review === true) && S.inLesson(S.lessonOf(w)); }
   function filtered(list) {
     return list.filter(function (w) { return ctx.settings.pos.indexOf(group(w)) >= 0; });
   }

@@ -157,7 +157,7 @@
   // ---------- adjectives ----------
   // nom lists the nominative singular as the dictionary prints it:
   //   "1-2": [magnus, magna, magnum], [miser, misera, miserum], [integer, integra, integrum]
-  //   "3":   [gravis, grave]
+  //   "3":   [gravis, grave], [ācer, ācris, ācre], or [audāx] with "gen": "audācis"
   // The stem is read from the feminine, so integer and noster drop the e
   // and miser keeps it. Third-declension adjectives decline as i-stems.
   // Flag "gen-ius": genitive singular -īus and dative singular -ī in all
@@ -167,9 +167,13 @@
   function adjectiveNom(entry) {
     var d = String(entry.declension), nom = entry.nom;
     if (ADJ_DECLENSIONS.indexOf(d) < 0) throw new Error("unknown adjective declension code " + JSON.stringify(entry.declension));
-    var want = d === "3" ? 2 : 3;
-    if (!Array.isArray(nom) || nom.length !== want) {
-      throw new Error(d === "3" ? 'a third-declension adjective needs "nom": [gravis, grave]' : 'a 1-2 adjective needs "nom": [magnus, magna, magnum]');
+    if (d === "3") {
+      // two endings (gravis, grave), three (ācer, ācris, ācre), or one with
+      // the genitive beside it (audāx, gen. audācis)
+      if (!Array.isArray(nom) || nom.length < 1 || nom.length > 3) throw new Error('a third-declension adjective needs "nom": [gravis, grave], [ācer, ācris, ācre] or [audāx] with "gen"');
+      if (nom.length === 1 && !(typeof entry.gen === "string" && endsWith(entry.gen, "is"))) throw new Error('a third-declension adjective of one ending needs "gen" (audāx: "gen": "audācis")');
+    } else if (!Array.isArray(nom) || nom.length !== 3) {
+      throw new Error('a 1-2 adjective needs "nom": [magnus, magna, magnum]');
     }
     return nom;
   }
@@ -183,16 +187,23 @@
   function declineAdjective(entry) {
     var nom = adjectiveNom(entry), out = {};
     if (String(entry.declension) === "3") {
-      var s3 = cut(nom[0], "is");
-      if (nom[1] !== s3 + "e") throw new Error('the neuter of "' + nom[0] + '" should be ' + s3 + "e, not " + nom[1]);
+      // gravis, grave | ācer, ācris, ācre | audāx (gen. audācis): the stem is
+      // the feminine (or the genitive) without -is; all are i-stems.
+      var s3, fNom, nNom;
+      if (nom.length === 1) { s3 = cut(entry.gen, "is"); fNom = nNom = nom[0]; }
+      else {
+        fNom = nom.length === 3 ? nom[1] : nom[0]; nNom = nom[nom.length - 1];
+        s3 = cut(fNom, "is");
+        if (nNom !== s3 + "e") throw new Error('the neuter of "' + nom[0] + '" should be ' + s3 + "e, not " + nNom);
+      }
       var mf = {
         sg: { nom: nom[0], gen: s3 + "is", dat: s3 + "ī", acc: s3 + "em", abl: s3 + "ī", voc: nom[0] },
         pl: { nom: s3 + "ēs", gen: s3 + "ium", dat: s3 + "ibus", acc: s3 + "ēs", abl: s3 + "ibus", voc: s3 + "ēs" }
       };
       out.m = mf;
-      out.f = { sg: Object.assign({}, mf.sg), pl: Object.assign({}, mf.pl) };
+      out.f = { sg: Object.assign({}, mf.sg, { nom: fNom, voc: fNom }), pl: Object.assign({}, mf.pl) };
       out.n = {
-        sg: { nom: nom[1], gen: s3 + "is", dat: s3 + "ī", acc: nom[1], abl: s3 + "ī", voc: nom[1] },
+        sg: { nom: nNom, gen: s3 + "is", dat: s3 + "ī", acc: nNom, abl: s3 + "ī", voc: nNom },
         pl: { nom: s3 + "ia", gen: s3 + "ium", dat: s3 + "ibus", acc: s3 + "ia", abl: s3 + "ibus", voc: s3 + "ia" }
       };
     } else {
@@ -237,7 +248,9 @@
     return declineAdjective(adj)[noun.gender][number][c];
   }
   function adjectiveEntryText(entry) {
-    return isDeclinedAdjective(entry) ? adjectiveNom(entry).join(", ") : entry.lemma;
+    if (!isDeclinedAdjective(entry)) return entry.lemma;
+    var nom = adjectiveNom(entry);
+    return nom.length === 1 ? nom[0] + " (gen. " + entry.gen + ")" : nom.join(", ");
   }
   // Lesson an adjective's paradigm is taught: its declension, raised for
   // the -er adjectives and the -īus group. grammar.adjectives:
@@ -298,6 +311,11 @@
   var DEP_INF_ENDING = { "1": "ārī", "2": "ērī", "3": "ī", "3io": "ī", "4": "īrī" };
 
   function add(stem, list) { return list.map(function (e) { return stem + e; }); }
+  // A compound's prefix on the base verb's forms. dē- is short before a
+  // vowel: dēsum, dēfuī, but deest, deesse, deerat.
+  function addPrefix(pre, list) {
+    return list.map(function (e) { return (pre === "dē" && /^[eē]/.test(e) ? "de" : pre) + e; });
+  }
 
   function verbStems(entry) {
     var c = String(entry.conjugation), parts = entry.parts || [];
@@ -322,7 +340,9 @@
         else throw new Error("4th principal part should end in -us or -um: " + p4);
       }
     }
-    return { conj: c, pres: pres, perf: perf, ppl: ppl, fut: futureStem(dep ? parts[2] : parts[3]),
+    // moritūrus and oritūrus are not made from mortuus and ortus
+    var fut = { morior: "morit", orior: "orit" }[normalize(entry.lemma)] || futureStem(dep ? parts[2] : parts[3]);
+    return { conj: c, pres: pres, perf: perf, ppl: ppl, fut: fut,
              impfSubj: pres + INF_ENDING[c].slice(0, -1) /* laudār, dūcer */ };
   }
   // Stem of the future participle active, read from the last principal
@@ -554,7 +574,7 @@
   // principal parts supply the perfect stem (absum → āfu-).
   // Only sum, eō and ferō take prefixes (dēdō and reddō are 3rd conjugation).
   var COMPOUND_BASES = ["sum", "eō", "ferō"];
-  var PREFIXES = ["ab", "ad", "ante", "circum", "con", "dē", "ex", "in", "inter", "intrō", "ob", "per", "prae", "prō", "prōd", "red", "sub", "super", "trāns"];
+  var PREFIXES = ["ab", "ad", "ante", "circum", "con", "dē", "dif", "ex", "in", "inter", "intrō", "ob", "per", "prae", "prō", "prōd", "re", "red", "sub", "super", "trāns"];
   function irregularFor(entry) {
     var key = normalize(entry.lemma);
     var found = null;
@@ -578,11 +598,11 @@
     if (parts[3] && endsWith(parts[3], "us") && !endsWith(parts[3], "ūrus")) ppl = cut(parts[3], "us");
     if (voice === "passive") {
       if (!table.passive) return null;
-      if (!perfTense) { var pf = table.passiveForms[mood] && table.passiveForms[mood][tense]; return pf ? plain(add(pre, pf)) : null; }
+      if (!perfTense) { var pf = table.passiveForms[mood] && table.passiveForms[mood][tense]; return pf ? plain(addPrefix(pre, pf)) : null; }
       return perfectPassive(ppl, mood, tense);
     }
     var given = table.active[mood] && table.active[mood][tense];
-    if (given) return plain(add(pre, given));
+    if (given) return plain(addPrefix(pre, given));
     if (!perfTense) return null;
     if (table.perfectFromParticiple) return perfectPassive(ppl, mood, tense);
     if (!perf) return null;
@@ -682,8 +702,8 @@
       if (endsWith(p4, "us") && !endsWith(p4, "ūrus")) ppl = cut(p4, "us");
       var perf = parts[2] && endsWith(parts[2], "ī") ? cut(parts[2], "ī") : (t.perf ? pre + t.perf : null);
       return {
-        impA: nf.imperative ? add(pre, nf.imperative) : null,
-        impP: passive && nf.passImperative ? add(pre, nf.passImperative) : null,
+        impA: nf.imperative ? addPrefix(pre, nf.imperative) : null,
+        impP: passive && nf.passImperative ? addPrefix(pre, nf.passImperative) : null,
         infA: parts[1] || null,
         infP: passive && nf.passInf ? pre + nf.passInf : null,
         perf: perf, perfInfAlso: nf.perfInfAlso ? add(pre, nf.perfInfAlso) : [],

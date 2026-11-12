@@ -1,0 +1,90 @@
+{
+  "id": "henle2",
+  "name": "Henle Second Year Latin",
+  "short": "Henle II",
+  "lessons": 32,
+  "lessonWord": "Lesson",
+  "_note": "The lessons are the 32 of Part IV, 'Exercises Based on Caesar' (pp. 305-520), which review the forms of First Year and add the rest. grammar: the lesson in which each form is taken up, from the lesson titles in the table of contents and the forms the lesson's own text and exercises give. The declensions are taken as known from First Year (Lesson 1 reviews the third). The typed games open a row or column once the lesson filter reaches that number. null means the form is not taught in this book. Compounds follow their base verb (dēsum like sum, trānseō like eō, cōnferō like ferō). The words: the Classified Word List (pp. 551-584). A word the list marks with an asterisk is a second-year word and belongs to the first lesson whose VOCABULARY has it; the others are the required words of First Year, entered at Lesson 1 with \"review\": true.",
+  "_source": {
+    "L1": "third declension nouns; sum (indicative)",
+    "L2": "review of adjectives: first and second declensions (with miser and integer) and the third (gravis)",
+    "L3": "indicative active of the four conjugations and of -iō verbs; quis, quid",
+    "L4": "present subjunctive active of the four conjugations, -iō verbs and sum",
+    "L5": "the subjunctive active, all four tenses, and of sum",
+    "L6": "personal pronouns, possessives, reflexives",
+    "L7": "indicative passive of the four conjugations and of -iō verbs",
+    "L8": "hic, is, ille",
+    "L9": "subjunctive passive of the four conjugations and of -iō verbs",
+    "L10": "other adjectives of the third declension: ācer, celer, audāx, dīligēns",
+    "L11": "indicative and subjunctive of deponent verbs (no infinitives or participles yet)",
+    "L12": "comparison of adjectives",
+    "L14": "irregular comparison of adjectives",
+    "L15": "eō and its compounds, indicative and subjunctive",
+    "L16": "formation and comparison of adverbs",
+    "L17": "adjectives with the genitive in -īus (ūnus, alius, tōtus…); numerals",
+    "L18": "ferō, active and perfect system passive; ipse; the perfect participle passive (pp. 407-411; of deponents p. 414)",
+    "L19": "possum; the present infinitive, active and passive (p. 421)",
+    "L20": "accusative with the infinitive: perfect infinitive active and passive (p. 435), future participle and future infinitive active (p. 437). The future infinitive passive is not given",
+    "L22": "present participle active (pp. 454-457), with ferēns and iēns",
+    "L23": "volō (nōlō and mālō are not taught)",
+    "L24": "fīō (no imperative)",
+    "L26-28": "the gerund and gerundive (not in the games)",
+    "L29": "the vocative; the imperative, present active and passive, with ī, fer, nōlī and the deponents (p. 507). No imperative of sum, possum, volō or fīō in the lesson"
+  },
+  "grammar": {
+    "nouns": {
+      "declension": { "1": 1, "2": 1, "3": 1, "4": 1, "5": 1 },
+      "vocative": 29
+    },
+    "adjectives": {
+      "declension": { "1-2": 2, "3": 2 },
+      "er": 2,
+      "gen-ius": 17
+    },
+    "verbs": {
+      "conjugation": { "1": 3, "2": 3, "3": 3, "4": 3, "3io": 3 },
+      "deponent": 11,
+      "irregular": {
+        "sum": 1,
+        "possum": 19,
+        "eō": 15,
+        "ferō": 18,
+        "volō": 23,
+        "fīō": 24,
+        "dō": { "start": 3, "like": "1" },
+        "nōlō": null,
+        "mālō": null
+      },
+      "indicative": {
+        "active": {
+          "present":        { "1": 3, "2": 3, "3": 3, "4": 3, "3io": 3 },
+          "imperfect":      { "1": 3, "2": 3, "3": 3, "4": 3, "3io": 3 },
+          "future":         { "1": 3, "2": 3, "3": 3, "4": 3, "3io": 3 },
+          "perfect":        { "1": 3, "2": 3, "3": 3, "4": 3, "3io": 3 },
+          "pluperfect":     { "1": 3, "2": 3, "3": 3, "4": 3, "3io": 3 },
+          "future perfect": { "1": 3, "2": 3, "3": 3, "4": 3, "3io": 3 }
+        },
+        "passive": {
+          "present": 7, "imperfect": 7, "future": 7,
+          "perfect": 7, "pluperfect": 7, "future perfect": 7
+        }
+      },
+      "subjunctive": {
+        "active":  { "present": 4, "imperfect": 5, "perfect": 5, "pluperfect": 5 },
+        "passive": { "present": 9, "imperfect": 9, "perfect": 9, "pluperfect": 9 }
+      },
+      "imperative": {
+        "active":  { "present": { "1": 29, "2": 29, "3": 29, "4": 29, "3io": 29, "eō": 29, "ferō": 29, "sum": null, "possum": null, "volō": null, "fīō": null } },
+        "passive": { "present": 29 }
+      },
+      "infinitive": {
+        "active":  { "present": 19, "perfect": 20, "future": 20 },
+        "passive": { "present": 19, "perfect": 20, "future": null }
+      },
+      "participle": {
+        "active":  { "present": 22, "future": 20 },
+        "passive": { "perfect": 18 }
+      }
+    }
+  }
+}

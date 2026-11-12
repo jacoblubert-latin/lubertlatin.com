@@ -1,0 +1,558 @@
+# Henle, Second Year Latin: the Classified Word List, pp. 551-584, as printed.
+# Tab-separated: section heading, * for a second-year word (blank: required First Year vocabulary), entry, meanings, book page.
+# A row whose entry begins "with" is a second meaning of the row above. Lines beginning # are the book's footnotes.
+# After correcting a line, run: node tools/build-henle2-vocab.js --write
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		amīcitia, ae	friendship	551
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)	*	causa, ae	cause; reason	551
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		cōpia, ae	supply; abundance	551
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		fortūna, ae	fortune	551
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		fossa, ae	ditch	551
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)	*	fuga, ae	flight	551
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		Gallia, ae	Gaul	551
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		glōria, ae	fame; glory	551
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		grātia, ae	favor; influence; grace (in Christian Latin)	551
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)	*	hōra, ae	hour	551
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		injūria, ae	injustice; wrong	551
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		inopia, ae	scarcity; want	551
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		Italia, ae	Italy	551
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		Marīa, ae	Mary	551
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		memoria, ae	memory	551
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		nātūra, ae	nature	551
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		nauta, ae	sailor	551
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		porta, ae	gate	551
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		prōvincia, ae	province	552
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		Rōma, ae	Rome	552
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		silva, ae	forest	552
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		terra, ae	earth; land	552
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		via, ae	road; way	552
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		victōria, ae	victory	552
+NOUNS OF THE FIRST DECLENSION (LIKE TERRA, AE)		vīta, ae	life	552
+PLURAL NOUNS OF THE FIRST DECLENSION (LIKE TERRAE, TERRĀRUM)	*	angustiae, angustiārum	defile; narrow place; difficulties	552
+PLURAL NOUNS OF THE FIRST DECLENSION (LIKE TERRAE, TERRĀRUM)		cōpiae, cōpiārum, f.	troops; forces (a military term)	552
+PLURAL NOUNS OF THE FIRST DECLENSION (LIKE TERRAE, TERRĀRUM)		grātiae, grātiārum	thanks	552
+PLURAL NOUNS OF THE FIRST DECLENSION (LIKE TERRAE, TERRĀRUM)		litterae, litterārum	letter (i. e., an epistle); dispatch	552
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		ager, agrī	field	552
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		amīcus, ī	friend	552
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)	*	annus, ī	year	552
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		Chrīstiānus, ī	Christian	552
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		Chrīstus, ī	Christ	552
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		Deus, ī	God	552
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		dominus, ī	master; Lord	553
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		fīlius, ī	son	553
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		Gallus, ī	a Gaul	553
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		gladius, ī	sword	553
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		lēgātus, ī	envoy; lieutenant	553
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		locus, ī (pl., loca, locōrum)	place	553
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		mundus, ī	world	553
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		mūrus, ī	wall	553
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		numerus, ī	number	553
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		nuntius, ī	messenger; message	553
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		populus, ī	people; nation	553
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		puer, puerī	boy	553
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		Rōmānus, ī	a Roman	553
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		servus, ī	slave; servant	553
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)	*	socius, ī	companion; ally	553
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		tribūnus, ī	tribune	553
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)	*	ventus, ī	wind	553
+MASCULINE NOUNS OF THE SECOND DECLENSION (LIKE SERVUS, Ī)		vir, virī	man	553
+NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLUM, Ī)		auxilium, ī	help; aid	553
+NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLUM, Ī)		bellum, ī	war	553
+NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLUM, Ī)		caelum, ī	sky; heaven	553
+NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLUM, Ī)		concilium, ī	council	554
+NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLUM, Ī)		cōnsilium, ī	plan; counsel	554
+NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLUM, Ī)		frūmentum, ī	grain (pl., crops)	554
+NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLUM, Ī)		imperium, ī	command; power; empire	554
+NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLUM, Ī)		oppidum, ī	town	554
+NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLUM, Ī)	*	peccātum, ī	mistake; sin (in Christian Latin)	554
+NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLUM, Ī)		perīculum, ī	danger	554
+NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLUM, Ī)	*	pīlum, ī	javelin	554
+NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLUM, Ī)		praemium, ī	reward	554
+NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLUM, Ī)	*	praesidium, ī	garrison; protection	554
+NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLUM, Ī)		proelium, ī	battle	554
+NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLUM, Ī)		rēgnum, ī	kingdom; royal power	554
+NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLUM, Ī)		signum, ī	standard; signal; sign	554
+NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLUM, Ī)		tēlum, ī	dart	554
+NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLUM, Ī)		vallum, ī	wall; rampart	554
+PLURAL NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLA, BELLŌRUM)		arma, armōrum	arms	554
+PLURAL NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLA, BELLŌRUM)		auxilia, auxiliōrum	reinforcements	554
+PLURAL NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLA, BELLŌRUM)		castra, castrōrum	camp	554
+PLURAL NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLA, BELLŌRUM)		hīberna, hībernōrum	winter quarters	554
+PLURAL NEUTER NOUNS OF THE SECOND DECLENSION (LIKE BELLA, BELLŌRUM)		impedīmenta, impedīmentōrum	baggage; baggage train	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)	*	auctōritās, auctōritātis	authority; influence	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		Caesar, Caesaris	Caesar	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)	*	cāritās, cāritātis	charity; love	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		centuriō, centuriōnis	centurion	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		cīvitās, cīvitātis	state	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		clāmor, clāmōris	shouting; shout	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)	*	cōnsul, cōnsulis, m.	consul	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)	*	crux, crucis	cross	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		custōs, custōdis	guard	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)	*	dolor, dolōris	pain; sorrow	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		dux, ducis	leader	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		eques, equitis	horseman (pl., cavalry)	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		frāter, frātris (frātrum)	brother	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		homō, hominis	man	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		imperātor, imperātōris	commander in chief; general	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		labor, labōris	effort; toil	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		legiō, legiōnis, f.	legion	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		lēx, lēgis	law	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)	*	lībertās, lībertātis	liberty	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		lūx, lūcis	light	555
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		māter, mātris (mātrum)	mother	556
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		mīles, mīlitis	soldier	556
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		nox, noctis	night	556
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		obses, obsidis, c.	hostage	556
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		ōrātiō, ōrātiōnis	speech; prayer	556
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		ōrdō, ōrdinis, m.	rank (of soldiers)	556
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		pater, patris (patrum)	father	556
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		pāx, pācis	peace	556
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)	*	pes, pedis, m.	foot (of an animal, mountain, etc.; or a unit of measure)	556
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		prīnceps, prīncipis	chief; leading man	556
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)	*	ratiō, ratiōnis	method; reason; plan; way	556
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		rēx, rēgis	king	556
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		salūs, salūtis	safety; welfare; salvation	556
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)	*	timor, timōris	fear	556
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		vēritās, vēritātis	truth	556
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		virtūs, virtūtis	courage; virtue	556
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE LĒX, LĒGIS)		vōx, vōcis	voice; cry	556
+PLURAL NOUNS OF THE THIRD DECLENSION (LIKE LĒGĒS, LĒGUM)	*	mājōrēs, mājōrum, m.	ancestors; forefathers	556
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE PARS, PARTIS)		caedēs, caedis	slaughter	557
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE PARS, PARTIS)	*	classis, classis	fleet	557
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE PARS, PARTIS)	*	cohors, cohortis	cohort (a division of a legion containing 600 men)	557
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE PARS, PARTIS)		collis, collis, m.	hill	557
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE PARS, PARTIS)		gēns, gentis	tribe	557
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE PARS, PARTIS)		hostis, hostis	enemy (in war)	557
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE PARS, PARTIS)		mōns, montis, m.	mountain	557
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE PARS, PARTIS)		mors, mortis	death	557
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE PARS, PARTIS)		pars, partis	part	557
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE PARS, PARTIS)		pōns, pontis, m.	bridge	557
+MASCULINE AND FEMININE NOUNS OF THE THIRD DECLENSION (LIKE PARS, PARTIS)		urbs, urbis	city	557
+PLURAL NOUNS OF THE THIRD DECLENSION (LIKE FĪNĒS, FĪNIUM)		fīnēs, fīnium, m.	territory	557
+PLURAL NOUNS OF THE THIRD DECLENSION (LIKE FĪNĒS, FĪNIUM)	*	vīrēs, vīrium, f.	strength; force	557
+NEUTER NOUNS OF THE THIRD DECLENSION (LIKE FLŪMEN, FLŪMINIS)		agmen, agminis	column (of soldiers); army (on the march)	557
+NEUTER NOUNS OF THE THIRD DECLENSION (LIKE FLŪMEN, FLŪMINIS)		corpus, corporis, n.	body	557
+NEUTER NOUNS OF THE THIRD DECLENSION (LIKE FLŪMEN, FLŪMINIS)		flūmen, flūminis	river	557
+NEUTER NOUNS OF THE THIRD DECLENSION (LIKE FLŪMEN, FLŪMINIS)		iter, itineris, n.	journey; march; route	558
+NEUTER NOUNS OF THE THIRD DECLENSION (LIKE FLŪMEN, FLŪMINIS)		nōmen, nōminis	name	558
+NEUTER NOUNS OF THE THIRD DECLENSION (LIKE FLŪMEN, FLŪMINIS)	*	tempus, temporis, n.	time	558
+NEUTER NOUNS OF THE THIRD DECLENSION (LIKE FLŪMEN, FLŪMINIS)		vulnus, vulneris, n.	wound	558
+NOUNS OF THE FOURTH DECLENSION (LIKE PORTUS, ŪS)		adventus, ūs	arrival; coming	558
+NOUNS OF THE FOURTH DECLENSION (LIKE PORTUS, ŪS)		equitātus, ūs	cavalry	558
+NOUNS OF THE FOURTH DECLENSION (LIKE PORTUS, ŪS)		exercitus, ūs	army	558
+NOUNS OF THE FOURTH DECLENSION (LIKE PORTUS, ŪS)		impetus, ūs	attack	558
+NOUNS OF THE FOURTH DECLENSION (LIKE PORTUS, ŪS)		metus, ūs	fear	558
+NOUNS OF THE FOURTH DECLENSION (LIKE PORTUS, ŪS)	*	passus, ūs	a pace (a measure = 5 Roman feet)	558
+NOUNS OF THE FOURTH DECLENSION (LIKE PORTUS, ŪS)		portus, ūs	harbor	558
+NOUNS OF THE FOURTH DECLENSION (LIKE PORTUS, ŪS)		senātus, ūs	senate	558
+NOUNS OF THE FOURTH DECLENSION (LIKE PORTUS, ŪS)		spīritus, ūs	breath; spirit	558
+NOUNS OF THE FIFTH DECLENSION (LIKE RĒS, REĪ)		aciēs, aciēī	battle line	558
+NOUNS OF THE FIFTH DECLENSION (LIKE RĒS, REĪ)	*	diēs, diēī, m. (f.)	day	558
+NOUNS OF THE FIFTH DECLENSION (LIKE RĒS, REĪ)		fidēs, fideī	faith; reliability; faithfulness	558
+NOUNS OF THE FIFTH DECLENSION (LIKE RĒS, REĪ)		rēs, reī	thing; affair	559
+NOUNS OF THE FIFTH DECLENSION (LIKE RĒS, REĪ)		spēs, speī	hope	559
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)		aliēnus, a, um	unfavorable; another's; foreign	559
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)		altus, a, um	high; deep	559
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)		angustus, a, um	narrow	559
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	barbarus, a, um	barbarian; foreign	559
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)		bonus, a, um	good	559
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	certus, a, um	certain; fixed	559
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)		Chrīstiānus, a, um	Christian	559
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)		cupidus, a, um; w. gen.	eager; desirous	559
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	dubius, a, um	doubtful; uncertain	559
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	extrēmus, a, um	outermost; farthest; last	559
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)		fīnitimus, a, um; w. dat.	neighboring; next	559
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	firmus, a, um	strong; vigorous	559
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	idōneus, a, um; w. dat. or ad w. acc.	suitable; proper; convenient	559
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)		lātus, a, um	wide	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)		longus, a, um	long	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)		magnus, a, um	great; large	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)		malus, a, um	bad	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	maximus, a, um	greatest	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	medius, a, um	middle	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	meus, a, um	my; mine	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	minimus, a, um	smallest	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)		multus, a, um	much (pl., many)	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)		novus, a, um	new	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	optimus, a, um	best	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	parātus, a, um; w. pres. infin. or ad w. acc.	prepared (for)	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	parvus, a, um	small	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	paucī, ae, a	few	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	pessimus, a, um	worst	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)		plēnus, a, um; w. gen. or abl.	full	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	plūrimus, a, um	very many; the greatest number; (pl., the most)	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	prīmus, a, um	first	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	proximus, a, um; w. dat.	nearest; next	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	quantus, a, um	how much; how large	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)		reliquus, a, um	remaining; the rest of	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)		Rōmānus, a, um	Roman	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)		sānctus, a, um	holy; saint	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	secundus, a, um	second	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	summus, a, um	highest	560
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	suus, a, um	his (own); her (own); its (own); their (own)	561
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	tantus, a, um	so great	561
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	tertius, a, um	third	561
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)		tūtus, a, um	safe	561
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	tuus, a, um	your (of one person); yours; your own	561
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MAGNUS, A, UM)	*	ultimus, a, um	farthest; last	561
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MISER, MISERA, MISERUM)		līber, lībera, līberum	free	561
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE MISER, MISERA, MISERUM)		miser, misera, miserum	wretched	561
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE INTEGER, INTEGRA, INTEGRUM)		integer, integra, integrum	fresh; uninjured; whole	561
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE INTEGER, INTEGRA, INTEGRUM)	*	noster, nostra, nostrum	our; ours; our own	561
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE INTEGER, INTEGRA, INTEGRUM)	*	vester, vestra, vestrum	your (of more than one person); yours; your own	561
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE ŪNUS, A, UM IN THE GENITIVE AND DATIVE SINGULAR)	*	alius, alia, aliud	other; another	562
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE ŪNUS, A, UM IN THE GENITIVE AND DATIVE SINGULAR)	*	alter, altera, alterum	second; the other (of two); the one (of two)	562
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE ŪNUS, A, UM IN THE GENITIVE AND DATIVE SINGULAR)	*	nūllus, a, um	no; none	562
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE ŪNUS, A, UM IN THE GENITIVE AND DATIVE SINGULAR)	*	sōlus, a, um	alone; only (as an adjective)	562
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE ŪNUS, A, UM IN THE GENITIVE AND DATIVE SINGULAR)	*	tōtus, a, um	whole; all of; the whole of	562
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE ŪNUS, A, UM IN THE GENITIVE AND DATIVE SINGULAR)	*	ūllus, a, um	any	562
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE ŪNUS, A, UM IN THE GENITIVE AND DATIVE SINGULAR)	*	ūnus, a, um	one	562
+ADJECTIVES OF THE FIRST AND SECOND DECLENSIONS (LIKE ŪNUS, A, UM IN THE GENITIVE AND DATIVE SINGULAR)	*	uterque, utraque, utrumque	each (of two); both (of two)	562
+ADJECTIVES OF THE THIRD DECLENSION (LIKE GRAVIS, E)		brevis, e	short	562
+ADJECTIVES OF THE THIRD DECLENSION (LIKE GRAVIS, E)		commūnis, e	common	562
+ADJECTIVES OF THE THIRD DECLENSION (LIKE GRAVIS, E)		difficilis, e	difficult	562
+ADJECTIVES OF THE THIRD DECLENSION (LIKE GRAVIS, E)		facilis, e	easy	562
+ADJECTIVES OF THE THIRD DECLENSION (LIKE GRAVIS, E)		fortis, e	brave; strong	562
+ADJECTIVES OF THE THIRD DECLENSION (LIKE GRAVIS, E)		gravis, e	heavy; severe; serious	562
+ADJECTIVES OF THE THIRD DECLENSION (LIKE GRAVIS, E)		nōbilis, e	noble; renowned	563
+ADJECTIVES OF THE THIRD DECLENSION (LIKE GRAVIS, E)		omnis, e	all; every	563
+ADJECTIVES OF THE THIRD DECLENSION (LIKE GRAVIS, E)		similis, e; w. gen. or dat.	like; similar	563
+ADJECTIVES OF THE THIRD DECLENSION (LIKE GRAVIS, E)	*	tālis, e	such; of such a kind	563
+ADJECTIVES OF THE THIRD DECLENSION (LIKE GRAVIS, E)		ūtilis, e; ad w. acc.	useful (for)	563
+ADJECTIVES OF THE THIRD DECLENSION (LIKE ĀCER, ĀCRIS, ĀCRE)	*	ācer, ācris, ācre	sharp; fierce; eager	563
+ADJECTIVES OF THE THIRD DECLENSION (LIKE ĀCER, ĀCRIS, ĀCRE)	*	celer, celeris, celere	swift	563
+ADJECTIVES OF THE THIRD DECLENSION (LIKE AUDĀX; gen. AUDĀCIS)	*	audāx (gen. audācis)	daring; bold; courageous	563
+ADJECTIVES OF THE THIRD DECLENSION (LIKE DĪLIGĒNS; gen. DĪLIGENTIS)	*	dīligēns (gen. dīligentis)	careful; exact	563
+COMPARATIVE ADJECTIVES (LIKE GRAVIOR, GRAVIUS)	*	mājor, mājus	greater	564
+COMPARATIVE ADJECTIVES (LIKE GRAVIOR, GRAVIUS)	*	melior, melius	better	564
+COMPARATIVE ADJECTIVES (LIKE GRAVIOR, GRAVIUS)	*	minor, minus	smaller	564
+COMPARATIVE ADJECTIVES (LIKE GRAVIOR, GRAVIUS)	*	pējor, pējus	worse	564
+COMPARATIVE ADJECTIVES (LIKE GRAVIOR, GRAVIUS)	*	superior, superius	higher; former	564
+COMPARATIVE ADJECTIVES (LIKE GRAVIOR, GRAVIUS)	*	ulterior, ulterius	farther	564
+IRREGULAR AND MIXED NOUNS AND ADJECTIVES		dī, deōrum (abl. and dat. dīs)	gods	564
+IRREGULAR AND MIXED NOUNS AND ADJECTIVES		Jēsūs, ū (declined: Jēsūs, Jēsū, Jēsū, Jēsum, Jēsū)	Jesus	564
+IRREGULAR AND MIXED NOUNS AND ADJECTIVES	*	mīlle passūs (pl., mīlia passuum)	a mile	564
+IRREGULAR AND MIXED NOUNS AND ADJECTIVES	*	nēmō, nēminis (nūllīus, nūllō, and nūllā usually used in place of nēminis and nēmine)	no one	564
+IRREGULAR AND MIXED NOUNS AND ADJECTIVES	*	nihil (short form: nīl), n., indecl. noun	nothing	564
+IRREGULAR AND MIXED NOUNS AND ADJECTIVES	*	parum, indecl. noun; w. gen.	too little; not enough	564
+IRREGULAR AND MIXED NOUNS AND ADJECTIVES	*	plūrēs, plūra	more	564
+IRREGULAR AND MIXED NOUNS AND ADJECTIVES	*	plūs, plūris, n.; w. gen.	more	564
+IRREGULAR AND MIXED NOUNS AND ADJECTIVES	*	quot, indecl. adj.	how many	564
+IRREGULAR AND MIXED NOUNS AND ADJECTIVES	*	satis, indecl. noun; w. gen.	enough	564
+IRREGULAR AND MIXED NOUNS AND ADJECTIVES	*	tot, indecl. adj.	so many	564
+IRREGULAR AND MIXED NOUNS AND ADJECTIVES	*	vīs (gen. vis [rare]; acc. vim; abl. vī)	force; power; violence	564
+ADVERBS		ācriter	bitterly; eagerly	565
+ADVERBS	*	adeō	so; to such a degree	565
+ADVERBS	*	bene	well	565
+ADVERBS		celeriter	swiftly	565
+ADVERBS	*	cūr	why	565
+ADVERBS	*	diū	a long time; long (of time)	565
+ADVERBS		diūtius	longer	565
+ADVERBS		etiam	also	565
+ADVERBS	*	facile	easily	565
+ADVERBS	*	facilius	more easily	565
+ADVERBS		ferē	almost	565
+ADVERBS		fortiter	bravely; strongly	565
+ADVERBS		ibi	there	565
+ADVERBS		interim	meanwhile	565
+ADVERBS	*	ita	so; in such a manner; thus	565
+ADVERBS		longē	far; by far	565
+ADVERBS	*	magis	more	565
+ADVERBS	*	magnōpere	greatly	565
+ADVERBS	*	male	badly	565
+ADVERBS	*	melius	better	565
+ADVERBS	*	minus	less	565
+ADVERBS	*	multum	much; greatly	565
+ADVERBS	*	nihil	not; not at all	565
+ADVERBS		nōn	not	565
+ADVERBS		nunc	now	566
+ADVERBS	*	nūper	lately	566
+ADVERBS	*	parum	little; too little	566
+ADVERBS	*	pējus	worse	566
+ADVERBS	*	plūs	more	566
+ADVERBS		posteā	afterwards	566
+ADVERBS	*	prope	near	566
+ADVERBS	*	propius	nearer	566
+ADVERBS	*	quam	than	566
+ADVERBS	*	quō	whither; where (of motion)	566
+ADVERBS		saepe	often	566
+ADVERBS	*	satis	sufficiently	566
+ADVERBS		semper	always	566
+ADVERBS	*	sīc	so; in such a manner	566
+ADVERBS		statim	at once; immediately	566
+ADVERBS	*	tam	so; to such a degree	566
+ADVERBS		tamen	nevertheless	566
+ADVERBS		tum	then; at that time	566
+ADVERBS	*	tūtō	safely	566
+ADVERBS	*	ubi	where	566
+ADVERBS		undique	from all sides; on all sides	566
+ADVERBS		usque	all the way (to); even (to); up (to)	566
+ADVERBS		vehementer	greatly; violently	566
+PRONOUNS	*	ego, meī	I	567
+PRONOUNS	*	hic, haec, hoc	this	567
+PRONOUNS	*	ille, illa, illud	that; he, she, it, they, etc.	567
+PRONOUNS	*	ipse, ipsa, ipsum	self	567
+PRONOUNS	*	is, ea, id	that; he, she, it, they, etc.	567
+PRONOUNS		nōs, nostrī	we	567
+PRONOUNS	*	quī, quae, quod	who; what; which; that	567
+PRONOUNS	*	quis, quid	who; what	567
+PRONOUNS	*	suī	himself (him); herself (her); itself (it); themselves (them)	567
+PRONOUNS	*	tū, tuī	you (sing.)	567
+PRONOUNS		vōs, vestrī	you (pl.)	567
+NUMERALS	*	centum	one hundred	567
+NUMERALS	*	decem	ten	567
+NUMERALS	*	duo, duae, duo	two	567
+NUMERALS	*	mīlle (indecl. adj. in sing.; mīlia, mīlium, neuter noun in pl.)	thousand	567
+NUMERALS	*	quattuor	four	567
+NUMERALS	*	trēs, tria	three	567
+PREPOSITIONS	*	ab (ā), w. abl.	by (agent); away from; from	568
+PREPOSITIONS		ad, w. acc.	to; until; at; for (with adjectives)	568
+PREPOSITIONS	*	ante, w. acc.	before (of time or place); in front of	568
+PREPOSITIONS	*	apud, w. acc.	among; in the presence of	568
+PREPOSITIONS	*	contrā, w. acc.	against; opposite	568
+PREPOSITIONS		cum, w. abl.	with	568
+PREPOSITIONS	*	dē, w. abl.	down from; out of; from; concerning; about	568
+PREPOSITIONS	*	ex (ē), w. abl.	out of; from	568
+PREPOSITIONS		in, w. abl.	in; on	568
+PREPOSITIONS		in, w. acc.	in; into; against; upon; onto; on	568
+PREPOSITIONS		inter, w. acc.	between; among	568
+PREPOSITIONS		per, w. acc.	through	568
+PREPOSITIONS		post, w. acc.	after; behind	568
+PREPOSITIONS	*	praeter, w. acc.	except; past; contrary to	569
+PREPOSITIONS		prō, w. abl.	in front of (before); on behalf of (for)	569
+PREPOSITIONS		propter, w. acc.	on account of	569
+PREPOSITIONS		sine, w. abl.	without	569
+PREPOSITIONS	*	sub, w. abl.	under; at the foot of	569
+PREPOSITIONS	*	sub, w. acc.	under; beneath; up to; about (of time); toward (of time)	569
+PREPOSITIONS		trāns, w. acc.	across	569
+OTHER WORDS, IDIOMS, AND PARTICLES	*	avē, interjection	hail!	569
+OTHER WORDS, IDIOMS, AND PARTICLES	*	causā, preceded by gen.	for the sake of	569
+OTHER WORDS, IDIOMS, AND PARTICLES		in perpetuum	forever	569
+OTHER WORDS, IDIOMS, AND PARTICLES		in prīmīs	especially (lit., among the first things)	569
+OTHER WORDS, IDIOMS, AND PARTICLES		in prīncipiō	in the beginning	569
+OTHER WORDS, IDIOMS, AND PARTICLES		in saecula saeculōrum	world without end; forever	569
+OTHER WORDS, IDIOMS, AND PARTICLES	*	nē	not (with commands, wishes, and hortatory subjunctives)	569
+# Footnote 1 (p. 569, on nē): Nē is also a conjunction; see page 584.
+OTHER WORDS, IDIOMS, AND PARTICLES	*	-ne (added to emphatic word—generally to the verb—and put first in the sentence)	particle used in asking questions	569
+OTHER WORDS, IDIOMS, AND PARTICLES	*	nōnne (generally first in its clause)	word used in asking questions when the answer 'yes' is expected	570
+OTHER WORDS, IDIOMS, AND PARTICLES	*	num (generally first in its clause)	word used in asking questions when the answer 'no' is expected	570
+OTHER WORDS, IDIOMS, AND PARTICLES		prīmā lūce	at dawn	570
+OTHER WORDS, IDIOMS, AND PARTICLES	*	utinam	particle used in wishes	570
+OTHER WORDS, IDIOMS, AND PARTICLES	*	vī (abl. of vīs)	violently; by force	570
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		adjuvō, adjuvāre, adjūvī, adjūtus, 1, tr.	help; aid	570
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		administrō, 1, tr.	manage; attend to	570
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		appellō, 1, tr.	address; call (upon)	570
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		with two accs.	call	570
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		appropinquō, 1, intr.; w. dat. or ad w. acc.	draw near to; approach	570
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		collocō, 1, tr.	place; station	570
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		comparō, 1, tr.	get ready; prepare	570
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)	*	cōnfirmō, 1, tr.	encourage; strengthen	570
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		with acc. w. infin.	affirm	570
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)	*	conjūrō, 1, intr.	conspire; form a conspiracy	570
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		cōnservō, 1, tr.	preserve; spare	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)	*	dēmōnstrō, 1, tr.; acc. w. infin.	show; point out	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		dō, dare, dedī, datus, 1, tr.	give	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)	*	exīstimō, 1, tr.; acc. w. infin.	think	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		explōrō, 1, tr.	reconnoiter; find out	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		expugnō, 1, tr.	storm; take by storm	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		exspectō, 1, tr.	wait for; wait	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)	*	imperō, 1, tr.; w. dat. of person	levy (on)	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		with ut (nē)	order; command	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		incitō, 1, tr.	incite; arouse	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		laudō, 1, tr.	praise	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)	*	mandō, 1, tr.; w. dat. of person	commit; entrust	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		with ut (nē)	command	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)	*	negō, 1, tr.; acc. w. infin.	deny; say . . . not	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)	*	nuntiō, 1, tr.; acc. w. infin.	announce; report	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		occupō, 1, tr.	seize	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		oppugnō, 1, tr.	attack; assault; storm	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		ōrō, 1, tr.; ut (nē)	beg; pray	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)	*	pācō, 1, tr.	pacify	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)	*	parō, 1, tr.; w. pres. infin.	prepare; get ready	571
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		perturbō, 1, tr.	confuse; disturb	572
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		portō, 1, tr.	carry	572
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		pugnō, 1, intr.	fight	572
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)	*	putō, 1, tr.; acc. w. infin.	think	572
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)	*	rogō, 1, tr.; ut (nē)	ask; request	572
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		servō, 1, tr.	guard; keep	572
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		superō, 1, tr.	overcome; conquer; surpass	572
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		vastō, 1, tr.	lay waste; ravage	572
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)	*	vetō, vetāre, vetuī, vetitus, 1, tr.; acc. w. pres. infin.	forbid	572
+VERBS OF THE FIRST CONJUGATION (LIKE LAUDŌ)		vocō, 1, tr.	call	572
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)	*	commoveō, commovēre, commōvī, commōtus, 2, tr.	alarm; arouse	572
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)		compleō, complēre, complēvī, complētus, 2, tr.; w. abl.	fill (with)	572
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)		contineō, continēre, continuī, contentus, 2, tr.	restrain; hold in	572
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)	*	dēbeō, 2, tr.; w. pres. infin.	ought; owe	572
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)		habeō, 2, tr.	have	572
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)	*	jubeō, jubēre, jussī, jussus, 2, tr.; acc. w. pres. infin.; ut (nē)	order; command	572
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)		maneō, manēre, mānsī, mānsūrus, 2, intr.	remain	572
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)		moneō, 2, tr.; ut (nē)	warn; advise	573
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)		moveō, movēre, mōvī, mōtus, 2, tr.	move	573
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)	*	noceō, nocēre, nocuī, nocitūrus, 2, intr.; w. dat.	harm; injure	573
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)		obtineō, obtinēre, obtinuī, obtentus, 2, tr.	hold; occupy	573
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)	*	oportet, oportēre, oportuit, 2, intr.; acc. w. pres. infin.	it behooves; it is necessary	573
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)	*	permoveō, permovēre, permōvī, permōtus, 2, tr.	arouse; influence	573
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)	*	persuādeō, persuādēre, persuāsī, persuāsum, 2, intr.; w. dat.; ut (nē)	persuade	573
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)		pertineō, pertinēre, pertinuī, 2, intr.; ad w. acc.	pertain to; stretch to	573
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)	*	prohibeō, 2, tr.; w. abl. of separation	ward off (from); prevent	573
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)	*	respondeō, respondēre, respondī, respōnsus, 2, tr.; acc. w. infin.	answer	573
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)		retineō, retinēre, retinuī, retentus, 2, tr.	hold back; keep	573
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)	*	studeō, studēre, studuī, 2, intr.; w. dat. or pres. infin.; acc. w. infin.; ut (nē)	am eager (for); strive (after); am devoted (to)	573
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)		sustineō, sustinēre, sustinuī, sustentus, 2, tr.	sustain; withstand	573
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)		teneō, tenēre, tenuī, tentus, 2, tr.	hold	573
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)		terreō, 2, tr.	terrify	573
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)		timeō, timēre, timuī, 2, tr.; w. pres. infin.	fear (to)	573
+VERBS OF THE SECOND CONJUGATION (LIKE MONEŌ)		videō, vidēre, vīdī, vīsus, 2, tr.; acc. w. infin.	see	573
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	abdō, abdere, abdidī, abditus, 3, tr. (always with an object in Latin)	hide; conceal	574
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	addūcō, addūcere, addūxī, adductus, 3, tr.; ut (nē)	lead to; induce; influence	574
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		agō, agere, ēgī, āctus, 3, tr.	drive; do; act; treat; give (w. grātiās)	574
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	animadvertō, animadvertere, animadvertī, animadversus, 3, tr.; acc. w. infin.	attend to; notice	574
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		cēdō, cēdere, cessī, cessūrus, 3, intr.	give way; yield	574
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		cognōscō, cognōscere, cognōvī, cognitus, 3, tr.; acc. w. infin.	learn; find out	574
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	cōgō, cōgere, coēgī, coāctus, 3, tr.; acc. w. infin.	bring together; collect; force	574
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	committō, committere, commīsī, commissus, 3, tr.	commit; allow	574
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	conjungō, conjungere, conjūnxī, conjūnctus, 3, tr.	join together; unite	574
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	cōnscrībō, cōnscrībere, cōnscrīpsī, cōnscrīptus, 3, tr.; acc. w. infin.	enroll; write	574
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	cōnstituō, cōnstituere, cōnstituī, cōnstitūtus, 3, tr.; w. pres. infin.	place; set up; decide; determine	574
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		contendō, contendere, contendī, 3, intr.; w. pres. infin.	strive; contend; hasten	574
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	crēdō, crēdere, crēdidī, crēditus, 3, tr. and intr.; w. dat. of person to whom or in whom; acc. w. infin.	believe; trust; entrust	575
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	dēdō, dēdere, dēdidī, dēditus, 3, tr. (always with an object in Latin)	give up; devote; surrender	575
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		dēdūcō, dēdūcere, dēdūxī, dēductus, 3, tr.	lead; lead away	575
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		dēfendō, dēfendere, dēfendī, dēfēnsus, 3, tr.	defend	575
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	dīcō, dīcere, dīxī, dictus, 3, tr.; acc. w. infin.	say; tell	575
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	dīligō, dīligere, dīlēxī, dīlēctus, 3, tr.	love	575
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		dīmittō, dīmittere, dīmīsī, dīmissus, 3, tr.	send away; dismiss	575
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	dispōnō, dispōnere, disposuī, dispositus, 3, tr.	distribute; station	575
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	dīvidō, dīvidere, dīvīsī, dīvīsus, 3, tr.	divide; separate	575
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		dūcō, dūcere, dūxī, ductus, 3, tr.	lead; guide	575
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		gerō, gerere, gessī, gestus, 3, tr.	carry; carry on; wage (w. bellum)	575
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		incendō, incendere, incendī, incēnsus, 3, tr.	set fire to; burn	575
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	incolō, incolere, incoluī, 3, tr.	inhabit; dwell in	575
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	indūcō, indūcere, indūxī, inductus, 3, tr.; ut (nē)	lead in; lead on; influence	575
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		īnstruō, īnstruere, īnstrūxī, īnstrūctus, 3, tr.	draw up; equip	575
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	intellegō, intellegere, intellēxī, intellēctus, 3, tr.; acc. w. infin.	understand; perceive	575
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	jungō, jungere, jūnxī, jūnctus, 3, tr.	join; unite	576
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		mittō, mittere, mīsī, missus, 3, tr.	send	576
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		occīdō, occīdere, occīdī, occīsus, 3, tr.	kill	576
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	ostendō, ostendere, ostendī, ostentus, 3, tr.; acc. w. infin.	show; tell	576
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		pellō, pellere, pepulī, pulsus, 3, tr.	drive; repulse; rout	576
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		petō, petere, petīvī, petītus, 3, tr.; ut (nē)	seek; beg; request	576
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		pōnō, pōnere, posuī, positus, 3, tr.	put; place; set; pitch (w. castra)	576
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		premō, premere, pressī, pressus, 3, tr.	press; press hard	576
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	quaerō, quaerere, quaesīvī, quaesītus, 3, tr.; ut (nē)	seek; ask	576
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	redūcō, redūcere, redūxī, reductus, 3, tr.	lead back; draw back	576
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	relinquō, relinquere, relīquī, relictus, 3, tr.	leave; leave behind	576
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	remittō, remittere, remīsī, remissus, 3, tr.	send back; return; release	576
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	repellō, repellere, reppulī, repulsus, 3, tr.	beat back; drive back	576
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	reprimō, reprimere, repressī, repressus, 3, tr.	press back; check; restrain	576
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	resistō, resistere, restitī, 3, intr.; w. dat.	remain behind; resist; withstand	576
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	sūmō, sūmere, sūmpsī, sūmptus, 3, tr.	take; assume	577
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	tollō, tollere, sustulī, sublātus, 3, tr.	lift up (passive, am elated); take away	577
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		trādō, trādere, trādidī, trāditus, 3, tr.	hand over	577
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	trādūcō, trādūcere, trādūxī, trāductus, 3, tr.; two accs. or acc. and trāns w. acc.	lead across; lead over	577
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)		vincō, vincere, vīcī, victus, 3, tr.	conquer	577
+VERBS OF THE THIRD CONJUGATION (LIKE MITTŌ)	*	vīvō, vīvere, vīxī, vīctūrus, 3, intr.	live	577
+VERBS OF THE FOURTH CONJUGATION (LIKE AUDIŌ)	*	aperiō, aperīre, aperuī, apertus, 4, tr.	open; uncover; expose	577
+VERBS OF THE FOURTH CONJUGATION (LIKE AUDIŌ)		audiō, 4, tr.; acc. w. infin.	hear	577
+VERBS OF THE FOURTH CONJUGATION (LIKE AUDIŌ)		conveniō, convenīre, convēnī, conventum, 4, intr.	come together; assemble	577
+VERBS OF THE FOURTH CONJUGATION (LIKE AUDIŌ)	*	impediō, 4, tr.	hinder; impede	577
+VERBS OF THE FOURTH CONJUGATION (LIKE AUDIŌ)		mūniō, 4, tr.	fortify; construct (w. viam or viās)	577
+VERBS OF THE FOURTH CONJUGATION (LIKE AUDIŌ)		perveniō, pervenīre, pervēnī, perventum, 4, intr.; in or ad w. acc.	arrive	577
+VERBS OF THE FOURTH CONJUGATION (LIKE AUDIŌ)	*	reperiō, reperīre, repperī, repertus, 4, tr.; acc. w. infin.	find (out)	577
+VERBS OF THE FOURTH CONJUGATION (LIKE AUDIŌ)	*	sciō, 4, tr.; acc. w. infin.	know	577
+VERBS OF THE FOURTH CONJUGATION (LIKE AUDIŌ)	*	sentiō, sentīre, sēnsī, sēnsus, 4, tr.; acc. w. infin.	feel; perceive; think	577
+VERBS OF THE FOURTH CONJUGATION (LIKE AUDIŌ)		veniō, venīre, vēnī, ventum, 4, intr.	come	577
+-IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIŌ)	*	accipiō, accipere, accēpī, acceptus, 3, tr.	receive; take	578
+-IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIŌ)	*	capiō, capere, cēpī, captus, 3, tr.	take; capture	578
+-IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIŌ)	*	cōnficiō, cōnficere, cōnfēcī, cōnfectus, 3, tr.	accomplish; finish; exhaust	578
+-IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIŌ)	*	cōnspiciō, cōnspicere, cōnspexī, cōnspectus, 3, tr.	observe; perceive	578
+-IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIŌ)	*	cupiō, cupere, cupīvī, cupītus, 3, tr.; w. pres. infin.; acc. w. infin.; ut (nē)	desire	578
+-IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIŌ)	*	dējiciō, dējicere, dējēcī, dējectus, 3, tr.	hurl down; cast down	578
+-IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIŌ)	*	efficiō, efficere, effēcī, effectus, 3, tr.; ut (ut nōn or nē)	bring about; cause	578
+-IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIŌ)	*	ēripiō, ēripere, ēripuī, ēreptus, 3, tr.; w. dat. of person or thing from which; ab (ā) or ex (ē) w. abl.	take away; save from	578
+-IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIŌ)	*	faciō, facere, fēcī, factus, 3, tr.	do; make	578
+-IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIŌ)	*	fugiō, fugere, fūgī, fugitūrus, 3, intr.	flee	578
+-IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIŌ)	*	interficiō, interficere, interfēcī, interfectus, 3, tr.	kill	578
+-IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIŌ)	*	jaciō, jacere, jēcī, jactus, 3, tr.	throw; hurl	578
+-IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIŌ)	*	perspiciō, perspicere, perspexī, perspectus, 3, tr.; acc. w. infin.	view; inspect; perceive	578
+-IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIŌ)	*	praeficiō, praeficere, praefēcī, praefectus, 3, tr.; w. dat. of thing of which	put in command of	578
+-IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIŌ)	*	recipiō, recipere, recēpī, receptus, 3, tr.	take back	578
+-IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIŌ)		with a reflexive pronoun	withdraw; recover	578
+-IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIŌ)	*	rejiciō, rejicere, rejēcī, rejectus, 3, tr.	hurl back; drive back; repel	579
+-IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIŌ)	*	suscipiō, suscipere, suscēpī, susceptus, 3, tr.	undertake; take (upon oneself)	579
+DEPONENT VERBS OF THE FIRST CONJUGATION (LIKE LAUDOR)	*	arbitror, 1, tr.; acc. w. infin.	think; consider	579
+DEPONENT VERBS OF THE FIRST CONJUGATION (LIKE LAUDOR)	*	cohortor, 1, tr.; ut (nē)	encourage	579
+DEPONENT VERBS OF THE FIRST CONJUGATION (LIKE LAUDOR)	*	cōnor, 1, tr.; w. pres. infin.	try; attempt	579
+DEPONENT VERBS OF THE FIRST CONJUGATION (LIKE LAUDOR)	*	hortor, 1, tr.; ut (nē)	urge; encourage	579
+DEPONENT VERBS OF THE SECOND CONJUGATION (LIKE MONEOR)	*	polliceor, 2, tr.; acc. w. infin. (usually future)	promise	579
+DEPONENT VERBS OF THE SECOND CONJUGATION (LIKE MONEOR)	*	vereor, 2, tr.; w. pres. infin. or nē (ut)	fear (to)	579
+DEPONENT VERBS OF THE THIRD CONJUGATION (LIKE MITTOR)	*	cōnsequor, cōnsequī, cōnsecūtus sum, 3, tr.	follow up; overtake; gain	579
+DEPONENT VERBS OF THE THIRD CONJUGATION (LIKE MITTOR)	*	loquor, loquī, locūtus sum, 3, tr. and intr.	talk; speak	579
+DEPONENT VERBS OF THE THIRD CONJUGATION (LIKE MITTOR)	*	proficīscor, proficīscī, profectus sum, 3, intr.	set out; depart	580
+DEPONENT VERBS OF THE THIRD CONJUGATION (LIKE MITTOR)	*	revertor, revertī, {revertī, | reversus sum,} 3, intr.	return	580
+DEPONENT VERBS OF THE THIRD CONJUGATION (LIKE MITTOR)	*	sequor, sequī, secūtus sum, 3, tr.	follow; pursue	580
+DEPONENT VERBS OF THE THIRD CONJUGATION (LIKE MITTOR)	*	ūtor, ūtī, ūsus sum, 3, intr.; w. abl.	use; employ; exercise	580
+DEPONENT VERBS OF THE FOURTH CONJUGATION (LIKE AUDIOR)	*	orior, orīrī, ortus sum, 4, intr.	rise; arise	580
+DEPONENT VERBS OF THE FOURTH CONJUGATION (LIKE AUDIOR)	*	potior, 4, intr.; w. abl. or gen.	get possession of; become master of	580
+DEPONENT -IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIOR)	*	aggredior, aggredī, aggressus sum, 3, tr.	advance to; attack	580
+DEPONENT -IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIOR)	*	ēgredior, ēgredī, ēgressus sum, 3, intr.	go out	580
+DEPONENT -IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIOR)	*	morior, morī, mortuus sum, 3, intr.	die	580
+DEPONENT -IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIOR)	*	patior, patī, passus sum, 3, tr.; acc. w. infin.	suffer; allow	580
+DEPONENT -IŌ VERBS OF THE THIRD CONJUGATION (LIKE CAPIOR)	*	prōgredior, prōgredī, prōgressus sum, 3, intr.	go forward; advance; proceed	580
+IRREGULAR VERBS (EŌ AND ITS COMPOUNDS)	*	adeō, adīre, adiī(-īvī), aditus, irreg., tr.	go to; approach; visit	581
+IRREGULAR VERBS (EŌ AND ITS COMPOUNDS)	*	eō, īre, īvī (iī), itum, irreg., intr.	go	581
+IRREGULAR VERBS (EŌ AND ITS COMPOUNDS)	*	exeō, exīre?, exiī(-īvī), exitum, irreg., intr.	go out	581
+IRREGULAR VERBS (EŌ AND ITS COMPOUNDS)	*	ineō, inīre, iniī(-īvī), initus, irreg., tr.	go into; enter upon	581
+IRREGULAR VERBS (EŌ AND ITS COMPOUNDS)	*	trānseō, trānsīre, trānsiī(-īvī), trānsitus, irreg., tr.	go across; cross; pass	581
+IRREGULAR VERBS (FERŌ AND ITS COMPOUNDS)	*	cōnferō, cōnferre, contulī, collātus, irreg., tr.	bring together; compare	581
+IRREGULAR VERBS (FERŌ AND ITS COMPOUNDS)		with a reflexive pronoun	betake oneself	581
+IRREGULAR VERBS (FERŌ AND ITS COMPOUNDS)	*	differō, differre, distulī, dīlātus, irreg., tr.	scatter; put off; differ	581
+IRREGULAR VERBS (FERŌ AND ITS COMPOUNDS)	*	ferō, ferre, tulī, lātus, irreg., tr.	bear; bring; carry	581
+IRREGULAR VERBS (FERŌ AND ITS COMPOUNDS)	*	īnferō, īnferre, īntulī?, illātus, irreg., tr.; w. dat. of person	bring (upon); inflict (upon); inspire (in)	581
+IRREGULAR VERBS (FERŌ AND ITS COMPOUNDS)	*	referō, referre, rettulī, relātus, irreg., tr.	bring back; report; refer	581
+IRREGULAR VERBS (SUM AND ITS COMPOUNDS)		absum, abesse, āfuī, āfutūrus, irreg., intr.; ab (ā) w. abl.	am away; am distant	582
+IRREGULAR VERBS (SUM AND ITS COMPOUNDS)	*	dēsum, deesse, dēfuī, dēfutūrus, irreg., intr.; w. dat.	am lacking; am absent; fail	582
+IRREGULAR VERBS (SUM AND ITS COMPOUNDS)	*	possum, posse, potuī, irreg., intr.; w. pres. infin.	am able; can	582
+IRREGULAR VERBS (SUM AND ITS COMPOUNDS)	*	praesum, praeesse, praefuī, praefutūrus, irreg., intr.; w. dat.	am over; am in command of	582
+IRREGULAR VERBS (SUM AND ITS COMPOUNDS)		sum, esse, fuī, futūrus, irreg., intr.	am	582
+OTHER IRREGULAR VERBS	*	coepī, coepisse, coeptus sum, tr.; w. pres. infin.	began; have begun	582
+# Footnote 1 (p. 582, on coepī ... w. pres. infin.): When coepī governs a passive infinitive it is changed to the passive form, coeptus sum. It is, however, translated as ACTIVE.
+OTHER IRREGULAR VERBS	*	fīō, fierī, factus sum, intr.; ut (ut nōn)	am made; am done; become; happen	582
+OTHER IRREGULAR VERBS	*	volō, velle, voluī, tr.; w. pres. infin.; acc. w. infin.; ut (nē)	am willing; wish	582
+VERBAL IDIOMS	*	certiōrem (-ēs) faciō, facere, fēcī, factus, 3, tr.; acc. w. infin.; dē w. abl.	inform (lit., make more certain)	582
+VERBAL IDIOMS	*	cōnsilium capiō, capere, cēpī, captus, 3, tr.	make a plan	582
+VERBAL IDIOMS	*	in fugam dō, dare, dedī, datus, 1, tr.	put to flight	583
+VERBAL IDIOMS	*	inquit (with direct quotations only; usually placed after the first word or phrase of the quotation)	he says; he said	583
+VERBAL IDIOMS		inter sē dō, dare, dedī, datus, 1, tr.	exchange	583
+VERBAL IDIOMS	*	iter faciō, facere, fēcī, factus, 3, tr.	march; make a journey	583
+VERBAL IDIOMS		memoriā teneō, tenēre, tenuī, tentus, 2, tr.; acc. w. infin.	keep in memory; remember	583
+VERBAL IDIOMS	*	miserēre; w. dat. or gen.	have mercy (on)	583
+VERBAL IDIOMS		nactus, a, um (perfect participle of nancīscor)	having obtained possession of; having met with; having found	583
+VERBAL IDIOMS		nōlī, w. pres. infin.	be unwilling	583
+VERBAL IDIOMS		nōlīte, w. pres. infin.	be unwilling	583
+VERBAL IDIOMS	*	pedem referō, referre, rettulī, relātus, irreg., tr.	retreat; fall back	583
+VERBAL IDIOMS	*	proelium committō, committere, commīsī, commissus, 3, tr.	join battle; begin battle	583
+CONJUNCTIONS		atque (ac)	and	583
+CONJUNCTIONS		aut	or	583
+CONJUNCTIONS		aut . . . aut	either . . . or	583
+CONJUNCTIONS		autem, postp.	however	583
+CONJUNCTIONS	*	cum	when; since	583
+CONJUNCTIONS	*	cum prīmum	as soon as	583
+CONJUNCTIONS		enim, postp.	for	583
+CONJUNCTIONS		et	and	583
+CONJUNCTIONS		et . . . et	both . . . and	583
+CONJUNCTIONS		itaque	therefore; and so	584
+CONJUNCTIONS		nam	for	584
+CONJUNCTIONS	*	nē	that . . . not (in negative purpose clauses and noun clauses after verbs of 'willing'); in order that not (in negative purpose clauses)	584
+CONJUNCTIONS		neque	nor; and . . . not	584
+CONJUNCTIONS		neque . . . neque	neither . . . nor	584
+CONJUNCTIONS	*	postquam	after	584
+CONJUNCTIONS		-que	and	584
+CONJUNCTIONS	*	quia	because	584
+CONJUNCTIONS	*	quō	that; in order that (both: in purpose clauses containing a comparative adverb or adjective)	584
+CONJUNCTIONS	*	quod	because	584
+CONJUNCTIONS	*	quoniam	because	584
+CONJUNCTIONS		sed	but	584
+CONJUNCTIONS		sīcut	as	584
+CONJUNCTIONS	*	ubi	when	584
+CONJUNCTIONS	*	ut	that (in noun, purpose, and result clauses); in order that (in purpose clauses)	584
+CONJUNCTIONS	*	ut prīmum	as soon as	584

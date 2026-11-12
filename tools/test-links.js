@@ -180,5 +180,20 @@ cases.forEach(([id, settings, typed], i) => {
   eq("round trip " + i + " (" + id + "): plain characters only", /^[a-z0-9=&,-]*$/.test(query), true);
 });
 
+// ---------- the textbook (book=) ----------
+{
+  const o = open("decline");
+  eq("book: read from a link, not counted as a setting", [K.read("?book=henle2", o.game, { min: MIN, max: MAX }).book, K.read("?book=henle2", o.game, { min: MIN, max: MAX }).count], ["henle2", 0]);
+  eq("book: beside settings", (({ book, count }) => [book, count])(K.read("?book=henle2&lesson=5&mode=single", o.game, { min: MIN, max: MAX })), ["henle2", 2]);
+  eq("book: a link without one names none", K.read("?lesson=5", o.game, { min: MIN, max: MAX }).book, undefined);
+  eq("book: a bad id is dropped", ["../x", "a/b", "", "-x", "x".repeat(41)].map((b) => K.read("?book=" + encodeURIComponent(b), o.game, { min: MIN, max: MAX }).book), [undefined, undefined, undefined, undefined, undefined]);
+  eq("book: upper case is read as lower", K.read("?book=HENLE2", o.game, { min: MIN, max: MAX }).book, "henle2");
+  const withBook = Object.assign({}, o.defaults, { book: "henle" });
+  const state = (book, settings) => ({ settings: Object.assign({}, o.defaults.settings, settings), typed: o.typed, book });
+  eq("book: the page's own textbook is left out of a link", K.build(o.game, state("henle", { lesson: 5 }), withBook), "lesson=5");
+  eq("book: another textbook leads the link", K.build(o.game, state("henle2", { lesson: 5 }), withBook), "book=henle2&lesson=5");
+  eq("book: alone when the settings are the defaults", K.build(o.game, state("henle2", {}), withBook), "book=henle2");
+}
+
 console.log(failures ? failures + " of " + checks + " checks FAILED" : "All " + checks + " link checks passed.");
 process.exit(failures ? 1 : 0);
