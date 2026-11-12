@@ -331,6 +331,61 @@
       }
       return null;
     },
+    // Worksheets (the shell's "Print a worksheet"). Latin → English stays
+    // multiple choice, as on screen: the entry and four meanings lettered
+    // a–d, one to circle (twelve to a page). English → Latin is the meaning,
+    // the part of speech and a blank (twenty to a page).
+    printSheet: function () {
+      return {
+        mode: isChoice() ? "Latin → English" : "English → Latin",
+        instructions: isChoice() ? "Circle the letter of the meaning of each Latin word."
+          : "Write the Latin word: the first form in its dictionary entry.",
+        macrons: !isChoice(),
+        items: isChoice() ? 12 : 20,
+        keyColumns: 2
+      };
+    },
+    printItem: function (item, box) {
+      var e = item.entry;
+      if (item.dir === "en-la") {
+        var row = S.make("div", "ws-single");
+        row.appendChild(S.make("span", "ws-entry", e.v.option));
+        row.appendChild(S.make("span", "ws-ask", posLabel(e)));
+        row.appendChild(S.make("span", "ws-blank"));
+        box.appendChild(row);
+        return;
+      }
+      // (kept on the item: the key names the letter)
+      item.printOptions = S.shuffle([e].concat(distractors(e)));
+      var wrap = S.make("div", "ws-choice");
+      var head = S.make("p", "ws-entry", entryText(e)); head.setAttribute("lang", "la");
+      wrap.appendChild(head);
+      var ol = S.make("ol", "ws-options");
+      item.printOptions.forEach(function (w, i) {
+        var li = S.make("li");
+        li.appendChild(S.make("span", "ws-letter", "abcd".charAt(i) + "."));
+        li.appendChild(S.make("span", null, w.v.option));
+        ol.appendChild(li);
+      });
+      wrap.appendChild(ol);
+      box.appendChild(wrap);
+    },
+    printAnswer: function (item, box) {
+      var e = item.entry, p = S.make("p", "ws-parse");
+      if (item.dir === "en-la") {
+        p.appendChild(S.answerNode(sharing(e).map(function (w) { return w.lemma; })));
+        p.appendChild(document.createTextNode(" (" + e.v.option + ")"));
+      } else {
+        var at = (item.printOptions || []).indexOf(e);
+        p.appendChild(S.make("b", null, at >= 0 ? "abcd".charAt(at) + ". " : ""));
+        p.appendChild(document.createTextNode(e.v.option + " ("));
+        var la = S.make("span", null, T.spell(e.lemma)); la.setAttribute("lang", "la");
+        p.appendChild(la);
+        p.appendChild(document.createTextNode(")"));
+      }
+      box.appendChild(p);
+    },
+
     review: function (item, result, li) {
       li.appendChild(entryLine(item.entry, "missed-parse"));
       var said = (result.picked != null ? result.picked : result.typed || "").trim();

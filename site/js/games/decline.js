@@ -403,6 +403,33 @@
       return form ? { entry: e, "case": key["case"], number: key.number, expected: form } : null;
     },
     missedRoundSize: function () { return 10; }, // single forms, whatever the mode
+
+    // Worksheets (the shell's "Print a worksheet"): a page is four noun
+    // tables, three noun + adjective tables (two with the vocative row) or
+    // twenty single forms.
+    printSheet: function () {
+      var table = asking() === "table" && !vocativeOnly();
+      var mode = (isPhrase() ? "Noun + adjective, " : "") + (asking() === "table" ? "full table" : "single form");
+      var forms = 0;
+      if (!table) {
+        var adjs = isPhrase() ? adjectivesThrough() : [];
+        game.pool().forEach(function (n) { forms += isPhrase() ? mostCells(n, adjs) : formsOf(n); });
+      }
+      return {
+        mode: mode.charAt(0).toUpperCase() + mode.slice(1),
+        instructions: isPhrase()
+          ? "Write the noun and the adjective together, in either order" + (table ? ", in every box." : ": the form asked for.")
+          : (table ? "Write every form of each noun." : "Write the form asked for."),
+        keyNote: isPhrase() ? "Either word order is right." : "",
+        items: table ? (isPhrase() ? (ctx.settings.vocative ? 2 : 3) : 4) : 20,
+        max: table ? game.pool().length : forms,
+        columns: table && !isPhrase() ? 2 : 1,
+        keyColumns: table && isPhrase() ? 1 : 2
+      };
+    },
+    printItem: function (item, box) { printNoun(item, box, false); },
+    printAnswer: function (item, box) { printNoun(item, box, true); },
+
     review: function (item, result, li) {
       var p = S.make("p", "missed-sentence"); p.setAttribute("lang", "la");
       p.textContent = entryText(item.entry) + (item.adj ? " + " + adjText(item.adj) : "");
@@ -420,6 +447,74 @@
       li.appendChild(ul);
     }
   };
+
+  // ---------- worksheets ----------
+  // How many single forms a noun can be asked for, alone or with the
+  // adjective that gives it the most.
+  function formsOf(n) {
+    var d = L.declineNoun(n), count = 0;
+    L.NUMBERS.forEach(function (num) { casesOf(n).forEach(function (c) { if (d[num][c]) count++; }); });
+    return count;
+  }
+  function mostCells(n, adjs) {
+    var most = 0;
+    adjs.forEach(function (a) { most = Math.max(most, pairCells(n, a).length); });
+    return most;
+  }
+  // The phrase the key shows for a cell (noun first, as on screen), then the
+  // other spellings; the other word order is said once at the top of the key.
+  function phraseForms(p) {
+    var out = [];
+    list(p.noun).forEach(function (n) { list(p.adj).forEach(function (j) { out.push(n + " " + j); }); });
+    return out;
+  }
+  // One item on paper: the entry (and gloss, for a table), then the grid the
+  // screen shows with empty cells, or "gen. pl." and a blank. `filled` is the
+  // answer key: the same grid with every form in it, or the one form.
+  function printNoun(item, box, filled) {
+    var single = !!item["case"];
+    var head = S.make("p", "ws-entry");
+    var la = S.make("span", null, entryText(item.entry) + (item.adj ? " + " + adjText(item.adj) : "")); la.setAttribute("lang", "la");
+    head.appendChild(la);
+    var gloss = [item.entry.english, item.adj && item.adj.english].filter(Boolean).join(" + ");
+    if (!single && gloss) head.appendChild(S.make("span", "ws-gloss", " " + gloss));
+    var byCell = {};
+    if (item.adj) phraseCells(item.entry, item.adj, L.CASES).forEach(function (p) { byCell[p.number + "." + p["case"]] = p; });
+    var d = L.declineNoun(item.entry);
+    function answer(c, n) {
+      var p = byCell[n + "." + c];
+      return item.adj ? (p ? phraseForms(p) : null) : d[n][c];
+    }
+    if (single) {
+      var row = S.make("div", "ws-single");
+      row.appendChild(head);
+      row.appendChild(S.make("span", "ws-ask", SHORT[item["case"]].toLowerCase() + " " + (item.number === "sg" ? "sg." : "pl.")));
+      row.appendChild(filled ? S.answerNode(answer(item["case"], item.number) || item.expected) : S.make("span", "ws-blank"));
+      box.appendChild(row);
+      return;
+    }
+    box.appendChild(head);
+    var table = S.make("table", item.adj ? "ws-grid ws-phrase-grid" : "ws-grid");
+    var thead = S.make("thead"), hr = S.make("tr");
+    hr.appendChild(S.make("th", null, ""));
+    hr.appendChild(S.make("th", null, "Singular")); hr.appendChild(S.make("th", null, "Plural"));
+    thead.appendChild(hr); table.appendChild(thead);
+    var tbody = S.make("tbody");
+    cases().forEach(function (c) {
+      var tr = S.make("tr");
+      var th = S.make("th", null, SHORT[c]); th.setAttribute("scope", "row");
+      tr.appendChild(th);
+      L.NUMBERS.forEach(function (n) {
+        var td = S.make("td"), form = answer(c, n);
+        if (!form) { td.className = "ws-none"; td.textContent = "—"; }
+        else if (filled) td.appendChild(S.answerNode(form));
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    box.appendChild(table);
+  }
 
   // Short note under the Mode row while the mode is closed.
   function phraseOpensAt() {

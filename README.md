@@ -87,7 +87,7 @@ Open `site/css/styles.css`. The first block (`:root`) holds the colors. Change `
 
 ## The practice games (/practice)
 
-Four games share one shell (`site/js/practice.js`): the start screen with its lesson filter, scoring, streak, the end-of-round review, and the footer. Each game is a small file in `site/js/games/` that only says what its start-screen options are, which items are in the pool, how an item is shown and graded, and how a missed item is reviewed. Everything is static: the browser reads JSON from `site/practice/data/<textbook>/` and keeps nothing anywhere else (the last settings and the missed list are remembered in the student's own browser only).
+Four games share one shell (`site/js/practice.js`): the start screen with its lesson filter, scoring, streak, the end-of-round review, printed worksheets, and the footer. Each game is a small file in `site/js/games/` that only says what its start-screen options are, which items are in the pool, how an item is shown and graded, and how a missed item is reviewed. Everything is static: the browser reads JSON from `site/practice/data/<textbook>/` and keeps nothing anywhere else (the last settings and the missed list are remembered in the student's own browser only).
 
 | Page | Game | Data |
 |---|---|---|
@@ -162,6 +162,53 @@ Optional: `missedRoundSize()` when a missed-list round should be a different len
 ```bash
 node tools/test-missed.js
 ```
+
+### Worksheets ("Print a worksheet")
+
+Beside **Start** on every start screen is **Print a worksheet**. It takes the settings as they stand (lesson, mode, filters, strict macrons, spelling), builds a round with the game's own `buildRound`, and prints it as a paper worksheet with a separate answer key. So a worksheet holds exactly what a round on screen would. Under the buttons:
+
+- **Number of items**: how many the worksheet has. It starts at about a page's worth and can go up to what the pool holds (100 at most).
+- **Include answer key**, on to begin with. Turn it off to print the worksheet alone.
+
+| Game and mode | On the worksheet | A page holds |
+|---|---|---|
+| Decline a noun, full table | the entry and gloss, then an empty case × number grid | 4 |
+| Noun + adjective, full table | both entries, then a wider grid for the two words | 3 (2 with the vocative row) |
+| Decline a noun, single form (either kind) | the entry, "gen. pl.", a blank | 20 |
+| Verb synopsis, full | the principal parts, the person and number, then the grid the screen shows, empty | 2, side by side |
+| Verb synopsis, single form | the principal parts, "imperfect passive indicative, 3rd pl.", a blank | 20 |
+| Parsing drill | the sentence with the word underlined and bold, then a labeled blank for each part (Case, Number, Gender, Use; or Person, Number, Tense, Voice, Mood) | 10 |
+| Vocabulary, Latin → English | the entry and four meanings lettered a–d, one to circle | 12 |
+| Vocabulary, English → Latin | the meaning, the part of speech, a blank | 20 |
+
+Two things differ from the screen in the parsing drill. The blanks themselves show whether the word is a noun or a verb, so that first question isn't asked (the key gives it). And the "Clause (if subjunctive)" blank is printed on every verb once the chosen lesson has a subjunctive to parse, so that its presence doesn't give the mood away.
+
+The header has the site name, lines for Name and Date, the game and mode, "Henle First Year Latin, through Lesson N" (or "Lesson N only"), and a line of instructions that says whether macrons count. The foot has the address of the game. The **answer key** starts on a new page with the same header, marked "Answer key", and the same numbers. Grids are filled in; single forms, parsing and vocabulary are a numbered list. Every form has its macrons and follows the spelling setting (Henle j or classical i). Where the game accepts more than one form, the others follow the main one in small italics after "or" (*dī or deī*; *laudātus es or laudāta es; laudātum es*). For a noun + adjective the key gives noun then adjective and says once, at the top, that either order is right.
+
+**How it works.** No PDF library, no new window, no third-party script. The shell builds the worksheet in the page as `<div id="worksheet" class="worksheet">` at the end of `<body>`, sets the class `print-worksheet` on `<html>`, and calls `window.print()`; the browser's own dialog does paper or "Save as PDF". When the dialog closes, printed or cancelled (`afterprint`), the shell removes both, and the page is as it was. The look is the `@media print` section at the end of `site/css/practice.css`: everything on the page except the worksheet is hidden, text is black on white with lines for borders and nothing that depends on color, the type is the site's serif, the margins are 0.6 in, an item is never split across pages (`break-inside: avoid`), and the key starts its own page (`break-before: page`). It is sized for US Letter and also fits A4, portrait.
+
+The button, the two controls, the page frame, the numbering and the print call are the shell's. A game takes part by adding two functions to what it already gives the shell:
+
+| Function | Does |
+|---|---|
+| `printItem(item, box)` | Renders one round item into `box` as the student gets it: the prompt and something to fill in. |
+| `printAnswer(item, box)` | Renders the same item's answer into `box`, for the key. |
+
+`printItem` is always called before `printAnswer` for an item, so it may leave on the item what the answer needs (the vocabulary game keeps the order of its four options there, so that the key can name the letter). `shell.answerNode(expected)` gives the standard answer: the first form in bold, the other accepted forms after "or", all in the chosen spelling. The class names the print styles know are `ws-entry`, `ws-gloss`, `ws-grid` (a table; `ws-none` for a cell with no form, `ws-section` for a heading row), `ws-single` with `ws-ask` and `ws-blank` (one line with a rule to write on), and `ws-fields`, `ws-field`, `ws-label` (labeled blanks).
+
+Optional: `printSheet()`, which returns any of
+
+| Field | Meaning | Default |
+|---|---|---|
+| `mode` | the mode's name, for the header ("Full table") | none |
+| `instructions` | the line under the header | none |
+| `keyNote` | a sentence for the top of the key | none |
+| `items` | how many items fill about a page | `roundSize()` |
+| `max` | the most the worksheet can have | the size of the pool |
+| `columns`, `keyColumns` | 1 or 2: items side by side on the worksheet, and in the key | 1; the key follows the worksheet |
+| `macrons` | whether the student writes Latin, so the macron line is shown | true for a typed game |
+
+A game without `printItem` and `printAnswer` has no button. Share links are not on `main` yet; when they are, `sheetUrl()` in `practice.js` is the one place to print the link for the same settings instead of the page's plain address.
 
 ### Textbooks (curricula)
 
