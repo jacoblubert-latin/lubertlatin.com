@@ -17,7 +17,7 @@
 //   only=1              "Lesson N only" (games that offer the choice)
 //   ...the game's own parameters, in the game's order...
 //   macrons=strict      strict macrons (typed games); "optional" turns it off
-//   spelling=classical  spelling on screen (typed games); or "henle"
+//   spelling=henle      spelling on screen (typed games); or "classical"
 //   start=1             skip the start screen and begin the round
 //
 // A game takes part with two functions on the object it registers:
