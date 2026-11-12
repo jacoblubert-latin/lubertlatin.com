@@ -10,6 +10,10 @@
   status = 301
   force = true
 
+# Links for assignments (/practice/decline/?lesson=5&mode=single) need no
+# rule here: the pages are plain files, and Netlify passes a query string
+# through its redirects (the two below, and the added trailing slash).
+
 # The drill's data moved under /practice/data/<curriculum>/.
 [[redirects]]
   from = "/practice/items.json"

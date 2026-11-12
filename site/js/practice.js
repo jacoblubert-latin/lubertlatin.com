@@ -16,6 +16,10 @@
 // round with the game's own buildRound, lays it out as a paper worksheet
 // with an answer key and calls window.print(). A game takes part by
 // supplying printItem() and printAnswer() (and, optionally, printSheet()).
+// Settings can also arrive in the page's address (?lesson=5&mode=single) and
+// be copied from the start screen as a link: js/practice-link.js, and
+// "links for assignments" below. A game takes part by supplying fromLink()
+// and toLink().
 //
 // Page markup: <div id="drill" data-game="parse" data-curriculum="henle" data-root="/practice/data/">
 // Data files live at <root><curriculum>/<file>.json. Adding a textbook means
@@ -32,6 +36,7 @@
   var TYPED_KEY = "lubertlatin.practice.typed";
   var MISSED_KEY = "lubertlatin.practice.missed";
   var M = window.LatinMissed;
+  var K = window.LatinLink;
 
   var el = {
     start: document.getElementById("screen-start"),
@@ -47,6 +52,11 @@
     lessonOutput: document.getElementById("lesson-output"),
     poolNote: document.getElementById("pool-note"),
     startButton: document.getElementById("start-button"),
+    linkNote: document.getElementById("link-note"),
+    linkReset: document.getElementById("link-reset"),
+    copyLink: document.getElementById("copy-link"),
+    copyStatus: document.getElementById("copy-status"),
+    copyUrl: document.getElementById("copy-url"),
     missedStart: document.getElementById("missed-start"),
     missedCount: document.getElementById("missed-count"),
     missedDrill: document.getElementById("missed-drill"),
@@ -65,6 +75,11 @@
     resultsLine: document.getElementById("results-line"),
     missedBlock: document.getElementById("missed-block"),
     missedList: document.getElementById("missed-list"),
+    resultShare: document.getElementById("result-share"),
+    resultSummary: document.getElementById("result-summary"),
+    resultCopy: document.getElementById("result-copy"),
+    resultStatus: document.getElementById("result-status"),
+    title: document.getElementById("practice-title"),
     retry: document.getElementById("retry-button"),
     again: document.getElementById("again-button"),
     settings: document.getElementById("settings-button")
@@ -140,7 +155,8 @@
       typed.settings.strict = !!(s && s.checked);
       var sp = form.querySelector("input[name=spelling]:checked");
       typed.settings.spelling = sp ? sp.value : "henle";
-      typed.save();
+      // (on a visit from a shared link they are saved with the rest, at Start)
+      if (!link.active) typed.save();
     },
     spell: function (s) { return window.LatinForms ? window.LatinForms.spell(s, typed.settings.spelling) : s; },
     same: function (answer, expected) { return window.LatinForms.sameForm(answer, expected, typed.settings.strict); },
@@ -256,7 +272,66 @@
     ctx.settings.lessonOnly = !!(game.lessonOnlyChoice && saved && saved.lessonOnly === true);
     if (saved && game.restore) game.restore(saved);
   }
-  function saveSettings() { writeJSON(game.storageKey, ctx.settings); typed.save(); }
+  // A shared link's settings are for that visit: nothing is saved until the
+  // student changes a setting on the start screen.
+  function saveSettings() {
+    if (link.active && !link.touched) return;
+    writeJSON(game.storageKey, ctx.settings); typed.save();
+  }
+
+  // ---------- links for assignments ----------
+  // The page's query string, applied over the saved settings (defaults, then
+  // localStorage, then the link) and never written back on load. What the
+  // parameters are: js/practice-link.js.
+  var link = {
+    active: false,   // the link set at least one setting
+    touched: false,  // ...and the student has since changed one
+    start: false,    // start=1: begin the round straight away
+    defaults: null   // { settings, typed } before anything was restored
+  };
+  function typedState() { return game.typed ? { strict: typed.settings.strict, spelling: typed.settings.spelling } : null; }
+  function applyLink() {
+    if (!K || !window.location.search) return;
+    var res = K.read(window.location.search, game, bounds);
+    link.start = res.start;
+    if (!res.count) return;
+    link.active = true;
+    if (res.settings.lesson != null) ctx.settings.lesson = res.settings.lesson;
+    if (typeof res.settings.lessonOnly === "boolean") ctx.settings.lessonOnly = res.settings.lessonOnly;
+    if (game.restore) game.restore(res.settings);
+    if (typeof res.typed.strict === "boolean") typed.settings.strict = res.typed.strict;
+    if (res.typed.spelling) typed.settings.spelling = res.typed.spelling;
+  }
+  // The address of this page with the start screen's settings, leaving out
+  // the ones still at their defaults.
+  function linkUrl() {
+    readStartForm();
+    var query = K.build(game, { settings: ctx.settings, typed: typedState() }, link.defaults);
+    return window.location.origin + window.location.pathname + (query ? "?" + query : "");
+  }
+  function copyLink() {
+    var url = linkUrl();
+    el.copyUrl.hidden = true;
+    el.copyStatus.textContent = "";
+    function copied() { el.copyStatus.textContent = "Link copied"; }
+    // No clipboard (an old browser, a page not on https, permission refused):
+    // show the link in a field, selected, to be copied by hand.
+    function byHand() {
+      el.copyUrl.value = url;
+      el.copyUrl.hidden = false;
+      el.copyUrl.focus(); el.copyUrl.select();
+      el.copyUrl.scrollLeft = 0;   // show the start of the address, not its tail
+      el.copyStatus.textContent = "Copy the link from the box.";
+    }
+    copyText(url, copied, byHand);
+  }
+  // Put text on the clipboard; `failed` runs where that can't be done.
+  function copyText(text, done, failed) {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, failed);
+      else failed();
+    } catch (e) { failed(); }
+  }
 
   function readStartForm() {
     ctx.settings.lesson = clampLesson(el.lessonNumber.value);
@@ -282,9 +357,15 @@
     el.poolNote.textContent = (n === 0 && ctx.settings.lessonOnly && nothingNewNote()) || game.poolNote(n);
     el.startButton.disabled = n === 0;
     syncSheetControls();
+    if (el.linkNote) el.linkNote.hidden = !link.active;
     showMissedLine();
   }
-  function onStartChange() { readStartForm(); syncStartForm(); }
+  function onStartChange() {
+    link.touched = true;
+    readStartForm(); syncStartForm();
+    // a copied link is for the settings as they were
+    if (el.copyStatus) { el.copyStatus.textContent = ""; el.copyUrl.hidden = true; }
+  }
 
   // How many items the game's pool would have at another lesson, the other
   // settings staying as they are.
@@ -420,10 +501,18 @@
 
   function startRound() {
     var size = game.roundSize ? game.roundSize() : 10;
-    beginRound((game.buildRound || defaultBuildRound)(game.pool(), size));
+    beginRound((game.buildRound || defaultBuildRound)(game.pool(), size), roundLabel());
   }
-  function beginRound(items) {
-    round = { items: items, index: 0, correct: 0, streak: 0, missed: [], wrongKeys: [], phase: "play" };
+  // What a round was, in words, for the result summary: the lesson filter
+  // and the game's settings as they stood when it began.
+  function roundLabel() {
+    var parts = [curriculum.short + " " + (ctx.settings.lessonOnly ? lessonName() + " only" : "through " + lessonName())];
+    try { if (game.summary) parts = parts.concat(game.summary() || []); } catch (e) { /* the lesson alone */ }
+    return parts;
+  }
+  function typedLabel() { return game.typed && typed.settings.strict ? ["Strict macrons"] : []; }
+  function beginRound(items, label) {
+    round = { items: items, index: 0, correct: 0, streak: 0, missed: [], wrongKeys: [], phase: "play", label: label.concat(typedLabel()) };
     show(el.play);
     showItem();
   }
@@ -432,7 +521,7 @@
   // don't apply; a key that no longer has an item is left out.
   function startMissedRound(keys) {
     var items = keys.map(itemFor).filter(Boolean);
-    if (items.length) beginRound(items);
+    if (items.length) beginRound(items, ["Missed-list round"]);
     return items.length > 0;
   }
   // Results screen: only what was missed in the round just played, shuffled.
@@ -515,6 +604,7 @@
       el.missedList.appendChild(li);
     });
     if (el.retry) el.retry.hidden = round.wrongKeys.length === 0;
+    showSummary(n, pct);
     show(el.results);
     el.results.scrollIntoView({ block: "start", behavior: "smooth" });
   }
@@ -573,12 +663,15 @@
     row.appendChild(countLabel); row.appendChild(keyLabel);
     actions.parentNode.insertBefore(row, actions.nextSibling);
     sheetUi = { button: button, count: count, key: key };
-    // (runs before the form's own change handler, which then shows the number in range)
     count.addEventListener("change", function () {
       var n = Math.round(Number(count.value));
-      if (count.value === "" || !isFinite(n)) { sheetChoice = null; return; }
-      sheetChoice = Math.max(1, n); sheetChoiceFor = sheetInfo().items;
+      if (count.value === "" || !isFinite(n)) sheetChoice = null;
+      else { sheetChoice = Math.max(1, n); sheetChoiceFor = sheetInfo().items; }
+      syncSheetControls();   // shows the number in range
     });
+    // These two are about the worksheet, not the game: they don't count as a
+    // change of settings (a shared link's settings stay unsaved).
+    row.addEventListener("change", function (e) { e.stopPropagation(); });
     // Enter in the number field is not Start.
     count.addEventListener("keydown", function (e) {
       if (e.key !== "Enter") return;
@@ -602,10 +695,15 @@
     var m = document.querySelector('meta[property="og:site_name"]');
     return (m && m.getAttribute("content")) || location.hostname;
   }
-  // The address of this game, for the foot of the worksheet.
+  // The address for the foot of the worksheet: this game with the settings
+  // the worksheet was made from, the same link "Copy link to these settings"
+  // gives (js/practice-link.js), on the site's own address.
   function sheetUrl() {
     var c = document.querySelector('link[rel="canonical"]');
-    return (c && c.href) || location.origin + location.pathname;
+    var base = (c && c.href) || location.origin + location.pathname;
+    var query = "";
+    try { if (K) query = K.build(game, { settings: ctx.settings, typed: typedState() }, link.defaults); } catch (e) { query = ""; }
+    return base + (query ? "?" + query : "");
   }
   function gameTitle() {
     var h = document.getElementById("practice-title");
@@ -688,6 +786,31 @@
   // Printed or cancelled: the page is as it was.
   window.addEventListener("afterprint", removeWorksheet);
 
+  // The result summary: one line saying what the round was and how it went,
+  // for a student to copy and send to a teacher. It is made here and goes
+  // nowhere by itself; the site keeps no record of it.
+  //   Decline a noun · Henle through Lesson 5 · Single form · 9/10 (90%) · 11 Nov 2026, 4:12 PM
+  function dateText(d) {
+    try {
+      return d.toLocaleString(undefined, { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" });
+    } catch (e) { return d.toString(); }
+  }
+  function showSummary(n, pct) {
+    if (!el.resultShare) return;
+    var parts = [el.title ? el.title.textContent.trim() : gameId].concat(round.label || []);
+    parts.push(round.correct + "/" + n + " (" + pct + "%)", dateText(new Date()));
+    el.resultSummary.textContent = parts.join(" · ");
+    el.resultStatus.textContent = "";
+    el.resultShare.hidden = false;
+  }
+  function copySummary() {
+    copyText(el.resultSummary.textContent, function () { el.resultStatus.textContent = "Result copied"; }, function () {
+      // No clipboard: select the line, to be copied by hand.
+      try { window.getSelection().selectAllChildren(el.resultSummary); } catch (e) { /* the line is still there to select */ }
+      el.resultStatus.textContent = "Copy the selected line.";
+    });
+  }
+
   // ---------- wiring ----------
   el.start.addEventListener("change", onStartChange);
   el.lessonRange.addEventListener("input", function () { el.lessonNumber.value = el.lessonRange.value; onStartChange(); });
@@ -705,12 +828,19 @@
   el.again.addEventListener("click", startRound);
   el.settings.addEventListener("click", function () { askClear(false); syncStartForm(); show(el.start); });
   if (el.retry) el.retry.addEventListener("click", retryMissed);
+  if (el.resultCopy) el.resultCopy.addEventListener("click", copySummary);
   if (el.missedStart) {
     el.missedDrill.addEventListener("click", drillMissedList);
     el.missedClear.addEventListener("click", function () { askClear(true); el.missedClearNo.focus(); });
     el.missedClearNo.addEventListener("click", function () { askClear(false); el.missedClear.focus(); });
     el.missedClearYes.addEventListener("click", function () { missed.clear(); askClear(false); showMissedLine(); el.startButton.focus(); });
   }
+  if (K && el.copyLink && el.copyStatus && el.copyUrl) {
+    el.copyLink.hidden = false;
+    el.copyLink.addEventListener("click", copyLink);
+  }
+  // "Use my saved settings": the same page without the link's settings.
+  if (el.linkReset) el.linkReset.addEventListener("click", function () { window.location.assign(window.location.pathname); });
 
   // ---------- loading ----------
   function fetchJSON(file) {
@@ -743,12 +873,16 @@
         bounds = g.lessonBounds();
         if (!isFinite(bounds.min) || !isFinite(bounds.max)) throw new Error("No items");
         ctx.settings.lesson = bounds.max; // default: everything unlocked
+        link.defaults = { settings: JSON.parse(JSON.stringify(ctx.settings)), typed: g.typed ? { strict: false, spelling: "henle" } : null };
         loadSettings();
         ctx.settings.lesson = clampLesson(ctx.settings.lesson);
+        applyLink();
         missed.init();
         buildStartScreen();
         syncStartForm();
-        show(el.start);
+        // start=1 goes straight to a round, when the settings give one
+        if (link.start && game.pool().length) startRound();
+        else show(el.start);
       })
       .catch(function (err) {
         el.messageText.textContent = "The practice data couldn't be loaded. Please refresh the page and try again.";

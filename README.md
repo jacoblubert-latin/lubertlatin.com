@@ -17,6 +17,7 @@ site/                 ← everything Netlify publishes
   practice/index.html          ← game 1: the parsing drill (lubertlatin.com/practice/)
   practice/decline/index.html  ← game 2: decline a noun, alone or with an adjective (typed)
   practice/synopsis/index.html ← game 3: verb synopsis (typed)
+  practice/vocab/index.html    ← game 4: vocabulary meanings
   practice/data/henle/         ← one folder per textbook (see "The practice games")
     curriculum.json            ← name, lesson count, and which forms each lesson teaches
     items.json                 ← parsing-drill sentences and answers
@@ -27,7 +28,8 @@ site/                 ← everything Netlify publishes
   js/main.js          ← mobile menu, footer year, FAQ search markup
   js/practice.js      ← the shared game shell (start screen, lesson filter, scoring, review)
   js/latin-forms.js   ← the rules engine that declines nouns and adjectives and conjugates verbs
-  js/games/*.js       ← one file per game: parse.js, decline.js, synopsis.js
+  js/practice-link.js ← settings in a link: reads and writes the query string (see "Links for assignments")
+  js/games/*.js       ← one file per game: parse.js, decline.js, synopsis.js, vocab.js
   assets/             ← images, fonts, and the PDF
   robots.txt, sitemap.xml
 netlify.toml          ← Netlify settings
@@ -87,7 +89,7 @@ Open `site/css/styles.css`. The first block (`:root`) holds the colors. Change `
 
 ## The practice games (/practice)
 
-Four games share one shell (`site/js/practice.js`): the start screen with its lesson filter, scoring, streak, the end-of-round review, printed worksheets, and the footer. Each game is a small file in `site/js/games/` that only says what its start-screen options are, which items are in the pool, how an item is shown and graded, and how a missed item is reviewed. Everything is static: the browser reads JSON from `site/practice/data/<textbook>/` and keeps nothing anywhere else (the last settings and the missed list are remembered in the student's own browser only).
+Four games share one shell (`site/js/practice.js`): the start screen with its lesson filter, scoring, streak, the end-of-round review, printed worksheets, and the footer. Each game is a small file in `site/js/games/` that only says what its start-screen options are, which items are in the pool, how an item is shown and graded, and how a missed item is reviewed. Everything is static: the browser reads JSON from `site/practice/data/<textbook>/` and keeps nothing anywhere else (the last settings and the missed list are remembered in the student's own browser only). A game's settings can also be sent as a link: see "Links for assignments" below.
 
 | Page | Game | Data |
 |---|---|---|
@@ -126,6 +128,96 @@ A game asks the shell `shell.inLesson(l)` with one of these numbers; the shell a
 - **Vocabulary:** the words whose lesson is N, all of them in one round, shuffled. The wrong options in multiple choice, and the "either word" answers, still come from every word through Lesson N. (In English → Latin two words asked by the same gloss are asked once, so a round can be a word or two shorter than the count.)
 
 The note under the slider counts what is in play. When "only" leaves nothing it says so and names the nearest lessons that have something, with the other settings as they are ("Nothing new for this game in Lesson 11. Try Lesson 10 or 12."), and Start is off. A round is never filled out from other lessons. A round from the missed list ignores the choice, as it ignores the slider.
+
+### Links for assignments
+
+A teacher can post a link that opens a game with its settings already chosen:
+
+```
+https://lubertlatin.com/practice/decline/?lesson=5&mode=single
+https://lubertlatin.com/practice/vocab/?lesson=3&only=1&dir=en-la&start=1
+https://lubertlatin.com/practice/synopsis/?lesson=17&imp=0&nonfinite=0&macrons=strict
+```
+
+**Making one.** Set the start screen the way the class should have it and press **Copy link to these settings** under Start. The link carries only the settings that differ from the defaults, always in the same order, so the same setup always gives the same link. Where the browser won't copy (an old browser, a page not on https) the link appears in a box, selected, to copy by hand. The address bar is never rewritten.
+
+**Opening one.** The page applies its defaults, then the student's saved settings, then the link. A setting the link doesn't mention keeps the student's saved value. The start screen says "Settings from a shared link", with **Use my saved settings** to reload the page without them. A link's settings are for that visit: nothing is saved when the page opens, or when the student presses Start without changing anything, so the student's own setup is still there on the bare address. If the student changes a setting and then starts a round, the settings are saved as usual. A link holds settings only: no missed list, no scores, nothing about the student.
+
+Because a link leaves out defaults, a student whose saved settings differ from the defaults keeps their own for anything the link doesn't name. To pin a setting at its default, write it into the link by hand: every value in the tables below is accepted, defaults included (`?lesson=5&mode=table&voc=0&macrons=optional`).
+
+**The parameters.** These names and values are a public interface: links that teachers have posted must keep working, so add to them but never rename or remove one.
+
+Every game:
+
+| Parameter | Values | Setting |
+|---|---|---|
+| `lesson` | a whole number | The lesson slider. A number outside the game's range is brought to the nearest end (`lesson=999` is the last lesson). Default: the last lesson. |
+| `only` | `1`, `0` | "Lesson N only" (`1`) or "Through Lesson N" (`0`, the default). Only in games that show the choice (Vocabulary); ignored elsewhere. |
+| `macrons` | `strict`, `optional` | Strict macrons on or off (default `optional`). Typed games: Decline, Synopsis, Vocabulary. |
+| `spelling` | `henle`, `classical` | Spelling on screen: j (default `henle`) or i. Typed games. |
+| `start` | `1` | Skip the start screen and begin the round. If the settings leave nothing to ask, the start screen is shown with its note instead. Never part of a copied link; add `&start=1` by hand. |
+
+Parsing drill (`/practice/`):
+
+| Parameter | Values | Setting |
+|---|---|---|
+| `type` | `noun`, `verb`, `both` | Practice: Nouns, Verbs, Both (default `both`). |
+
+Decline a noun (`/practice/decline/`):
+
+| Parameter | Values | Setting |
+|---|---|---|
+| `mode` | `table`, `single`, `phrase` | Mode: Full table (default), Single form, Noun + adjective. |
+| `form` | `table`, `single` | Inside Noun + adjective: Full table (default) or Single form. |
+| `decl` | a list of `1`–`5`, as `decl=1,2,3` | The Declensions boxes that are ticked. Default: all five. |
+| `voc` | `1`, `0` | Include vocative (default `0`). |
+
+Verb synopsis (`/practice/synopsis/`):
+
+| Parameter | Values | Setting |
+|---|---|---|
+| `mode` | `synopsis`, `single` | Mode: Full synopsis (default), Single form. |
+| `subj` | `1`, `0` | Include subjunctive (default `1`). |
+| `imp` | `1`, `0` | Include imperative (default `1`). |
+| `nonfinite` | `1`, `0` | Include infinitives and participles (default `1`). |
+
+Vocabulary (`/practice/vocab/`):
+
+| Parameter | Values | Setting |
+|---|---|---|
+| `dir` | `la-en`, `en-la` | Mode: Latin → English (default), English → Latin. |
+| `pos` | a list of `noun`, `verb`, `adjective`, `other`, as `pos=noun,verb` | The Parts of speech boxes that are ticked. Default: all four. |
+
+A parameter the game doesn't know, or a value not in these tables, is ignored without any message, and the rest of the link still applies. Nothing from the address is ever written into the page.
+
+**How it is built.** `site/js/practice-link.js` reads and writes the query string and has no page code in it, so the tests run it in Node. The shell (`practice.js`) handles `lesson`, `only`, `macrons`, `spelling` and `start`. A game handles its own settings with two functions on the object it registers:
+
+| Function | What it does |
+|---|---|
+| `fromLink(params, link)` | `params` is `{ name: value }` from the address, values trimmed and lower-cased. Returns the settings it recognises in the shape `restore()` takes, leaving out anything missing or bad. The shell passes the result to `restore()`, so a link goes through the same checks as saved settings. |
+| `toLink(settings, link)` | Returns `[[name, value], ...]` for every one of the game's settings, always in the same order. The shell drops the ones that match the defaults. |
+
+`link` is the module itself, for its small readers: `link.oneOf(value, allowed)`, `link.flag(value)` (`1`/`0`), `link.list(value, allowed)` and `link.onOff(boolean)`. A new setting in a game needs a line in each function, a row in the table above and a case in the test:
+
+```bash
+node tools/test-links.js
+```
+
+Each practice page's `<link rel="canonical">` is its bare address, so links with settings are not indexed as separate pages. `netlify.toml` needs no rule for them: Netlify passes a query string through its redirects.
+
+### The result summary ("Copy my result")
+
+The results screen shows one line saying what the round was and how it went, with a **Copy my result** button, so a student can paste it into an email or the class platform:
+
+```
+Decline a noun · Henle through Lesson 5 · Single form · Declensions 1st, 2nd · Strict macrons · 9/10 (90%) · Nov 11, 2026, 4:12 PM
+```
+
+It has the game, the lesson filter ("through Lesson 5" or "Lesson 5 only"), the game's settings in words, "Strict macrons" when that was on, the score, and the date and time on the student's device in the student's own date format. A round from the missed list says "Missed-list round" in place of the lesson and settings, which don't apply to it. Where the browser won't copy, the line is selected to copy by hand.
+
+The line is made in the student's browser and goes nowhere by itself: the site keeps no record and sends nothing to anyone. It is plain text that a student could edit, so treat it as a report of work done, not a secure grade. It has no name on it; the student's message says who it is from.
+
+The shell (`practice.js`) builds the line. A game adds its settings with one optional function on the object it registers: `summary()` returns a list of short phrases for the settings as they stand (`["Single form", "Declensions 1st, 2nd", "With vocative"]`), leaving out what is at its default where that reads better. A game without it gets the lesson and the score only.
 
 ### The missed list ("drill only what I missed")
 
@@ -183,7 +275,7 @@ Beside **Start** on every start screen is **Print a worksheet**. It takes the se
 
 Two things differ from the screen in the parsing drill. The blanks themselves show whether the word is a noun or a verb, so that first question isn't asked (the key gives it). And the "Clause (if subjunctive)" blank is printed on every verb once the chosen lesson has a subjunctive to parse, so that its presence doesn't give the mood away.
 
-The header has the site name, lines for Name and Date, the game and mode, "Henle First Year Latin, through Lesson N" (or "Lesson N only"), and a line of instructions that says whether macrons count. The foot has the address of the game. The **answer key** starts on a new page with the same header, marked "Answer key", and the same numbers. Grids are filled in; single forms, parsing and vocabulary are a numbered list. Every form has its macrons and follows the spelling setting (Henle j or classical i). Where the game accepts more than one form, the others follow the main one in small italics after "or" (*dī or deī*; *laudātus es or laudāta es; laudātum es*). For a noun + adjective the key gives noun then adjective and says once, at the top, that either order is right.
+The header has the site name, lines for Name and Date, the game and mode, "Henle First Year Latin, through Lesson N" (or "Lesson N only"), and a line of instructions that says whether macrons count. The foot has, in small type, the link that opens the game with the same settings (the one **Copy link to these settings** gives; see "Links for assignments"), so students can do the same drill online. The link carries the settings, not the items: the round online is a fresh one. The **answer key** starts on a new page with the same header, marked "Answer key", and the same numbers. Grids are filled in; single forms, parsing and vocabulary are a numbered list. Every form has its macrons and follows the spelling setting (Henle j or classical i). Where the game accepts more than one form, the others follow the main one in small italics after "or" (*dī or deī*; *laudātus es or laudāta es; laudātum es*). For a noun + adjective the key gives noun then adjective and says once, at the top, that either order is right.
 
 **How it works.** No PDF library, no new window, no third-party script. The shell builds the worksheet in the page as `<div id="worksheet" class="worksheet">` at the end of `<body>`, sets the class `print-worksheet` on `<html>`, and calls `window.print()`; the browser's own dialog does paper or "Save as PDF". When the dialog closes, printed or cancelled (`afterprint`), the shell removes both, and the page is as it was. The look is the `@media print` section at the end of `site/css/practice.css`: everything on the page except the worksheet is hidden, text is black on white with lines for borders and nothing that depends on color, the type is the site's serif, the margins are 0.6 in, an item is never split across pages (`break-inside: avoid`), and the key starts its own page (`break-before: page`). It is sized for US Letter and also fits A4, portrait.
 
@@ -208,7 +300,7 @@ Optional: `printSheet()`, which returns any of
 | `columns`, `keyColumns` | 1 or 2: items side by side on the worksheet, and in the key | 1; the key follows the worksheet |
 | `macrons` | whether the student writes Latin, so the macron line is shown | true for a typed game |
 
-A game without `printItem` and `printAnswer` has no button. Share links are not on `main` yet; when they are, `sheetUrl()` in `practice.js` is the one place to print the link for the same settings instead of the page's plain address.
+A game without `printItem` and `printAnswer` has no button. "Number of items" and "Include answer key" are not settings of the game: they are not saved and are not part of a link.
 
 ### Textbooks (curricula)
 
